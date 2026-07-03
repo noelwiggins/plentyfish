@@ -80,17 +80,24 @@ def base_name(com_domain: str) -> str:
     return d.rsplit(".", 1)[0]
 
 
-def rdap_check(domain: str, timeout=10):
-    try:
-        r = requests.get(RDAP_URL.format(domain), headers={"User-Agent": UA},
-                          timeout=timeout)
-        if r.status_code == 404:
-            return False, "404 not found (available)"
-        if r.status_code == 200:
-            return True, "200 (registered)"
-        return None, f"unexpected status {r.status_code}"
-    except Exception as e:
-        return None, f"error: {e}"
+def rdap_check(domain: str, timeout=10, retries=3):
+    for attempt in range(retries):
+        try:
+            r = requests.get(RDAP_URL.format(domain), headers={"User-Agent": UA},
+                              timeout=timeout)
+            if r.status_code == 404:
+                return False, "404 not found (available)"
+            if r.status_code == 200:
+                return True, "200 (registered)"
+            if r.status_code == 429:
+                wait = 3 * (attempt + 1)
+                print(f"[warn] 429 on {domain}, backing off {wait}s")
+                time.sleep(wait)
+                continue
+            return None, f"unexpected status {r.status_code}"
+        except Exception as e:
+            return None, f"error: {e}"
+    return None, "429 persisted after retries"
 
 
 def run(limit: int, offset: int, sleep_s: float):
@@ -130,7 +137,8 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=200)
     ap.add_argument("--offset", type=int, default=0)
-    ap.add_argument("--sleep", type=float, default=0.5,
-                     help="seconds between RDAP calls (be courteous)")
+    ap.add_argument("--sleep", type=float, default=1.2,
+                     help="seconds between RDAP calls (be courteous; rdap.org "
+                          "returns 429 if hit faster than ~1/sec)")
     args = ap.parse_args()
     run(args.limit, args.offset, args.sleep)
