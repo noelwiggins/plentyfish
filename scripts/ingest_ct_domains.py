@@ -125,11 +125,13 @@ def run(since_hours: int):
     try:
         conn = connect_crtsh()
     except RuntimeError as e:
+        session.close()
         print(f"[error] {e}")
         print("[error] Skipping this run — crt.sh unreachable. "
               "Do not interpret as zero new domains.")
-        session.close()
-        sys.exit(1)
+        # Raise rather than sys.exit() so this is safe to call as a library
+        # (e.g. from a Flask admin route) as well as from the CLI below.
+        raise
 
     cur = conn.cursor()
     cur.execute(CRTSH_QUERY, ("%.ai", since))
@@ -165,4 +167,7 @@ if __name__ == "__main__":
     ap.add_argument("--since-hours", type=int, default=24,
                      help="look back this many hours for new CT log entries")
     args = ap.parse_args()
-    run(args.since_hours)
+    try:
+        run(args.since_hours)
+    except RuntimeError:
+        sys.exit(1)
