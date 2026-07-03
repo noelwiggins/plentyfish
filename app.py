@@ -137,18 +137,35 @@ def api_unclaimed():
     ])
 
 
-@app.route("/debug/crtsh-egress-test")
-def debug_crtsh_egress():
-    """Temporary: verifies outbound TCP:5432 to crt.sh works from this host.
-    Remove after confirming (this is not meant to be a permanent endpoint)."""
-    import psycopg2
-    try:
-        conn = psycopg2.connect(host="crt.sh", port=5432, dbname="certwatch",
-                                 user="guest", connect_timeout=10)
-        conn.close()
-        return jsonify({"crtsh_port_5432_reachable": True})
-    except Exception as e:
-        return jsonify({"crtsh_port_5432_reachable": False, "error": str(e)})
+ADMIN_TOKEN = os.environ.get("ADMIN_TOKEN")
+
+
+@app.route("/admin/run-tranco-check")
+def admin_run_tranco():
+    """Manually trigger a Tranco/RDAP unclaimed-.ai scan. Protected by
+    ADMIN_TOKEN. TEMPORARY mechanism -- convert to a Railway cron service
+    (see scripts/tranco_check.py) rather than relying on manual hits."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    limit = int(request.args.get("limit", 100))
+    from scripts.tranco_check import run as tranco_run
+    tranco_run(limit=limit, offset=0, sleep_s=0.3)
+    return jsonify({"status": "done", "limit": limit})
+
+
+@app.route("/admin/run-ct-ingest")
+def admin_run_ct_ingest():
+    """Manually trigger CT-log (crt.sh) discovery ingestion. Protected by
+    ADMIN_TOKEN. TEMPORARY mechanism -- convert to a Railway cron service
+    (see scripts/ingest_ct_domains.py) for real scheduled operation."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    since_hours = int(request.args.get("since_hours", 24))
+    from scripts.ingest_ct_domains import run as ct_run
+    ct_run(since_hours)
+    return jsonify({"status": "done", "since_hours": since_hours})
 
 
 if __name__ == "__main__":
