@@ -15,6 +15,23 @@ engine = create_engine(DATABASE_URL)
 Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 
+
+def _auto_seed_revenue():
+    """
+    Idempotently seeds published Anguilla revenue figures on startup.
+    Cheap and local (no external network calls), safe to run on every
+    boot -- it's a no-op after the first successful seed since
+    scripts/seed_anguilla_revenue.py checks for existing rows first.
+    """
+    try:
+        from scripts.seed_anguilla_revenue import run as seed_run
+        seed_run()
+    except Exception as e:
+        print(f"[warn] auto-seed of revenue data failed: {e}")
+
+
+_auto_seed_revenue()
+
 app = Flask(__name__)
 
 # --- Revenue-per-day model, derived from published annual/monthly figures ---
