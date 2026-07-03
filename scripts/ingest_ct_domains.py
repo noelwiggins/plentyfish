@@ -133,11 +133,31 @@ def run(since_hours: int):
         # (e.g. from a Flask admin route) as well as from the CLI below.
         raise
 
-    cur = conn.cursor()
-    cur.execute(CRTSH_QUERY, ("%.ai", since))
-    rows = cur.fetchall()
-    cur.close()
+    rows = None
+    last_err = None
+    for attempt in range(1, 4):
+        try:
+            cur = conn.cursor()
+            cur.execute(CRTSH_QUERY, ("%.ai", since))
+            rows = cur.fetchall()
+            cur.close()
+            break
+        except Exception as e:
+            last_err = e
+            print(f"[warn] crt.sh query attempt {attempt}/3 failed: {e}")
+            try:
+                conn.close()
+            except Exception:
+                pass
+            time.sleep(5 * attempt)
+            if attempt < 3:
+                conn = connect_crtsh()
     conn.close()
+
+    if rows is None:
+        session.close()
+        print(f"[error] crt.sh query failed after retries: {last_err}")
+        raise RuntimeError(f"crt.sh query failed after retries: {last_err}")
 
     new_count = 0
     for cert_id, name_value_block, entry_ts in rows:
