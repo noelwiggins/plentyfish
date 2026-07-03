@@ -137,5 +137,19 @@ def api_unclaimed():
     ])
 
 
+@app.route("/debug/crtsh-egress-test")
+def debug_crtsh_egress():
+    """Temporary: verifies outbound TCP:5432 to crt.sh works from this host.
+    Remove after confirming (this is not meant to be a permanent endpoint)."""
+    import psycopg2
+    try:
+        conn = psycopg2.connect(host="crt.sh", port=5432, dbname="certwatch",
+                                 user="guest", connect_timeout=10)
+        conn.close()
+        return jsonify({"crtsh_port_5432_reachable": True})
+    except Exception as e:
+        return jsonify({"crtsh_port_5432_reachable": False, "error": str(e)})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
