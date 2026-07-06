@@ -1,4 +1,5 @@
 import os
+import re
 from datetime import datetime, timedelta
 
 from flask import Flask, render_template, jsonify
@@ -133,6 +134,29 @@ PEER_CCTLDS = [
                   "the ccTLD to be retired over several years if the \"IO\" "
                   "country code is removed from ISO 3166-1.",
         "source_url": "https://en.wikipedia.org/wiki/.io",
+    },
+    {
+        "tld": ".co", "territory": "Colombia",
+        "revenue_usd_year": 125_000_000, "revenue_year_label": "trailing 5yr through 2025",
+        "pct_of_govt_revenue": "was ~6-7%, renegotiated to 81%, now new operator keeps only 8% (92% to Colombia)",
+        "population": "~52 million",
+        "status": "The clearest lesson in negotiating leverage of any ccTLD "
+                  "here: Colombia's government revenue SHARE went from single "
+                  "digits under the original contract to 81%+ on renewal, by "
+                  "re-bidding the registry contract rather than accepting the "
+                  "incumbent's terms.",
+        "source_url": "https://domainincite.com/31134-godaddy-loses-co-to-team-internet",
+    },
+    {
+        "tld": ".me", "territory": "Montenegro",
+        "revenue_usd_year": 7_100_000, "revenue_year_label": "2015 (~\u20ac6.5M; most recent public figure found)",
+        "pct_of_govt_revenue": "~2% of total exports (different framing than govt revenue %)",
+        "population": "~620,000",
+        "status": "Older, more mature boom (crossed 1M registrations in 2016) "
+                  "-- shows what a ccTLD windfall looks like once growth "
+                  "plateaus into a steady, smaller ongoing revenue stream, "
+                  "rather than Anguilla's current rapid-growth phase.",
+        "source_url": "https://techcrunch.com/2017/01/10/me-10-years-and-two-percent-of-exports/",
     },
 ]
 
@@ -379,6 +403,40 @@ def admin_run_ct_tail():
     from scripts.ct_log_tail import run as ct_tail_run
     ct_tail_run(entry_budget, initial_lookback, max_wall_seconds)
     return jsonify({"status": "done"})
+
+
+LOOKUP_NAME_RE = re.compile(r"^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$")
+
+
+@app.route("/api/check-domain.json")
+def api_check_domain():
+    """
+    Single-domain .ai availability lookup, for the search box on the
+    homepage. Proxied through our backend (rather than the browser
+    hitting RDAP directly) to avoid CORS issues and to reuse the existing
+    retry/backoff-aware rdap_check() helper.
+    """
+    from flask import request
+    from scripts.tranco_check import rdap_check
+
+    raw = (request.args.get("name") or "").strip().lower()
+    # Be forgiving: accept "example", "example.ai", "example.AI", etc.
+    if raw.endswith(".ai"):
+        raw = raw[:-3]
+    raw = raw.rstrip(".")
+
+    if not raw or not LOOKUP_NAME_RE.match(raw):
+        return jsonify({
+            "error": "Enter a valid domain label (letters, numbers, "
+                     "hyphens only, not starting/ending with a hyphen)."
+        }), 400
+
+    candidate = f"{raw}.ai"
+    registered, raw_status = rdap_check(candidate)
+    if registered is None:
+        return jsonify({"error": f"Couldn't check right now ({raw_status}). Try again shortly."}), 502
+
+    return jsonify({"domain": candidate, "registered": registered})
 
 
 if __name__ == "__main__":
