@@ -45,6 +45,16 @@
   .note { color:var(--dim); font-size:12px; line-height:1.5; margin-top:6px; }
   canvas { max-height: 320px; }
   a { color: var(--accent); }
+
+  .tabs { display:flex; gap:4px; padding: 8px 32px 0; border-bottom:1px solid var(--line); }
+  .tab-btn { background:none; border:none; color:var(--dim); font-size:14px;
+    font-family:inherit; padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition: color .15s, border-color .15s; }
+  .tab-btn:hover { color:var(--ink); }
+  .tab-btn.active { color:var(--ink); border-bottom-color:var(--accent); font-weight:600; }
+  .tab-count { color:var(--dim); font-size:11px; margin-left:4px; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
 </style>
 </head>
 <body>
@@ -98,11 +108,50 @@
   </div>
 </section>
 
-<section>
-  <h2>Popular .com sites without a matching .ai (Tranco top {{ unclaimed_count + claimed_count }})</h2>
-  <p class="note">
+<div class="tabs">
+  <button class="tab-btn active" data-tab="active-sites">Most Active .ai Sites</button>
+  <button class="tab-btn" data-tab="recent">Most Recent</button>
+  <button class="tab-btn" data-tab="unregistered">Unregistered
+    <span class="tab-count">({{ unclaimed_count }})</span></button>
+</div>
+
+<section class="tab-panel active" id="panel-active-sites">
+  <p class="note" style="margin-top:12px;">
+    .ai domains that rank directly in Tranco's global top-sites list -- real
+    ranking data (Tranco measures DNS query volume across contributing
+    resolvers worldwide), not derived by guessing names. This means these
+    are genuinely active, frequently-resolved .ai sites, not just claimed names.
+  </p>
+  <table>
+    <tr><th>Rank</th><th>Domain</th><th></th></tr>
+    {% for s in top_ai_sites %}
+    <tr>
+      <td>{{ s.tranco_rank }}</td>
+      <td><a href="https://{{ s.domain }}" target="_blank" rel="noopener">{{ s.domain }}</a></td>
+      <td><span class="badge">active</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="3" class="note">No data yet — run scripts/top_ai_sites.py to populate.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="tab-panel" id="panel-recent">
+  <p class="note" style="margin-top:12px;">
+    Sightings from Certificate Transparency logs -- this shows when a
+    domain first got a public TLS certificate, not its registration date,
+    and it undercounts true registration volume (speculative/parked
+    domains never get a cert). See the Anguilla panel above for the
+    real aggregate registration/revenue totals.
+  </p>
+  <div id="discovered-list"></div>
+  <p id="discovered-status" class="note" style="text-align:center; padding:12px 0;"></p>
+</section>
+
+<section class="tab-panel" id="panel-unregistered">
+  <p class="note" style="margin-top:12px;">
     {{ claimed_count }} of the top {{ claimed_count + unclaimed_count }} Tranco-ranked
-    sites have a matching .ai registered; {{ unclaimed_count }} do not.
+    consumer sites have a matching .ai registered; {{ unclaimed_count }} do not.
     {% if last_checked %}Last RDAP check: {{ last_checked.checked_at.strftime("%Y-%m-%d %H:%M UTC") }}.{% endif %}
   </p>
   <table>
@@ -120,18 +169,16 @@
   </table>
 </section>
 
-<section>
-  <h2>Recently discovered .ai domains</h2>
-  <p class="note">
-    Sightings from Certificate Transparency logs -- this shows when a
-    domain first got a public TLS certificate, not its registration date,
-    and it undercounts true registration volume (speculative/parked
-    domains never get a cert). See the Anguilla panel above for the
-    real aggregate registration/revenue totals.
-  </p>
-  <div id="discovered-list"></div>
-  <p id="discovered-status" class="note" style="text-align:center; padding:12px 0;"></p>
-</section>
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
 
 <script>
 (function () {
