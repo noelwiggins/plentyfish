@@ -27,17 +27,18 @@ Session = sessionmaker(bind=engine)
 
 # --- Annual figures, actuals -------------------------------------------------
 ANNUAL = [
-    # label, revenue_usd, revenue_ecd, cumulative_registrations, source, note
-    ("2018", 2_900_000, None, 48_272,
+    # label, revenue_usd, revenue_ecd, cumulative_registrations, pct_of_govt_revenue, source, note
+    ("2018", 2_900_000, None, 48_272, None,
      "https://www.domaintechnik.at/wp-content/uploads/ai-domain-en.pdf",
      "Early baseline, pre-AI-boom."),
-    ("2023", 32_000_000, 86_830_000, 353_928,
+    ("2023", 32_000_000, 86_830_000, 353_928, 20.0,
      "https://www.pymnts.com/artificial-intelligence-2/2026/the-ai-boom-is-funding-a-caribbean-island-two-letters-at-a-time/",
-     "~22% of government revenue that year; ~354K domains registered."),
-    ("2024", 39_000_000, None, None,
+     "~20-22% of government revenue that year (source estimates vary "
+     "slightly); ~354K domains registered."),
+    ("2024", 39_000_000, None, None, 25.0,
      "https://quasa.io/media/anguilla-s-ai-domain-boom-millions-in-revenue-but-there-s-a-catch",
-     "~23% of total government revenue."),
-    ("2025", 85_300_000, 230_499_740.50, 1_000_000,
+     "~23-25% of total government revenue (source estimates vary slightly)."),
+    ("2025", 85_300_000, 230_499_740.50, 1_000_000, 47.0,
      "https://anguillafocus.com/ai-domain-surge-brings-ec230m-windfall-to-anguilla-in-2025/",
      "More than double 2024; nearly triple 2023. Crossed 1M cumulative "
      "registrations around Jan 2, 2026. ~47% of government revenue."),
@@ -73,18 +74,22 @@ def run():
     Base.metadata.create_all(engine)
     session = Session()
 
-    for label, usd, ecd, cum, src, note in ANNUAL:
+    for label, usd, ecd, cum, pct, src, note in ANNUAL:
         y = int(label)
         row = session.query(AnguillaRevenue).filter_by(
             period_label=label, granularity="year"
         ).first()
         if row:
+            # Backfill pct_of_govt_revenue on rows created before this
+            # field existed, without touching anything else.
+            if row.pct_of_govt_revenue is None and pct is not None:
+                row.pct_of_govt_revenue = pct
             continue
         session.add(AnguillaRevenue(
             period_start=date(y, 1, 1), period_end=date(y, 12, 31),
             period_label=label, granularity="year",
             revenue_usd=usd, revenue_ecd=ecd,
-            total_registrations_cumulative=cum,
+            total_registrations_cumulative=cum, pct_of_govt_revenue=pct,
             source_url=src, source_note=note, is_projection=False,
         ))
 
