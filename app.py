@@ -16,6 +16,29 @@ Session = sessionmaker(bind=engine)
 Base.metadata.create_all(engine)
 
 
+def _auto_migrate():
+    """
+    Base.metadata.create_all() only creates missing TABLES, it never adds
+    columns to tables that already exist -- so a new nullable column added
+    to a model (like pct_of_govt_revenue) needs an explicit ALTER TABLE on
+    a database that already has that table. Postgres supports
+    "ADD COLUMN IF NOT EXISTS" natively, making this safe to run on every
+    boot regardless of whether the column already exists.
+    """
+    from sqlalchemy import text
+    try:
+        with engine.begin() as conn:
+            conn.execute(text(
+                "ALTER TABLE anguilla_revenue "
+                "ADD COLUMN IF NOT EXISTS pct_of_govt_revenue FLOAT"
+            ))
+    except Exception as e:
+        print(f"[warn] auto-migration failed (non-Postgres dev DB is expected to hit this): {e}")
+
+
+_auto_migrate()
+
+
 def _auto_seed_revenue():
     """
     Idempotently seeds published Anguilla revenue figures on startup.
