@@ -69,6 +69,19 @@
   <div class="sub">.ai domain intelligence — Anguilla revenue tracking &amp; unclaimed-name scanner</div>
 </header>
 
+<section style="padding:8px 32px 24px;">
+  <div style="display:flex; gap:8px; max-width:520px;">
+    <input id="lookup-input" type="text" placeholder="Check if a name is available… e.g. hydra"
+      style="flex:1; background:var(--panel); border:1px solid var(--line); border-radius:8px;
+      color:var(--ink); padding:12px 14px; font-size:14px;" />
+    <button id="lookup-btn" style="background:var(--accent); color:#03181a; border:none;
+      border-radius:8px; padding:0 20px; font-weight:600; font-size:14px; cursor:pointer;">
+      Check .ai
+    </button>
+  </div>
+  <div id="lookup-result" style="margin-top:10px; font-size:14px;"></div>
+</section>
+
 <div class="grid">
   <div class="card">
     <div class="label"><span class="live-dot"></span>Revenue today (so far)</div>
@@ -526,6 +539,46 @@ fetch('/api/revenue.json').then(r => r.json()).then(data => {
     });
   }
 });
+</script>
+
+<script>
+(function () {
+  const input = document.getElementById('lookup-input');
+  const btn = document.getElementById('lookup-btn');
+  const result = document.getElementById('lookup-result');
+
+  async function doLookup() {
+    const name = input.value.trim();
+    if (!name) return;
+    result.style.color = 'var(--dim)';
+    result.textContent = 'Checking…';
+    try {
+      const res = await fetch('/api/check-domain.json?name=' + encodeURIComponent(name));
+      const data = await res.json();
+      if (!res.ok) {
+        result.style.color = 'var(--warn)';
+        result.textContent = data.error || 'Something went wrong.';
+        return;
+      }
+      if (data.registered) {
+        result.style.color = 'var(--dim)';
+        result.innerHTML = '<strong style="color:var(--ink)">' + data.domain + '</strong> is already registered.';
+      } else {
+        result.style.color = 'var(--accent)';
+        result.innerHTML = '<strong>' + data.domain + '</strong> looks available! ' +
+          '<a href="https://www.namecheap.com/domains/registration/results/?domain=' +
+          encodeURIComponent(data.domain) + '" target="_blank" rel="noopener" ' +
+          'style="margin-left:8px;">Register it →</a>';
+      }
+    } catch (e) {
+      result.style.color = 'var(--warn)';
+      result.textContent = 'Something went wrong. Try again.';
+    }
+  }
+
+  btn.addEventListener('click', doLookup);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLookup(); });
+})();
 </script>
 
 </body>
