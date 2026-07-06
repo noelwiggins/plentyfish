@@ -71,12 +71,12 @@
 
 <section style="padding:8px 32px 24px;">
   <div style="display:flex; gap:8px; max-width:520px;">
-    <input id="lookup-input" type="text" placeholder="Check if a name is available… e.g. hydra"
+    <input id="lookup-input" type="text" placeholder="Check .ai and .com availability… e.g. hydra"
       style="flex:1; background:var(--panel); border:1px solid var(--line); border-radius:8px;
       color:var(--ink); padding:12px 14px; font-size:14px;" />
     <button id="lookup-btn" style="background:var(--accent); color:#03181a; border:none;
       border-radius:8px; padding:0 20px; font-weight:600; font-size:14px; cursor:pointer;">
-      Check .ai
+      Check .ai + .com
     </button>
   </div>
   <div id="lookup-result" style="margin-top:10px; font-size:14px;"></div>
@@ -547,6 +547,20 @@ fetch('/api/revenue.json').then(r => r.json()).then(data => {
   const btn = document.getElementById('lookup-btn');
   const result = document.getElementById('lookup-result');
 
+  function renderOne(r) {
+    if (r.error) {
+      return '<div><strong style="color:var(--warn)">' + r.domain +
+        '</strong> — couldn\'t check (' + r.error + ')</div>';
+    }
+    if (r.registered) {
+      return '<div><strong style="color:var(--ink)">' + r.domain + '</strong> — taken</div>';
+    }
+    return '<div><strong style="color:var(--accent)">' + r.domain + '</strong> — available ' +
+      '<a href="https://www.namecheap.com/domains/registration/results/?domain=' +
+      encodeURIComponent(r.domain) + '" target="_blank" rel="noopener" ' +
+      'style="margin-left:6px;">Register →</a></div>';
+  }
+
   async function doLookup() {
     const name = input.value.trim();
     if (!name) return;
@@ -560,16 +574,11 @@ fetch('/api/revenue.json').then(r => r.json()).then(data => {
         result.textContent = data.error || 'Something went wrong.';
         return;
       }
-      if (data.registered) {
-        result.style.color = 'var(--dim)';
-        result.innerHTML = '<strong style="color:var(--ink)">' + data.domain + '</strong> is already registered.';
-      } else {
-        result.style.color = 'var(--accent)';
-        result.innerHTML = '<strong>' + data.domain + '</strong> looks available! ' +
-          '<a href="https://www.namecheap.com/domains/registration/results/?domain=' +
-          encodeURIComponent(data.domain) + '" target="_blank" rel="noopener" ' +
-          'style="margin-left:8px;">Register it →</a>';
-      }
+      result.style.color = 'var(--ink)';
+      result.innerHTML =
+        '<div style="display:flex; gap:24px; flex-wrap:wrap;">' +
+        renderOne(data.results.ai) + renderOne(data.results.com) +
+        '</div>';
     } catch (e) {
       result.style.color = 'var(--warn)';
       result.textContent = 'Something went wrong. Try again.';
