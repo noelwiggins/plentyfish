@@ -41,6 +41,7 @@ class AnguillaRevenue(Base):
     revenue_usd = Column(Float, nullable=False)
     revenue_ecd = Column(Float, nullable=True)
     total_registrations_cumulative = Column(BigInteger, nullable=True)
+    pct_of_govt_revenue = Column(Float, nullable=True)
     source_url = Column(String(512), nullable=True)
     source_note = Column(Text, nullable=True)
     is_projection = Column(Boolean, default=False)
