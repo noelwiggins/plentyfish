@@ -73,6 +73,30 @@ class DiscoveredDomain(Base):
     rdap_checked_at = Column(DateTime, nullable=True)
 
 
+class TopAiSite(Base):
+    """
+    .ai domains that appear DIRECTLY in the Tranco top-sites list (i.e.
+    ranked on their own global DNS popularity, not derived from checking
+    a .com name). This is real ranking data -- Tranco ranks every domain
+    it sees regardless of TLD -- so a .ai domain showing up here means it
+    genuinely gets meaningful traffic/DNS query volume worldwide.
+
+    Framed as "most active / top ranked .ai sites", not "most visited"
+    (Tranco measures DNS resolution volume across contributing recursive
+    resolvers, which correlates with but isn't identical to visits).
+    """
+    __tablename__ = "top_ai_sites"
+
+    id = Column(Integer, primary_key=True)
+    domain = Column(String(255), nullable=False, unique=True, index=True)
+    tranco_rank = Column(Integer, nullable=False)
+    checked_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("domain", name="uq_top_ai_domain"),
+    )
+
+
 class TrancoCheck(Base):
     """
     Result of checking {name}.ai via RDAP for a domain from the Tranco
