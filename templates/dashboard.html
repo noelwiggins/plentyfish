@@ -113,12 +113,72 @@
   </div>
 </section>
 
+<section>
+  <h2>What this means for Anguilla</h2>
+
+  <div class="grid" style="padding:0 0 16px;">
+    <div class="card">
+      <div class="label"><span class="live-dot"></span>Per resident, {{ revenue.latest_actual.period_label if revenue.latest_actual }} (so far)</div>
+      <div class="value" id="counter-per-resident">$0</div>
+      <div class="foot">{{ "{:,}".format(civic.population) }} residents (commonly-cited estimate)</div>
+    </div>
+    <div class="card">
+      <div class="label">Renewal base, current</div>
+      <div class="value">{{ "{:,}".format(civic.renewal_base_estimate) if civic.renewal_base_estimate else "—" }}</div>
+      <div class="foot">domains likely to renew next cycle, at a ~{{ (civic.renewal_rate*100)|round|int }}% renewal rate</div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:-6px;">
+    The per-resident figure divides the live "so far" counter above by
+    Anguilla's population -- a way to make an abstract multi-million-dollar
+    number concrete, not an indication that funds are distributed per
+    person. The renewal base is a simple model (cumulative registrations ×
+    the ~90% renewal rate widely cited in reporting), meant to separate
+    "already fairly reliable" revenue from new speculative growth -- it is
+    not an exact revenue split, since we don't have per-domain pricing
+    granularity.
+  </p>
+
+  <h3 style="font-size:14px; margin:20px 0 4px;">Government revenue dependency</h3>
+  <canvas id="dependencyChart" style="max-height:220px;"></canvas>
+  <p class="note">
+    Share of Anguilla's total government revenue coming from .ai domain
+    fees, by year. Rising fast: from roughly a fifth of government revenue
+    in 2023 to nearly half in 2025 -- worth knowing both as a success story
+    and as a concentration-risk signal, since it means the government
+    budget is increasingly tied to the fortunes of one specific product
+    category (AI naming demand).
+  </p>
+
+  <h3 style="font-size:14px; margin:20px 0 4px;">How Anguilla compares to other windfall ccTLDs</h3>
+  <table>
+    <tr><th>TLD</th><th>Territory</th><th>Recent revenue</th><th>% of govt revenue</th><th>Population</th><th>Outlook</th></tr>
+    {% for p in civic.peer_cctlds %}
+    <tr>
+      <td>{{ p.tld }}</td>
+      <td>{{ p.territory }}</td>
+      <td>${{ "{:,.0f}".format(p.revenue_usd_year) }} ({{ p.revenue_year_label }})</td>
+      <td>{{ p.pct_of_govt_revenue }}</td>
+      <td>{{ p.population }}</td>
+      <td style="max-width:280px;">{{ p.status }} <a href="{{ p.source_url }}" target="_blank">source</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h3 style="font-size:14px; margin:20px 0 4px;">Where the money is going</h3>
+  <p class="note">
+    {{ civic.budget_allocation.text }}
+    <a href="{{ civic.budget_allocation.source_url }}" target="_blank">source</a>
+  </p>
+</section>
+
 <div class="tabs">
   <button class="tab-btn active" data-tab="active-sites">Most Active .ai Sites</button>
   <button class="tab-btn" data-tab="recent">Most Recent</button>
   <button class="tab-btn" data-tab="unregistered">Unregistered
     <span class="tab-count">({{ unclaimed_count }})</span></button>
 </div>
+
 
 <section class="tab-panel active" id="panel-active-sites">
   <p class="note" style="margin-top:12px;">
@@ -352,9 +412,18 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   const weekRatePerMs = weeklyEstimate / (7 * 86400000);
   const monthRatePerMs = monthlyEstimate / (daysInMonth * 86400000);
 
+  const population = {{ civic.population|tojson }};
+  const yearStart = Date.UTC(now0.getUTCFullYear(), 0, 1);
+  const perResidentRatePerMs = population ? dayRatePerMs / population : 0;
+
   const elToday = document.getElementById('counter-today');
   const elWeek = document.getElementById('counter-week');
   const elMonth = document.getElementById('counter-month');
+  const elPerResident = document.getElementById('counter-per-resident');
+
+  function fmtCents(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
 
   function flash(el) {
     el.classList.remove('flash');
@@ -371,6 +440,13 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     if (newToday !== elToday.textContent) { elToday.textContent = newToday; flash(elToday); }
     if (newWeek !== elWeek.textContent) { elWeek.textContent = newWeek; flash(elWeek); }
     if (newMonth !== elMonth.textContent) { elMonth.textContent = newMonth; flash(elMonth); }
+    if (elPerResident && population) {
+      const newPerResident = fmtCents((now - yearStart) * perResidentRatePerMs);
+      if (newPerResident !== elPerResident.textContent) {
+        elPerResident.textContent = newPerResident;
+        flash(elPerResident);
+      }
+    }
   }
 
   // Irregular tick timing (0.4s-3s, randomized each time) rather than a
@@ -422,6 +498,33 @@ fetch('/api/revenue.json').then(r => r.json()).then(data => {
       }
     }
   });
+
+  const depData = data.filter(d => d.pct_of_govt_revenue !== null && d.pct_of_govt_revenue !== undefined);
+  const depCanvas = document.getElementById('dependencyChart');
+  if (depCanvas && depData.length) {
+    new Chart(depCanvas, {
+      type: 'line',
+      data: {
+        labels: depData.map(d => d.label),
+        datasets: [{
+          label: '% of government revenue',
+          data: depData.map(d => d.pct_of_govt_revenue),
+          borderColor: 'rgba(242,166,90,.9)',
+          backgroundColor: 'rgba(242,166,90,.15)',
+          fill: true,
+          tension: 0.25,
+          pointBackgroundColor: 'rgba(242,166,90,1)',
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { color: '#8b98a5', callback: v => v + '%' }, grid: { color: '#232c38' } },
+          x: { ticks: { color: '#8b98a5' }, grid: { display: false } },
+        }
+      }
+    });
+  }
 });
 </script>
 
