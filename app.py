@@ -168,5 +168,46 @@ def admin_run_ct_ingest():
     return jsonify({"status": "done", "since_hours": since_hours})
 
 
+@app.route("/api/discovered.json")
+def api_discovered():
+    """
+    Cursor-paginated feed of CT-log-discovered .ai domains, for infinite
+    scroll. Pass `before` (ISO datetime) to get the next page older than
+    the last item you already have.
+
+    NOTE: labeled "discovered", never "registered" -- see DiscoveredDomain
+    docstring in models.py for why. This endpoint returns whatever the
+    CT-log ingestion (scripts/ingest_ct_domains.py) has found so far; if
+    that pipeline hasn't successfully run yet (e.g. crt.sh outage), this
+    will legitimately return an empty list, not an error.
+    """
+    from flask import request
+    limit = min(int(request.args.get("limit", 25)), 100)
+    before_raw = request.args.get("before")
+
+    session = Session()
+    q = session.query(DiscoveredDomain).order_by(desc(DiscoveredDomain.discovered_at))
+    if before_raw:
+        try:
+            before_dt = datetime.fromisoformat(before_raw)
+            q = q.filter(DiscoveredDomain.discovered_at < before_dt)
+        except ValueError:
+            pass
+    rows = q.limit(limit).all()
+    session.close()
+
+    return jsonify({
+        "items": [
+            {
+                "domain": d.domain,
+                "discovered_at": d.discovered_at.isoformat(),
+                "vendor": d.vendor,
+            }
+            for d in rows
+        ],
+        "next_before": rows[-1].discovered_at.isoformat() if len(rows) == limit else None,
+    })
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
