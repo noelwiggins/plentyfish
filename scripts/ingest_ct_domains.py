@@ -64,6 +64,7 @@ import time
 from datetime import datetime, timedelta
 
 import psycopg2
+import requests
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
@@ -91,6 +92,9 @@ CRTSH_QUERY = """
         ORDER BY min(sub.ENTRY_TIMESTAMP) ASC;
 """
 
+CRTSH_JSON_URL = "https://crt.sh/?q=%25.ai&output=json&exclude=expired"
+UA = "plentyfish.ai research bot (contact: noel@plentyfish.ai)"
+
 
 def connect_crtsh(retries=3, backoff=5):
     last_err = None
@@ -104,7 +108,7 @@ def connect_crtsh(retries=3, backoff=5):
             last_err = e
             print(f"[warn] crt.sh connect attempt {attempt}/{retries} failed: {e}")
             time.sleep(backoff * attempt)
-    raise RuntimeError(f"crt.sh unreachable after {retries} attempts: {last_err}")
+    raise RuntimeError(f"crt.sh Postgres unreachable after {retries} attempts: {last_err}")
 
 
 def is_apex_dot_ai(name: str) -> bool:
@@ -116,23 +120,12 @@ def is_apex_dot_ai(name: str) -> bool:
     return name.count(".") == 1
 
 
-def run(since_hours: int):
-    Base.metadata.create_all(engine)
-    session = Session()
-
-    since = datetime.utcnow() - timedelta(hours=since_hours)
-
-    try:
-        conn = connect_crtsh()
-    except RuntimeError as e:
-        session.close()
-        print(f"[error] {e}")
-        print("[error] Skipping this run — crt.sh unreachable. "
-              "Do not interpret as zero new domains.")
-        # Raise rather than sys.exit() so this is safe to call as a library
-        # (e.g. from a Flask admin route) as well as from the CLI below.
-        raise
-
+def fetch_via_postgres(since):
+    """Primary path: direct Postgres query. Most complete when it works,
+    but crt.sh's Postgres interface has been observed to drop the
+    connection mid-query under load (documented, not something we can
+    fix). Retries a few times before giving up to the caller."""
+    conn = connect_crtsh()
     rows = None
     last_err = None
     for attempt in range(1, 4):
@@ -144,7 +137,7 @@ def run(since_hours: int):
             break
         except Exception as e:
             last_err = e
-            print(f"[warn] crt.sh query attempt {attempt}/3 failed: {e}")
+            print(f"[warn] crt.sh Postgres query attempt {attempt}/3 failed: {e}")
             try:
                 conn.close()
             except Exception:
@@ -155,12 +148,73 @@ def run(since_hours: int):
     conn.close()
 
     if rows is None:
-        session.close()
-        print(f"[error] crt.sh query failed after retries: {last_err}")
-        raise RuntimeError(f"crt.sh query failed after retries: {last_err}")
+        raise RuntimeError(f"crt.sh Postgres query failed after retries: {last_err}")
+
+    # Normalize to (name_value_block, entry_timestamp) tuples like the JSON path
+    return [(name_block, entry_ts) for _, name_block, entry_ts in rows]
+
+
+def fetch_via_json(since, retries=3):
+    """Fallback path: crt.sh's public JSON HTTP endpoint. Slower and known
+    to return an incomplete/randomized subset for broad wildcard queries
+    like '%.ai' (crt.sh caps result size for performance), so this will
+    under-discover relative to the Postgres path -- but it's a genuinely
+    different failure mode (plain HTTPS, no long-lived DB connection to
+    drop), so it's worth trying when Postgres is down."""
+    last_err = None
+    for attempt in range(1, retries + 1):
+        try:
+            r = requests.get(CRTSH_JSON_URL, headers={"User-Agent": UA}, timeout=60)
+            r.raise_for_status()
+            data = r.json()
+            out = []
+            for entry in data:
+                name_value = entry.get("name_value", "")
+                entry_ts_raw = entry.get("entry_timestamp")
+                entry_ts = None
+                if entry_ts_raw:
+                    try:
+                        entry_ts = datetime.strptime(
+                            entry_ts_raw.split(".")[0], "%Y-%m-%dT%H:%M:%S"
+                        )
+                    except ValueError:
+                        entry_ts = None
+                if entry_ts and entry_ts <= since:
+                    continue
+                out.append((name_value, entry_ts))
+            return out
+        except Exception as e:
+            last_err = e
+            print(f"[warn] crt.sh JSON endpoint attempt {attempt}/{retries} failed: {e}")
+            time.sleep(5 * attempt)
+    raise RuntimeError(f"crt.sh JSON endpoint failed after retries: {last_err}")
+
+
+def run(since_hours: int):
+    Base.metadata.create_all(engine)
+    session = Session()
+
+    since = datetime.utcnow() - timedelta(hours=since_hours)
+
+    rows = None
+    source = None
+    try:
+        rows = fetch_via_postgres(since)
+        source = "crt.sh (Certificate Transparency, Postgres)"
+    except RuntimeError as e:
+        print(f"[warn] Postgres path failed, falling back to JSON endpoint: {e}")
+        try:
+            rows = fetch_via_json(since)
+            source = "crt.sh (Certificate Transparency, JSON fallback)"
+        except RuntimeError as e2:
+            session.close()
+            print(f"[error] Both crt.sh access paths failed. Postgres: {e} | JSON: {e2}")
+            print("[error] Skipping this run entirely. Do not interpret as "
+                  "zero new domains -- crt.sh itself was unreachable.")
+            raise
 
     new_count = 0
-    for cert_id, name_value_block, entry_ts in rows:
+    for name_value_block, entry_ts in rows:
         for candidate in name_value_block.split("\n"):
             candidate = candidate.strip().lower()
             if not is_apex_dot_ai(candidate):
@@ -171,15 +225,15 @@ def run(since_hours: int):
             session.add(DiscoveredDomain(
                 domain=candidate,
                 discovered_at=entry_ts or datetime.utcnow(),
-                vendor="crt.sh (Certificate Transparency)",
+                vendor=source,
                 vendor_reported_created_date=None,  # CT logs don't give this
             ))
             new_count += 1
 
     session.commit()
     session.close()
-    print(f"[ok] Scanned {len(rows)} certificates since {since.isoformat()}Z, "
-          f"added {new_count} newly-discovered .ai domains.")
+    print(f"[ok] Scanned {len(rows)} certificates since {since.isoformat()}Z via "
+          f"{source}, added {new_count} newly-discovered .ai domains.")
 
 
 if __name__ == "__main__":
