@@ -90,7 +90,7 @@ def dashboard():
                           .limit(25).all())
     top_ai_sites = (session.query(TopAiSite)
                      .order_by(TopAiSite.tranco_rank)
-                     .limit(50).all())
+                     .limit(25).all())
     session.close()
 
     return render_template(
@@ -215,15 +215,26 @@ def api_discovered():
 
 @app.route("/api/top-ai-sites.json")
 def api_top_ai_sites():
+    from flask import request
+    limit = min(int(request.args.get("limit", 25)), 100)
+    offset = int(request.args.get("offset", 0))
+
     session = Session()
     rows = (session.query(TopAiSite)
             .order_by(TopAiSite.tranco_rank)
-            .limit(50).all())
+            .offset(offset).limit(limit).all())
+    total = session.query(TopAiSite).count()
     session.close()
-    return jsonify([
-        {"rank": r.tranco_rank, "domain": r.domain, "checked_at": r.checked_at.isoformat()}
-        for r in rows
-    ])
+
+    next_offset = offset + limit if offset + limit < total else None
+    return jsonify({
+        "items": [
+            {"rank": r.tranco_rank, "domain": r.domain, "checked_at": r.checked_at.isoformat()}
+            for r in rows
+        ],
+        "total": total,
+        "next_offset": next_offset,
+    })
 
 
 @app.route("/admin/run-top-ai-sites")
