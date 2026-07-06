@@ -5,7 +5,7 @@ from flask import Flask, render_template, jsonify
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck
+from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck, TopAiSite
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///plentyfish_dev.db")
 if DATABASE_URL.startswith("postgres://"):
@@ -88,6 +88,9 @@ def dashboard():
     recent_discovered = (session.query(DiscoveredDomain)
                           .order_by(desc(DiscoveredDomain.discovered_at))
                           .limit(25).all())
+    top_ai_sites = (session.query(TopAiSite)
+                     .order_by(TopAiSite.tranco_rank)
+                     .limit(50).all())
     session.close()
 
     return render_template(
@@ -99,6 +102,7 @@ def dashboard():
         last_checked=last_checked,
         recent_discovered=recent_discovered,
         has_discovery_feed=len(recent_discovered) > 0,
+        top_ai_sites=top_ai_sites,
         now=datetime.utcnow(),
     )
 
@@ -207,6 +211,34 @@ def api_discovered():
         ],
         "next_before": rows[-1].discovered_at.isoformat() if len(rows) == limit else None,
     })
+
+
+@app.route("/api/top-ai-sites.json")
+def api_top_ai_sites():
+    session = Session()
+    rows = (session.query(TopAiSite)
+            .order_by(TopAiSite.tranco_rank)
+            .limit(50).all())
+    session.close()
+    return jsonify([
+        {"rank": r.tranco_rank, "domain": r.domain, "checked_at": r.checked_at.isoformat()}
+        for r in rows
+    ])
+
+
+@app.route("/admin/run-top-ai-sites")
+def admin_run_top_ai_sites():
+    """Manually trigger a refresh of top-ranked .ai sites. Protected by
+    ADMIN_TOKEN. TEMPORARY mechanism -- convert to a Railway cron service
+    (see scripts/top_ai_sites.py) rather than relying on manual hits."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    scan = int(request.args.get("scan", 1_000_000))
+    top = int(request.args.get("top", 50))
+    from scripts.top_ai_sites import run as top_ai_run
+    top_ai_run(scan=scan, top=top)
+    return jsonify({"status": "done", "scan": scan, "top": top})
 
 
 if __name__ == "__main__":
