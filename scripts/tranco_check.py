@@ -111,7 +111,16 @@ INFRA_DENYLIST = [
     "ezviz", "hicloudcam", "hicloud",
     # cloud/API infrastructure (developer-facing, not consumer-facing)
     "googleapis", "amazonaws", "azureedge", "azurewebsites", "herokuapp",
-    "googlevideo", "1e100",
+    "googlevideo", "1e100", "aliyun", "azurefd",
+    # generic infra-indicator words (broad on purpose -- these almost never
+    # appear in an actual consumer brand name, but do appear constantly in
+    # backend/telemetry/CDN hostnames)
+    "analytics", "measurement", "telemetry", "metrics", "beacon", "pixel",
+    "tracker", "syndication", "adsystem", "registrar", "registry", "ncsi",
+    "connecttest", "parking", "gppnetwork",
+    # specific observed infra/backend hosts not covered by the patterns above
+    "steamserver", "vkuserphoto", "tiktokv", "nflxso", "gwfb", "mailinabox",
+    "dnsowl", "jomodns",
 ]
 
 
