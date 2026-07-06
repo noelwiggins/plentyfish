@@ -71,9 +71,97 @@ def get_revenue_context():
     }
 
 
+# --- Civic-impact reference data ---------------------------------------
+# Static reference content (updated a few times a year at most, not worth
+# a DB table). Sources noted inline; see chat history / commit messages
+# for the research trail.
+
+ANGUILLA_POPULATION = 16_000  # commonly-cited round figure; sources range
+# ~14,800 (UN medium-fertility estimate, Worldometer/StatisticsTimes) to
+# ~17,000 (Countrymeters, which factors in recent migration). We use the
+# rounder ~16,000 figure used directly in press coverage of the .ai boom
+# (e.g. HLC.com: "home to around just 16,000 people").
+
+PEER_CCTLDS = [
+    {
+        "tld": ".ai", "territory": "Anguilla",
+        "revenue_usd_year": 85_300_000, "revenue_year_label": "2025",
+        "pct_of_govt_revenue": "~47%",
+        "population": "~16,000",
+        "status": "Rapid growth, riding the AI naming boom.",
+        "source_url": "https://anguillafocus.com/ai-domain-surge-brings-ec230m-windfall-to-anguilla-in-2025/",
+    },
+    {
+        "tld": ".tv", "territory": "Tuvalu",
+        "revenue_usd_year": 10_000_000, "revenue_year_label": "~2024",
+        "pct_of_govt_revenue": "~8-10%",
+        "population": "~11,000",
+        "status": "Stable but modest relative to Anguilla's .ai windfall -- "
+                  "riding streaming/esports demand (Twitch.tv) rather than a boom.",
+        "source_url": "https://en.wikipedia.org/wiki/.tv",
+    },
+    {
+        "tld": ".io", "territory": "British Indian Ocean Territory",
+        "revenue_usd_year": 42_400_000, "revenue_year_label": "2024",
+        "pct_of_govt_revenue": "N/A (no permanent population/government budget)",
+        "population": "Uninhabited except UK/US military base",
+        "status": "Future genuinely uncertain -- UK ceded BIOT sovereignty to "
+                  "Mauritius (treaty signed May 2025); ICANN rules could force "
+                  "the ccTLD to be retired over several years if the \"IO\" "
+                  "country code is removed from ISO 3166-1.",
+        "source_url": "https://en.wikipedia.org/wiki/.io",
+    },
+]
+
+BUDGET_ALLOCATION_NOTE = {
+    "text": (
+        "Anguilla's Premier, Ellis Webster, has publicly stated .ai revenue "
+        "is funding: airport expansion, free medical care for senior "
+        "citizens, completion of a vocational technology training centre "
+        "at Anguilla's high school, and hurricane-resilient infrastructure "
+        "including secure domain-hosting facilities."
+    ),
+    "source_url": "https://www.hlc.com/en/publications/british-territories-ride-wave-of-tech-boom-ai-and-io",
+}
+
+RENEWAL_RATE = 0.90  # widely cited across sources (domaintechnik.at, pymnts, etc.)
+
+
+def get_civic_context(revenue_ctx):
+    """Per-resident dividend, dependency trend, renewal-base estimate."""
+    latest = revenue_ctx["latest_actual"]
+    per_resident_year = (latest.revenue_usd / ANGUILLA_POPULATION) if latest else None
+    daily_estimate = revenue_ctx["daily_estimate"]
+    per_resident_daily_rate = (daily_estimate / ANGUILLA_POPULATION) if daily_estimate else None
+
+    dependency_years = [
+        {"label": y.period_label, "pct": y.pct_of_govt_revenue}
+        for y in revenue_ctx["years"]
+        if y.pct_of_govt_revenue is not None
+    ]
+
+    # Renewal-base estimate: illustrative, not a precise revenue split --
+    # see note rendered alongside it in the template.
+    cumulative = latest.total_registrations_cumulative if latest else None
+    renewal_base_estimate = int(cumulative * RENEWAL_RATE) if cumulative else None
+
+    return {
+        "population": ANGUILLA_POPULATION,
+        "per_resident_year": per_resident_year,
+        "per_resident_daily_rate": per_resident_daily_rate,
+        "dependency_years": dependency_years,
+        "renewal_rate": RENEWAL_RATE,
+        "cumulative_registrations": cumulative,
+        "renewal_base_estimate": renewal_base_estimate,
+        "peer_cctlds": PEER_CCTLDS,
+        "budget_allocation": BUDGET_ALLOCATION_NOTE,
+    }
+
+
 @app.route("/")
 def dashboard():
     ctx = get_revenue_context()
+    civic = get_civic_context(ctx)
 
     session = Session()
     unclaimed = (session.query(TrancoCheck)
@@ -96,6 +184,7 @@ def dashboard():
     return render_template(
         "dashboard.html",
         revenue=ctx,
+        civic=civic,
         unclaimed=unclaimed,
         claimed_count=claimed_count,
         unclaimed_count=unclaimed_count,
@@ -121,6 +210,7 @@ def api_revenue():
             "revenue_usd": y.revenue_usd,
             "is_projection": y.is_projection,
             "cumulative_registrations": y.total_registrations_cumulative,
+            "pct_of_govt_revenue": y.pct_of_govt_revenue,
         }
         for y in years
     ])
