@@ -80,7 +80,41 @@ def base_name(com_domain: str) -> str:
     return d.rsplit(".", 1)[0]
 
 
-def rdap_check(domain: str, timeout=10, retries=3):
+# Tranco ranks by raw DNS query volume, which is dominated by invisible
+# backend infrastructure (CDN edge nodes, ad-tech/analytics beacons, OS
+# telemetry, DNS infra, IoT device backends) rather than sites a person
+# actually visits. We filter those out so "unclaimed .ai" reads as
+# recognizable consumer brands, not plumbing.
+#
+# This is a denylist of substrings matched against the base (second-level)
+# label. It's necessarily a heuristic/curated list, not exhaustive -- new
+# infra patterns will show up over time and can be added here.
+INFRA_DENYLIST = [
+    # CDN / edge / static-asset hosts
+    "cdn", "edgekey", "edgesuite", "edgecast", "akamai", "akadns", "akam",
+    "fastly", "cloudflare", "cloudfront", "stackpath", "cachefly",
+    "gstatic", "ytimg", "twimg", "fbcdn", "staticflickr", "ggpht",
+    "mzstatic", "googleusercontent",
+    # ad-tech / analytics / tracking SDKs
+    "doubleclick", "googlesyndication", "googletagmanager", "google-analytics",
+    "googleadservices", "adservice", "scorecardresearch", "adnxs", "criteo",
+    "taboola", "outbrain", "moatads", "adsrvr", "rubiconproject", "pubmatic",
+    "appsflyersdk", "adjust", "branch.io", "segment", "mixpanel", "amplitude",
+    "quantserve", "adform", "casalemedia",
+    # DNS / registry infra
+    "gtld-servers", "root-servers", "nsone", "ultradns", "akadns", "ripn",
+    "verisign-grs", "googledomains",
+    # OS / device background services (not something a user "visits")
+    "windowsupdate", "msedge", "gvt1", "gvt2", "ntp", "apple-dns",
+    "captive.apple", "push.apple", "myfritz",
+    # IoT / device manufacturer backends
+    "ezviz", "hicloudcam", "hicloud",
+]
+
+
+def is_consumer_facing(com_domain: str) -> bool:
+    name = base_name(com_domain)
+    return not any(pattern in name for pattern in INFRA_DENYLIST)
     for attempt in range(retries):
         try:
             r = requests.get(RDAP_URL.format(domain), headers={"User-Agent": UA},
@@ -100,17 +134,48 @@ def rdap_check(domain: str, timeout=10, retries=3):
     return None, "429 persisted after retries"
 
 
+def cleanup_infra(session):
+    """Remove any previously-stored TrancoCheck rows that fail the
+    consumer-facing filter (added after the filter was introduced -- this
+    cleans up rows saved before the filter existed)."""
+    removed = 0
+    for row in session.query(TrancoCheck).all():
+        if not is_consumer_facing(row.com_domain):
+            session.delete(row)
+            removed += 1
+    if removed:
+        session.commit()
+        print(f"[cleanup] removed {removed} pre-existing infra/CDN/tracking rows")
+
+
 def run(limit: int, offset: int, sleep_s: float):
     Base.metadata.create_all(engine)
     session = Session()
 
-    ranked = fetch_tranco(limit + offset)[offset:offset + limit]
+    cleanup_infra(session)
+    # Scan a generously larger window than requested, since a meaningful
+    # fraction of raw Tranco entries are infra and get filtered out. Grow
+    # the scan window if we don't find enough consumer-facing candidates.
+    scan_size = (offset + limit) * 4
+    max_scan_size = 20000
+    consumer_ranked = []
+    while True:
+        raw = fetch_tranco(scan_size)
+        consumer_ranked = [(rank, d) for rank, d in raw if is_consumer_facing(d)]
+        if len(consumer_ranked) >= offset + limit or scan_size >= max_scan_size:
+            break
+        scan_size = min(scan_size * 2, max_scan_size)
+
+    ranked = consumer_ranked[offset:offset + limit]
+    print(f"[info] scanned {scan_size} raw Tranco ranks, found "
+          f"{len(consumer_ranked)} consumer-facing candidates, "
+          f"using {len(ranked)} of them (offset={offset}, limit={limit})")
 
     for rank, com_domain in ranked:
         candidate = f"{base_name(com_domain)}.ai"
-        registered, raw = rdap_check(candidate)
+        registered, raw_status = rdap_check(candidate)
         if registered is None:
-            print(f"[skip] {candidate}: {raw}")
+            print(f"[skip] {candidate}: {raw_status}")
             time.sleep(sleep_s)
             continue
 
@@ -119,12 +184,12 @@ def run(limit: int, offset: int, sleep_s: float):
             row.tranco_rank = rank
             row.ai_registered = registered
             row.checked_at = datetime.utcnow()
-            row.rdap_raw_status = raw
+            row.rdap_raw_status = raw_status
         else:
             session.add(TrancoCheck(
                 com_domain=com_domain, ai_candidate=candidate,
                 tranco_rank=rank, ai_registered=registered,
-                checked_at=datetime.utcnow(), rdap_raw_status=raw,
+                checked_at=datetime.utcnow(), rdap_raw_status=raw_status,
             ))
         session.commit()
         print(f"[ok] #{rank:>5}  {candidate:<30} {'REGISTERED' if registered else 'AVAILABLE'}")
