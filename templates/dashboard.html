@@ -127,18 +127,8 @@
     resolvers worldwide), not derived by guessing names. This means these
     are genuinely active, frequently-resolved .ai sites, not just claimed names.
   </p>
-  <table>
-    <tr><th>Rank</th><th>Domain</th><th></th></tr>
-    {% for s in top_ai_sites %}
-    <tr>
-      <td>{{ s.tranco_rank }}</td>
-      <td><a href="https://{{ s.domain }}" target="_blank" rel="noopener">{{ s.domain }}</a></td>
-      <td><span class="badge">active</span></td>
-    </tr>
-    {% else %}
-    <tr><td colspan="3" class="note">No data yet — run scripts/top_ai_sites.py to populate.</td></tr>
-    {% endfor %}
-  </table>
+  <div id="active-sites-list"></div>
+  <p id="active-sites-status" class="note" style="text-align:center; padding:12px 0;"></p>
 </section>
 
 <section class="tab-panel" id="panel-recent">
@@ -239,6 +229,72 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
         exhausted = true;
         status.textContent = data.items.length
           ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
+
+<script>
+(function () {
+  const list = document.getElementById('active-sites-list');
+  const status = document.getElementById('active-sites-status');
+  let offset = 0;
+  let loading = false;
+  let exhausted = false;
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; ' +
+      'padding:8px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<span>#' + item.rank + '</span>' +
+      '<a href="https://' + item.domain + '" target="_blank" rel="noopener" ' +
+      'style="flex:1; margin:0 12px;">' + item.domain + '</a>' +
+      '<span class="badge">active</span>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/top-ai-sites.json', window.location.origin);
+    url.searchParams.set('limit', '25');
+    url.searchParams.set('offset', String(offset));
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && offset === 0) {
+        status.textContent = 'No data yet — the daily refresh hasn\'t ' +
+          'populated this yet.';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      offset += data.items.length;
+      if (data.next_offset === null || data.next_offset === undefined) {
+        exhausted = true;
+        status.textContent = data.items.length ? 'End of list.' : '';
       } else {
         status.textContent = '';
       }
