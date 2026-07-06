@@ -107,27 +107,90 @@
 
 <section>
   <h2>Recently discovered .ai domains</h2>
-  {% if has_discovery_feed %}
-  <table>
-    <tr><th>Discovered</th><th>Domain</th><th>Vendor</th></tr>
-    {% for d in recent_discovered %}
-    <tr>
-      <td>{{ d.discovered_at.strftime("%Y-%m-%d %H:%M") }}</td>
-      <td>{{ d.domain }}</td>
-      <td>{{ d.vendor }}</td>
-    </tr>
-    {% endfor %}
-  </table>
-  {% else %}
   <p class="note">
-    No discovery-feed vendor connected yet. This panel populates once a
-    licensed newly-registered-domains feed (WhoisXML API / domains-monitor.com
-    / NetAPI) is wired in — see ingestion module notes. Entries here are
-    labeled "discovered", not "registered", since no vendor has an
-    authoritative .ai creation date.
+    Sightings from Certificate Transparency logs -- this shows when a
+    domain first got a public TLS certificate, not its registration date,
+    and it undercounts true registration volume (speculative/parked
+    domains never get a cert). See the Anguilla panel above for the
+    real aggregate registration/revenue totals.
   </p>
-  {% endif %}
+  <div id="discovered-list"></div>
+  <p id="discovered-status" class="note" style="text-align:center; padding:12px 0;"></p>
 </section>
+
+<script>
+(function () {
+  const list = document.getElementById('discovered-list');
+  const status = document.getElementById('discovered-status');
+  let cursor = null;
+  let loading = false;
+  let exhausted = false;
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; ' +
+      'padding:8px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<span>' + item.domain + '</span>' +
+      '<span style="color:var(--dim)">' + fmtDate(item.discovered_at) + '</span>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/discovered.json', window.location.origin);
+    url.searchParams.set('limit', '25');
+    if (cursor) url.searchParams.set('before', cursor);
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && !cursor) {
+        status.textContent = 'No domains discovered yet -- the CT-log ' +
+          'ingestion pipeline hasn\'t successfully populated this yet ' +
+          '(see note above).';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      cursor = data.next_before;
+      if (!cursor) {
+        exhausted = true;
+        status.textContent = data.items.length
+          ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
 
 <script>
 fetch('/api/revenue.json').then(r => r.json()).then(data => {
