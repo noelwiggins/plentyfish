@@ -411,18 +411,20 @@ LOOKUP_NAME_RE = re.compile(r"^[a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?$")
 @app.route("/api/check-domain.json")
 def api_check_domain():
     """
-    Single-domain .ai availability lookup, for the search box on the
-    homepage. Proxied through our backend (rather than the browser
-    hitting RDAP directly) to avoid CORS issues and to reuse the existing
-    retry/backoff-aware rdap_check() helper.
+    Domain availability lookup for the search box on the homepage --
+    checks both {name}.ai and {name}.com. Proxied through our backend
+    (rather than the browser hitting RDAP directly) to avoid CORS issues
+    and to reuse the existing retry/backoff-aware rdap_check() helper.
     """
     from flask import request
     from scripts.tranco_check import rdap_check
 
     raw = (request.args.get("name") or "").strip().lower()
-    # Be forgiving: accept "example", "example.ai", "example.AI", etc.
-    if raw.endswith(".ai"):
-        raw = raw[:-3]
+    # Be forgiving: accept "example", "example.ai", "example.com", etc.
+    for suffix in (".ai", ".com"):
+        if raw.endswith(suffix):
+            raw = raw[: -len(suffix)]
+            break
     raw = raw.rstrip(".")
 
     if not raw or not LOOKUP_NAME_RE.match(raw):
@@ -431,12 +433,16 @@ def api_check_domain():
                      "hyphens only, not starting/ending with a hyphen)."
         }), 400
 
-    candidate = f"{raw}.ai"
-    registered, raw_status = rdap_check(candidate)
-    if registered is None:
-        return jsonify({"error": f"Couldn't check right now ({raw_status}). Try again shortly."}), 502
+    results = {}
+    for tld in ("ai", "com"):
+        candidate = f"{raw}.{tld}"
+        registered, raw_status = rdap_check(candidate)
+        if registered is None:
+            results[tld] = {"domain": candidate, "error": raw_status}
+        else:
+            results[tld] = {"domain": candidate, "registered": registered}
 
-    return jsonify({"domain": candidate, "registered": registered})
+    return jsonify({"query": raw, "results": results})
 
 
 if __name__ == "__main__":
