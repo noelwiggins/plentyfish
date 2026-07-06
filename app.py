@@ -252,5 +252,21 @@ def admin_run_top_ai_sites():
     return jsonify({"status": "done", "scan": scan, "top": top})
 
 
+@app.route("/admin/run-ct-tail")
+def admin_run_ct_tail():
+    """Manually trigger the direct CT-log tailer (bypasses crt.sh entirely).
+    Protected by ADMIN_TOKEN. TEMPORARY mechanism -- the real operation is
+    via the ct-tail-cron Railway service on a schedule."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    entry_budget = int(request.args.get("entry_budget", 20000))
+    initial_lookback = int(request.args.get("initial_lookback", 3000))
+    max_wall_seconds = int(request.args.get("max_wall_seconds", 200))
+    from scripts.ct_log_tail import run as ct_tail_run
+    ct_tail_run(entry_budget, initial_lookback, max_wall_seconds)
+    return jsonify({"status": "done"})
+
+
 if __name__ == "__main__":
     app.run(debug=True, port=int(os.environ.get("PORT", 5000)))
