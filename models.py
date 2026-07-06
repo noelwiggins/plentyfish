@@ -97,6 +97,25 @@ class TopAiSite(Base):
     )
 
 
+class CTLogCheckpoint(Base):
+    """
+    Tracks how far we've read into each individual CT log (direct tailing,
+    not going through crt.sh). Each usable log from Google's official CT
+    log list (gstatic log_list.json) is a separate append-only stream with
+    its own tree_size; we record the last index processed so each cron run
+    picks up where the previous one left off instead of re-scanning from
+    the start (individual logs can have billions of historical entries --
+    we only care about new ones going forward).
+    """
+    __tablename__ = "ct_log_checkpoints"
+
+    id = Column(Integer, primary_key=True)
+    log_url = Column(String(255), nullable=False, unique=True, index=True)
+    log_name = Column(String(255), nullable=True)
+    tree_size_processed = Column(BigInteger, nullable=False, default=0)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
 class TrancoCheck(Base):
     """
     Result of checking {name}.ai via RDAP for a domain from the Tranco
