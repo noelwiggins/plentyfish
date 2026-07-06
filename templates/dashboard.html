@@ -23,7 +23,12 @@
   .card .label { color:var(--dim); font-size:12px; text-transform:uppercase;
     letter-spacing:.06em; }
   .card .value { font-size:26px; font-weight:600; margin-top:6px;
-    font-variant-numeric: tabular-nums; }
+    font-variant-numeric: tabular-nums; transition: color .15s; }
+  .card .value.flash { color: var(--accent); animation: valueFlash .5s ease-out; }
+  @keyframes valueFlash {
+    0% { opacity: .55; }
+    100% { opacity: 1; }
+  }
   .live-dot { display:inline-block; width:6px; height:6px; border-radius:50%;
     background:var(--accent); margin-right:6px; vertical-align:middle;
     animation: pulse 1.6s ease-in-out infinite; }
@@ -295,14 +300,34 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
   const elWeek = document.getElementById('counter-week');
   const elMonth = document.getElementById('counter-month');
 
-  function tick() {
-    const now = Date.now();
-    elToday.textContent = fmt((now - dayStart) * dayRatePerMs);
-    elWeek.textContent = fmt((now - weekStart) * weekRatePerMs);
-    elMonth.textContent = fmt((now - monthStart) * monthRatePerMs);
-    requestAnimationFrame(tick);
+  function flash(el) {
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true });
   }
-  if (dailyEstimate) requestAnimationFrame(tick);
+
+  function updateOnce() {
+    const now = Date.now();
+    const newToday = fmt((now - dayStart) * dayRatePerMs);
+    const newWeek = fmt((now - weekStart) * weekRatePerMs);
+    const newMonth = fmt((now - monthStart) * monthRatePerMs);
+    if (newToday !== elToday.textContent) { elToday.textContent = newToday; flash(elToday); }
+    if (newWeek !== elWeek.textContent) { elWeek.textContent = newWeek; flash(elWeek); }
+    if (newMonth !== elMonth.textContent) { elMonth.textContent = newMonth; flash(elMonth); }
+  }
+
+  // Irregular tick timing (0.4s-3s, randomized each time) rather than a
+  // smooth per-frame update -- real accrual only moves a few dollars a
+  // second, so a perfectly regular high-frequency tick reads as fake.
+  // Random-interval updates showing the true elapsed-time value look more
+  // like real sporadic activity landing, without inflating the numbers
+  // beyond what's actually accrued.
+  function scheduleNext() {
+    const delay = 400 + Math.random() * 2600;
+    setTimeout(() => { updateOnce(); scheduleNext(); }, delay);
+  }
+  if (dailyEstimate) { updateOnce(); scheduleNext(); }
 
   // Count-up animation for the year total (runs once on load)
   const elYear = document.getElementById('counter-year');
