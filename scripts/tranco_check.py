@@ -109,12 +109,18 @@ INFRA_DENYLIST = [
     "captive.apple", "push.apple", "myfritz",
     # IoT / device manufacturer backends
     "ezviz", "hicloudcam", "hicloud",
+    # cloud/API infrastructure (developer-facing, not consumer-facing)
+    "googleapis", "amazonaws", "azureedge", "azurewebsites", "herokuapp",
+    "googlevideo", "1e100",
 ]
 
 
 def is_consumer_facing(com_domain: str) -> bool:
     name = base_name(com_domain)
     return not any(pattern in name for pattern in INFRA_DENYLIST)
+
+
+def rdap_check(domain: str, timeout=10, retries=3):
     for attempt in range(retries):
         try:
             r = requests.get(RDAP_URL.format(domain), headers={"User-Agent": UA},
