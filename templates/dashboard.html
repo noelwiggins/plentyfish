@@ -22,7 +22,15 @@
     border-radius:10px; padding:18px 20px; }
   .card .label { color:var(--dim); font-size:12px; text-transform:uppercase;
     letter-spacing:.06em; }
-  .card .value { font-size:26px; font-weight:600; margin-top:6px; }
+  .card .value { font-size:26px; font-weight:600; margin-top:6px;
+    font-variant-numeric: tabular-nums; }
+  .live-dot { display:inline-block; width:6px; height:6px; border-radius:50%;
+    background:var(--accent); margin-right:6px; vertical-align:middle;
+    animation: pulse 1.6s ease-in-out infinite; }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(79,209,197,.5); }
+    50% { opacity: .5; box-shadow: 0 0 0 4px rgba(79,209,197,0); }
+  }
   .card .foot { color:var(--dim); font-size:11px; margin-top:8px; }
   section { padding: 8px 32px 32px; }
   section h2 { font-size:15px; color:var(--ink); border-bottom:1px solid var(--line);
@@ -48,21 +56,21 @@
 
 <div class="grid">
   <div class="card">
-    <div class="label">Est. revenue today</div>
-    <div class="value">${{ "%.0f"|format(revenue.daily_estimate) if revenue.daily_estimate else "—" }}</div>
+    <div class="label"><span class="live-dot"></span>Revenue today (so far)</div>
+    <div class="value" id="counter-today">$0</div>
     <div class="foot">derived from {{ revenue.latest_actual.period_label if revenue.latest_actual }} actuals</div>
   </div>
   <div class="card">
-    <div class="label">Est. this week</div>
-    <div class="value">${{ "%.0f"|format(revenue.weekly_estimate) if revenue.weekly_estimate else "—" }}</div>
+    <div class="label"><span class="live-dot"></span>This week (so far)</div>
+    <div class="value" id="counter-week">$0</div>
   </div>
   <div class="card">
-    <div class="label">Est. this month</div>
-    <div class="value">${{ "%.0f"|format(revenue.monthly_estimate) if revenue.monthly_estimate else "—" }}</div>
+    <div class="label"><span class="live-dot"></span>This month (so far)</div>
+    <div class="value" id="counter-month">$0</div>
   </div>
   <div class="card">
     <div class="label">{{ revenue.latest_actual.period_label if revenue.latest_actual }} actual (year)</div>
-    <div class="value">${{ "{:,.0f}".format(revenue.latest_actual.revenue_usd) if revenue.latest_actual else "—" }}</div>
+    <div class="value" id="counter-year">$0</div>
     <div class="foot">
       {% if revenue.latest_actual and revenue.latest_actual.source_url %}
         <a href="{{ revenue.latest_actual.source_url }}" target="_blank">source</a>
@@ -70,6 +78,13 @@
     </div>
   </div>
 </div>
+<p class="note" style="padding:0 32px; margin-top:-8px;">
+  "So far" counters are a live model, not a metered feed: they grow at a
+  constant per-second rate derived from Anguilla's actual published
+  {{ revenue.latest_actual.period_label if revenue.latest_actual }} total, reset at
+  the start of each day/week/month (UTC), and estimate where the real
+  number likely stands right now between official reports.
+</p>
 
 <section>
   <h2>Anguilla .ai revenue — actuals &amp; projection</h2>
@@ -189,6 +204,72 @@
   }, { rootMargin: '200px' }).observe(sentinel);
 
   loadMore();
+})();
+</script>
+
+<script>
+// Live "so far" counters: grow at a constant per-second rate derived from
+// real published revenue figures, anchored to the start of the current
+// UTC day/week/month. This is a model, not a metered feed -- see the note
+// under the cards.
+(function () {
+  const dailyEstimate = {{ (revenue.daily_estimate or 0)|tojson }};
+  const weeklyEstimate = {{ (revenue.weekly_estimate or 0)|tojson }};
+  const monthlyEstimate = {{ (revenue.monthly_estimate or 0)|tojson }};
+  const yearActual = {{ (revenue.latest_actual.revenue_usd if revenue.latest_actual else 0)|tojson }};
+
+  function fmt(n) {
+    return '$' + Math.floor(n).toLocaleString('en-US');
+  }
+
+  function startOfUTCDay(d) {
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+  function startOfUTCWeek(d) {
+    const day = d.getUTCDay(); // 0=Sun
+    const diff = (day === 0 ? 6 : day - 1); // Monday as week start
+    return startOfUTCDay(d) - diff * 86400000;
+  }
+  function startOfUTCMonth(d) {
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  }
+
+  const now0 = new Date();
+  const dayStart = startOfUTCDay(now0);
+  const weekStart = startOfUTCWeek(now0);
+  const monthStart = startOfUTCMonth(now0);
+  const daysInMonth = new Date(Date.UTC(now0.getUTCFullYear(), now0.getUTCMonth() + 1, 0)).getUTCDate();
+
+  const dayRatePerMs = dailyEstimate / 86400000;
+  const weekRatePerMs = weeklyEstimate / (7 * 86400000);
+  const monthRatePerMs = monthlyEstimate / (daysInMonth * 86400000);
+
+  const elToday = document.getElementById('counter-today');
+  const elWeek = document.getElementById('counter-week');
+  const elMonth = document.getElementById('counter-month');
+
+  function tick() {
+    const now = Date.now();
+    elToday.textContent = fmt((now - dayStart) * dayRatePerMs);
+    elWeek.textContent = fmt((now - weekStart) * weekRatePerMs);
+    elMonth.textContent = fmt((now - monthStart) * monthRatePerMs);
+    requestAnimationFrame(tick);
+  }
+  if (dailyEstimate) requestAnimationFrame(tick);
+
+  // Count-up animation for the year total (runs once on load)
+  const elYear = document.getElementById('counter-year');
+  if (yearActual) {
+    const duration = 1200;
+    const start = performance.now();
+    function animateYear(ts) {
+      const p = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      elYear.textContent = fmt(yearActual * eased);
+      if (p < 1) requestAnimationFrame(animateYear);
+    }
+    requestAnimationFrame(animateYear);
+  }
 })();
 </script>
 
