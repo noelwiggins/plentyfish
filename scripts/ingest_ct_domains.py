@@ -96,7 +96,7 @@ CRTSH_JSON_URL = "https://crt.sh/?q=%25.ai&output=json&exclude=expired"
 UA = "plentyfish.ai research bot (contact: noel@plentyfish.ai)"
 
 
-def connect_crtsh(retries=3, backoff=5):
+def connect_crtsh(retries=6, backoff=10):
     last_err = None
     for attempt in range(1, retries + 1):
         try:
@@ -128,7 +128,8 @@ def fetch_via_postgres(since):
     conn = connect_crtsh()
     rows = None
     last_err = None
-    for attempt in range(1, 4):
+    max_attempts = 8
+    for attempt in range(1, max_attempts + 1):
         try:
             cur = conn.cursor()
             cur.execute(CRTSH_QUERY, ("%.ai", since))
@@ -137,13 +138,13 @@ def fetch_via_postgres(since):
             break
         except Exception as e:
             last_err = e
-            print(f"[warn] crt.sh Postgres query attempt {attempt}/3 failed: {e}")
+            print(f"[warn] crt.sh Postgres query attempt {attempt}/{max_attempts} failed: {e}")
             try:
                 conn.close()
             except Exception:
                 pass
-            time.sleep(5 * attempt)
-            if attempt < 3:
+            time.sleep(min(10 * attempt, 90))
+            if attempt < max_attempts:
                 conn = connect_crtsh()
     conn.close()
 
@@ -154,7 +155,7 @@ def fetch_via_postgres(since):
     return [(name_block, entry_ts) for _, name_block, entry_ts in rows]
 
 
-def fetch_via_json(since, retries=3):
+def fetch_via_json(since, retries=6):
     """Fallback path: crt.sh's public JSON HTTP endpoint. Slower and known
     to return an incomplete/randomized subset for broad wildcard queries
     like '%.ai' (crt.sh caps result size for performance), so this will
