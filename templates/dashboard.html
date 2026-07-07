@@ -13,16 +13,22 @@
   * { box-sizing: border-box; }
   body { margin:0; background:var(--bg); color:var(--ink);
     font-family: -apple-system, "Inter", "Helvetica Neue", Arial, sans-serif; }
-  header { padding: 28px 32px 8px; }
-  header h1 { margin:0; font-size: 22px; letter-spacing: -0.02em; }
-  header .sub { color:var(--dim); font-size: 13px; margin-top:4px; }
-  .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px;
-    padding: 20px 32px; }
+  .accent-rule { height:2px; background:linear-gradient(90deg, var(--accent), var(--warn));
+    opacity:.7; }
+  header { padding: 18px 24px 4px; }
+  header h1 { margin:0; font-size: 21px; letter-spacing: -0.02em; font-weight:700; }
+  header .sub { color:var(--dim); font-size: 13px; margin-top:3px; }
+  .hero { padding: 14px 24px 18px; }
+  .hero .headline { font-size:15px; color:var(--ink); margin:0 0 12px; font-weight:500; }
+  .hero .headline strong { color:var(--accent); font-weight:700; }
+  .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:12px;
+    padding: 4px 24px 16px; }
   .card { background:var(--panel); border:1px solid var(--line);
-    border-radius:10px; padding:18px 20px; }
-  .card .label { color:var(--dim); font-size:12px; text-transform:uppercase;
+    border-radius:10px; padding:14px 16px; transition: border-color .15s, transform .15s; }
+  .card:hover { border-color:var(--accent); transform:translateY(-1px); }
+  .card .label { color:var(--dim); font-size:11px; text-transform:uppercase;
     letter-spacing:.06em; }
-  .card .value { font-size:26px; font-weight:600; margin-top:6px;
+  .card .value { font-size:23px; font-weight:700; margin-top:4px;
     font-variant-numeric: tabular-nums; transition: color .15s; }
   .card .value.flash { color: var(--accent); animation: valueFlash .5s ease-out; }
   @keyframes valueFlash {
@@ -36,26 +42,28 @@
     0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(79,209,197,.5); }
     50% { opacity: .5; box-shadow: 0 0 0 4px rgba(79,209,197,0); }
   }
-  .card .foot { color:var(--dim); font-size:11px; margin-top:8px; }
-  section { padding: 8px 32px 32px; }
-  section h2 { font-size:15px; color:var(--ink); border-bottom:1px solid var(--line);
-    padding-bottom:8px; }
-  table { width:100%; border-collapse:collapse; font-size:13px; }
-  th { text-align:left; color:var(--dim); font-weight:500; padding:8px 6px;
+  .card .foot { color:var(--dim); font-size:10.5px; margin-top:6px; }
+  section { padding: 4px 24px 20px; }
+  section h2 { font-size:14px; color:var(--ink); border-bottom:1px solid var(--line);
+    padding-bottom:6px; margin-bottom:10px; }
+  table { width:100%; border-collapse:collapse; font-size:12.5px; }
+  th { text-align:left; color:var(--dim); font-weight:500; padding:7px 6px;
     border-bottom:1px solid var(--line); }
-  td { padding:8px 6px; border-bottom:1px solid var(--line); }
+  td { padding:7px 6px; border-bottom:1px solid var(--line); }
+  tr { transition: background-color .1s; }
+  tbody tr:hover, table tr:hover td { background-color: rgba(79,209,197,.04); }
   .badge { display:inline-block; padding:2px 8px; border-radius:20px;
     font-size:11px; background:rgba(79,209,197,.15); color:var(--accent); }
   .badge.warn { background:rgba(242,166,90,.15); color:var(--warn); }
-  .note { color:var(--dim); font-size:12px; line-height:1.5; margin-top:6px; }
+  .note { color:var(--dim); font-size:11.5px; line-height:1.5; margin-top:5px; }
   canvas { max-height: 320px; }
   a { color: var(--accent); }
 
-  .tabs { display:flex; gap:4px; padding: 8px 32px 0; border-bottom:1px solid var(--line); }
-  .tab-btn { background:none; border:none; color:var(--dim); font-size:14px;
-    font-family:inherit; padding:10px 16px; cursor:pointer; border-bottom:2px solid transparent;
-    margin-bottom:-1px; transition: color .15s, border-color .15s; }
-  .tab-btn:hover { color:var(--ink); }
+  .tabs { display:flex; gap:2px; padding: 4px 24px 0; border-bottom:1px solid var(--line); }
+  .tab-btn { background:none; border:none; color:var(--dim); font-size:13.5px;
+    font-family:inherit; padding:9px 14px; cursor:pointer; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition: color .15s, border-color .15s; border-radius:6px 6px 0 0; }
+  .tab-btn:hover { color:var(--ink); background:rgba(255,255,255,.03); }
   .tab-btn.active { color:var(--ink); border-bottom-color:var(--accent); font-weight:600; }
   .tab-count { color:var(--dim); font-size:11px; margin-left:4px; }
   .tab-panel { display:none; }
@@ -68,14 +76,17 @@
   <h1>plentyfish.ai</h1>
   <div class="sub">.ai domain intelligence — Anguilla revenue tracking &amp; unclaimed-name scanner</div>
 </header>
+<div class="accent-rule"></div>
 
-<section style="padding:8px 32px 24px;">
+<section class="hero">
+  <p class="headline"><strong>Find your .ai name</strong> before someone else does — checked live against the real registry.</p>
   <div style="display:flex; gap:8px; max-width:520px;">
-    <input id="lookup-input" type="text" placeholder="Check .ai and .com availability… e.g. hydra"
+    <input id="lookup-input" type="text" placeholder="e.g. hydra"
       style="flex:1; background:var(--panel); border:1px solid var(--line); border-radius:8px;
-      color:var(--ink); padding:12px 14px; font-size:14px;" />
+      color:var(--ink); padding:11px 14px; font-size:14px;" />
     <button id="lookup-btn" style="background:var(--accent); color:#03181a; border:none;
-      border-radius:8px; padding:0 20px; font-weight:600; font-size:14px; cursor:pointer;">
+      border-radius:8px; padding:0 20px; font-weight:700; font-size:14px; cursor:pointer;
+      transition:opacity .15s;" onmouseover="this.style.opacity=.85" onmouseout="this.style.opacity=1">
       Check .ai + .com
     </button>
   </div>
@@ -106,23 +117,19 @@
     </div>
   </div>
 </div>
-<p class="note" style="padding:0 32px; margin-top:-8px;">
-  "So far" counters are a live model, not a metered feed: they grow at a
-  constant per-second rate derived from Anguilla's actual published
-  {{ revenue.latest_actual.period_label if revenue.latest_actual }} total, reset at
-  the start of each day/week/month (UTC), and estimate where the real
-  number likely stands right now between official reports.
+<p class="note" style="padding:0 24px; margin-top:-6px;">
+  "So far" counters are a live model, not a metered feed: constant per-second
+  rate from Anguilla's real {{ revenue.latest_actual.period_label if revenue.latest_actual }}
+  total, resetting each day/week/month (UTC).
 </p>
 
 <section>
   <h2>Anguilla .ai revenue — actuals &amp; projection</h2>
   <canvas id="revenueChart"></canvas>
   <div class="note">
-    Figures are Anguilla's published .ai domain revenue (government budget
-    documents and press reporting), not a live feed — Anguilla reports
-    monthly/annual totals, not daily ones. Projected years are shown as
-    dashed/flagged and sourced from the government's own budget forecasts,
-    which have historically undershot actuals substantially.
+    Anguilla's published .ai revenue (budget docs &amp; press reporting), not a
+    live feed -- reported monthly/annually. Projected years are flagged and
+    have historically undershot actuals.
   </div>
 </section>
 
@@ -141,29 +148,22 @@
       <div class="foot">domains likely to renew next cycle, at a ~{{ (civic.renewal_rate*100)|round|int }}% renewal rate</div>
     </div>
   </div>
-  <p class="note" style="margin-top:-6px;">
-    The per-resident figure divides the live "so far" counter above by
-    Anguilla's population -- a way to make an abstract multi-million-dollar
-    number concrete, not an indication that funds are distributed per
-    person. The renewal base is a simple model (cumulative registrations ×
-    the ~90% renewal rate widely cited in reporting), meant to separate
-    "already fairly reliable" revenue from new speculative growth -- it is
-    not an exact revenue split, since we don't have per-domain pricing
-    granularity.
+  <p class="note" style="margin-top:-4px;">
+    Per-resident divides the live counter above by population -- makes an
+    abstract number concrete, not a claim funds are distributed per person.
+    Renewal base is a simple model (cumulative registrations × the ~90%
+    renewal rate widely cited in reporting), not an exact revenue split.
   </p>
 
-  <h3 style="font-size:14px; margin:20px 0 4px;">Government revenue dependency</h3>
-  <canvas id="dependencyChart" style="max-height:220px;"></canvas>
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">Government revenue dependency</h3>
+  <canvas id="dependencyChart" style="max-height:200px;"></canvas>
   <p class="note">
-    Share of Anguilla's total government revenue coming from .ai domain
-    fees, by year. Rising fast: from roughly a fifth of government revenue
-    in 2023 to nearly half in 2025 -- worth knowing both as a success story
-    and as a concentration-risk signal, since it means the government
-    budget is increasingly tied to the fortunes of one specific product
-    category (AI naming demand).
+    Share of Anguilla's government revenue from .ai fees, by year -- from
+    roughly a fifth in 2023 to nearly half in 2025. A success story and a
+    concentration-risk signal at once.
   </p>
 
-  <h3 style="font-size:14px; margin:20px 0 4px;">How Anguilla compares to other windfall ccTLDs</h3>
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">How Anguilla compares to other windfall ccTLDs</h3>
   <table>
     <tr><th>TLD</th><th>Territory</th><th>Recent revenue</th><th>% of govt revenue</th><th>Population</th><th>Outlook</th></tr>
     {% for p in civic.peer_cctlds %}
@@ -178,7 +178,7 @@
     {% endfor %}
   </table>
 
-  <h3 style="font-size:14px; margin:20px 0 4px;">Where the money is going</h3>
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">Where the money is going</h3>
   <p class="note">
     {{ civic.budget_allocation.text }}
     <a href="{{ civic.budget_allocation.source_url }}" target="_blank">source</a>
@@ -194,23 +194,20 @@
 
 
 <section class="tab-panel active" id="panel-active-sites">
-  <p class="note" style="margin-top:12px;">
-    .ai domains that rank directly in Tranco's global top-sites list -- real
-    ranking data (Tranco measures DNS query volume across contributing
-    resolvers worldwide), not derived by guessing names. This means these
-    are genuinely active, frequently-resolved .ai sites, not just claimed names.
+  <p class="note" style="margin-top:8px;">
+    .ai domains ranked directly in Tranco's global top-sites list -- real
+    DNS traffic data, not derived by guessing. Genuinely active sites, not
+    just claimed names.
   </p>
   <div id="active-sites-list"></div>
   <p id="active-sites-status" class="note" style="text-align:center; padding:12px 0;"></p>
 </section>
 
 <section class="tab-panel" id="panel-recent">
-  <p class="note" style="margin-top:12px;">
-    Sightings from Certificate Transparency logs -- this shows when a
-    domain first got a public TLS certificate, not its registration date,
-    and it undercounts true registration volume (speculative/parked
-    domains never get a cert). See the Anguilla panel above for the
-    real aggregate registration/revenue totals.
+  <p class="note" style="margin-top:8px;">
+    Sightings from Certificate Transparency logs -- first-seen-with-a-cert
+    date, not registration date, and undercounts parked/speculative names.
+    See the Anguilla panel above for real aggregate totals.
   </p>
   <div id="discovered-list"></div>
   <p id="discovered-status" class="note" style="text-align:center; padding:12px 0;"></p>
