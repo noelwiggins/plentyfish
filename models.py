@@ -117,6 +117,30 @@ class CTLogCheckpoint(Base):
     updated_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 
+class NewsItem(Base):
+    """
+    Anguilla-specific news headlines, pulled directly from local outlets'
+    own public RSS feeds (Anguilla Focus, The Anguillian) -- not from
+    Google News' RSS, whose own terms explicitly restrict use to "a
+    personal feed reader for personal, non-commercial use." Using each
+    outlet's own first-party feed sidesteps that entirely: they publish it
+    for syndication, and we only store headline + link + date, never
+    reproducing article body text.
+    """
+    __tablename__ = "news_items"
+
+    id = Column(Integer, primary_key=True)
+    title = Column(String(512), nullable=False)
+    link = Column(String(1024), nullable=False, unique=True)
+    source = Column(String(128), nullable=False)
+    published_at = Column(DateTime, nullable=True)
+    fetched_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("link", name="uq_news_link"),
+    )
+
+
 class TrancoCheck(Base):
     """
     Result of checking {name}.ai via RDAP for a domain from the Tranco
