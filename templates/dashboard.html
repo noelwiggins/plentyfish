@@ -190,6 +190,7 @@
   <button class="tab-btn" data-tab="recent">Most Recent</button>
   <button class="tab-btn" data-tab="unregistered">Unregistered
     <span class="tab-count">({{ unclaimed_count }})</span></button>
+  <button class="tab-btn" data-tab="news">Anguilla News</button>
 </div>
 
 
@@ -232,6 +233,16 @@
     <tr><td colspan="4" class="note">No checks run yet — run scripts/tranco_check.py to populate.</td></tr>
     {% endfor %}
   </table>
+</section>
+
+<section class="tab-panel" id="panel-news">
+  <p class="note" style="margin-top:8px;">
+    Headlines from Anguilla's own local news outlets -- Anguilla Focus and
+    The Anguillian -- linking out to the source. We show headlines and
+    dates only, never article text.
+  </p>
+  <div id="news-list"></div>
+  <p id="news-status" class="note" style="text-align:center; padding:12px 0;"></p>
 </section>
 
 <script>
@@ -355,6 +366,76 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       if (data.items.length === 0 && offset === 0) {
         status.textContent = 'No data yet — the daily refresh hasn\'t ' +
           'populated this yet.';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      offset += data.items.length;
+      if (data.next_offset === null || data.next_offset === undefined) {
+        exhausted = true;
+        status.textContent = data.items.length ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
+
+<script>
+(function () {
+  const list = document.getElementById('news-list');
+  const status = document.getElementById('news-status');
+  let offset = 0;
+  let loading = false;
+  let exhausted = false;
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:10px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<a href="' + item.link + '" target="_blank" rel="noopener" style="color:var(--ink); font-weight:500;">' +
+      item.title + '</a>' +
+      '<div style="color:var(--dim); font-size:11px; margin-top:3px;">' +
+      item.source + (item.published_at ? ' · ' + fmtDate(item.published_at) : '') + '</div>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/news.json', window.location.origin);
+    url.searchParams.set('limit', '20');
+    url.searchParams.set('offset', String(offset));
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && offset === 0) {
+        status.textContent = 'No headlines yet — the news fetch hasn\'t run.';
         exhausted = true;
         loading = false;
         return;
