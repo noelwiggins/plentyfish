@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck, TopAiSite
+from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck, TopAiSite, NewsItem
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///plentyfish_dev.db")
 if DATABASE_URL.startswith("postgres://"):
@@ -443,6 +443,42 @@ def api_check_domain():
             results[tld] = {"domain": candidate, "registered": registered}
 
     return jsonify({"query": raw, "results": results})
+
+
+@app.route("/api/news.json")
+def api_news():
+    from flask import request
+    limit = min(int(request.args.get("limit", 20)), 100)
+    offset = int(request.args.get("offset", 0))
+
+    session = Session()
+    rows = (session.query(NewsItem)
+            .order_by(NewsItem.published_at.desc().nullslast())
+            .offset(offset).limit(limit).all())
+    total = session.query(NewsItem).count()
+    session.close()
+
+    next_offset = offset + limit if offset + limit < total else None
+    return jsonify({
+        "items": [
+            {"title": n.title, "link": n.link, "source": n.source,
+             "published_at": n.published_at.isoformat() if n.published_at else None}
+            for n in rows
+        ],
+        "total": total,
+        "next_offset": next_offset,
+    })
+
+
+@app.route("/admin/run-news-fetch")
+def admin_run_news_fetch():
+    """Manually trigger the Anguilla news fetch. Protected by ADMIN_TOKEN."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    from scripts.fetch_anguilla_news import run as news_run
+    news_run()
+    return jsonify({"status": "done"})
 
 
 if __name__ == "__main__":
