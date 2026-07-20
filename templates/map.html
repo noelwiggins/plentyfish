@@ -59,14 +59,57 @@
 
 <div id="map"></div>
 
-<p class="note">
+<p class="note" style="padding-top:16px;">
   Weather and air quality: live from Open-Meteo (free, global, updated hourly).
   Business locations: OpenStreetMap community data, refreshed periodically —
-  not exhaustive, and accuracy depends on what's been mapped. Historical maps
-  and aerial photography layers are still being researched (Anguilla doesn't
-  have NYC-style freely-digitized historical aerial archives) and aren't in
-  this version yet.
+  not exhaustive, and accuracy depends on what's been mapped.
 </p>
+
+<section style="padding: 8px 24px 8px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Historical Archive
+  </h2>
+  <p class="note">
+    Hand-curated maps and photos, individually verified (real source, real
+    license) rather than pulled automatically. This is intentionally small —
+    see the note below on what exists but couldn't be included.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:14px; margin-top:12px;">
+    {% for item in archive_items %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden;">
+      <a href="{{ item.source_url }}" target="_blank" rel="noopener">
+        <img src="{{ item.image_url }}" alt="{{ item.title }}"
+          style="width:100%; height:150px; object-fit:cover; display:block;" loading="lazy" />
+      </a>
+      <div style="padding:10px 12px;">
+        <div style="font-size:13px; font-weight:600;">{{ item.title }}</div>
+        <div style="color:var(--dim); font-size:11px; margin-top:3px;">
+          {{ item.year }} · {{ item.kind }}
+        </div>
+        <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">
+          {{ item.description }}
+        </div>
+        <div style="margin-top:6px;">
+          <a href="{{ item.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
+            {{ item.source }} · {{ item.license }}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if archive_gaps %}
+  <p class="note" style="margin-top:16px;">
+    <strong>What exists but isn't here:</strong>
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      {% for gap in archive_gaps %}
+      <li style="margin-bottom:6px;">{{ gap }}</li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+</section>
 
 <footer>
   © {{ now.year }} Noel Wiggins. All rights reserved.
