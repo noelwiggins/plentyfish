@@ -6,7 +6,7 @@ from flask import Flask, render_template, jsonify
 from sqlalchemy import create_engine, desc
 from sqlalchemy.orm import sessionmaker
 
-from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck, TopAiSite, NewsItem
+from models import Base, AnguillaRevenue, DiscoveredDomain, TrancoCheck, TopAiSite, NewsItem, AnguillaBusiness
 
 DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///plentyfish_dev.db")
 if DATABASE_URL.startswith("postgres://"):
@@ -504,6 +504,34 @@ def admin_run_news_fetch():
         return jsonify({"error": "unauthorized"}), 403
     from scripts.fetch_anguilla_news import run as news_run
     news_run()
+    return jsonify({"status": "done"})
+
+
+@app.route("/map")
+def anguilla_map():
+    return render_template("map.html", now=datetime.utcnow())
+
+
+@app.route("/api/anguilla-businesses.json")
+def api_anguilla_businesses():
+    session = Session()
+    rows = session.query(AnguillaBusiness).all()
+    session.close()
+    return jsonify([
+        {"name": b.name or "Unnamed", "category": b.category,
+         "lat": b.latitude, "lon": b.longitude}
+        for b in rows
+    ])
+
+
+@app.route("/admin/run-businesses-fetch")
+def admin_run_businesses_fetch():
+    """Manually trigger the Anguilla business/POI fetch. Protected by ADMIN_TOKEN."""
+    from flask import request
+    if not ADMIN_TOKEN or request.args.get("token") != ADMIN_TOKEN:
+        return jsonify({"error": "unauthorized"}), 403
+    from scripts.fetch_anguilla_businesses import run as biz_run
+    biz_run()
     return jsonify({"status": "done"})
 
 
