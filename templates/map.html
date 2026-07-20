@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Anguilla Map — plentyfish.ai</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+  :root {
+    --bg: #0b0f14; --panel: #121821; --line: #232c38;
+    --ink: #e6edf3; --dim: #8b98a5; --accent: #4fd1c5; --warn: #f2a65a;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink);
+    font-family: -apple-system, "Inter", "Helvetica Neue", Arial, sans-serif; }
+  header { padding: 18px 24px 4px; display:flex; justify-content:space-between; align-items:baseline; }
+  header h1 { margin:0; font-size: 21px; letter-spacing: -0.02em; font-weight:700; }
+  header a { color:var(--accent); font-size:13px; text-decoration:none; }
+  .sub { color:var(--dim); font-size: 13px; padding: 0 24px 14px; }
+  .accent-rule { height:2px; background:linear-gradient(90deg, var(--accent), var(--warn)); opacity:.7; }
+
+  .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; padding: 16px 24px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
+  .card .label { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
+  .card .value { font-size:23px; font-weight:700; margin-top:4px; }
+  .card .foot { color:var(--dim); font-size:10.5px; margin-top:6px; }
+
+  #map { height: 65vh; width: 100%; }
+  .note { color:var(--dim); font-size:11.5px; line-height:1.5; padding: 10px 24px 24px; }
+  footer { padding:20px 24px 28px; border-top:1px solid var(--line); margin-top:12px;
+    color:var(--dim); font-size:11.5px; text-align:center; }
+
+  .leaflet-popup-content-wrapper { background:var(--panel); color:var(--ink); }
+  .leaflet-popup-tip { background:var(--panel); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>plentyfish.ai — Anguilla Map</h1>
+  <a href="/">← Back to dashboard</a>
+</header>
+<div class="sub">Live weather, air quality, and business locations for Anguilla.</div>
+<div class="accent-rule"></div>
+
+<div class="grid">
+  <div class="card">
+    <div class="label">Weather — The Valley, Anguilla</div>
+    <div class="value" id="weather-value">Loading…</div>
+    <div class="foot" id="weather-foot"></div>
+  </div>
+  <div class="card">
+    <div class="label">Air Quality (US AQI)</div>
+    <div class="value" id="aqi-value">Loading…</div>
+    <div class="foot" id="aqi-foot"></div>
+  </div>
+</div>
+
+<div id="map"></div>
+
+<p class="note">
+  Weather and air quality: live from Open-Meteo (free, global, updated hourly).
+  Business locations: OpenStreetMap community data, refreshed periodically —
+  not exhaustive, and accuracy depends on what's been mapped. Historical maps
+  and aerial photography layers are still being researched (Anguilla doesn't
+  have NYC-style freely-digitized historical aerial archives) and aren't in
+  this version yet.
+</p>
+
+<footer>
+  © {{ now.year }} Noel Wiggins. All rights reserved.
+</footer>
+
+<script>
+const ANGUILLA_CENTER = [18.2206, -63.0686];
+
+// --- Map setup ---------------------------------------------------------
+const map = L.map('map', { zoomControl: true }).setView(ANGUILLA_CENTER, 12);
+
+const darkLayer = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  { attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 19 }
+);
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  { attribution: 'Esri, Maxar, Earthstar Geographics', maxZoom: 19 }
+);
+darkLayer.addTo(map);
+
+const CATEGORY_COLORS = {
+  restaurant: '#f2a65a', bar: '#e06c9f', pub: '#e06c9f', cafe: '#f2a65a',
+  hotel: '#4fd1c5', supermarket: '#7ec8e3', convenience: '#7ec8e3',
+  bank: '#c792ea', pharmacy: '#c792ea', fuel: '#8b98a5',
+};
+
+const businessLayer = L.layerGroup();
+
+fetch('/api/anguilla-businesses.json')
+  .then(r => r.json())
+  .then(items => {
+    items.forEach(item => {
+      const color = CATEGORY_COLORS[item.category] || '#8b98a5';
+      const marker = L.circleMarker([item.lat, item.lon], {
+        radius: 6, color: color, fillColor: color, fillOpacity: 0.85, weight: 1,
+      });
+      marker.bindPopup('<strong>' + item.name + '</strong><br>' + item.category);
+      marker.addTo(businessLayer);
+    });
+  })
+  .catch(() => {});
+
+businessLayer.addTo(map);
+
+L.control.layers(
+  { 'Dark': darkLayer, 'Satellite': satelliteLayer },
+  { 'Businesses': businessLayer }
+).addTo(map);
+
+// --- Weather + air quality (Open-Meteo, direct client-side, CORS-enabled) --
+const WEATHER_CODES = {
+  0: 'Clear sky', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
+  45: 'Fog', 48: 'Depositing rime fog', 51: 'Light drizzle', 53: 'Drizzle',
+  55: 'Dense drizzle', 61: 'Slight rain', 63: 'Rain', 65: 'Heavy rain',
+  80: 'Rain showers', 81: 'Rain showers', 82: 'Violent rain showers',
+  95: 'Thunderstorm', 96: 'Thunderstorm w/ hail', 99: 'Thunderstorm w/ hail',
+};
+
+fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ANGUILLA_CENTER[0]}&longitude=${ANGUILLA_CENTER[1]}&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code&timezone=auto`)
+  .then(r => r.json())
+  .then(data => {
+    const c = data.current;
+    const desc = WEATHER_CODES[c.weather_code] || 'Unknown';
+    document.getElementById('weather-value').textContent = c.temperature_2m + '°C';
+    document.getElementById('weather-foot').textContent =
+      desc + ' · ' + c.relative_humidity_2m + '% humidity · wind ' + c.wind_speed_10m + ' km/h';
+  })
+  .catch(() => { document.getElementById('weather-value').textContent = 'Unavailable'; });
+
+fetch(`https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${ANGUILLA_CENTER[0]}&longitude=${ANGUILLA_CENTER[1]}&current=us_aqi,pm2_5,pm10,ozone`)
+  .then(r => r.json())
+  .then(data => {
+    const c = data.current;
+    let label = 'Good';
+    if (c.us_aqi > 150) label = 'Unhealthy';
+    else if (c.us_aqi > 100) label = 'Unhealthy for sensitive groups';
+    else if (c.us_aqi > 50) label = 'Moderate';
+    document.getElementById('aqi-value').textContent = c.us_aqi + ' (' + label + ')';
+    document.getElementById('aqi-foot').textContent =
+      'PM2.5: ' + c.pm2_5 + ' μg/m³ · PM10: ' + c.pm10 + ' μg/m³ · Ozone: ' + c.ozone + ' μg/m³';
+  })
+  .catch(() => { document.getElementById('aqi-value').textContent = 'Unavailable'; });
+</script>
+
+</body>
+</html>
