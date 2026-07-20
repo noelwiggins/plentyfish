@@ -67,11 +67,11 @@ def get_revenue_context():
     session = Session()
     years = (session.query(AnguillaRevenue)
              .filter_by(granularity="year")
-             .order_by(AnguillaRevenue.period_label)
+             .order_by(AnguillaRevenue.period_start)
              .all())
     months = (session.query(AnguillaRevenue)
               .filter_by(granularity="month")
-              .order_by(AnguillaRevenue.period_label)
+              .order_by(AnguillaRevenue.period_start)
               .all())
     session.close()
 
@@ -249,7 +249,7 @@ def api_revenue():
     session = Session()
     years = (session.query(AnguillaRevenue)
              .filter_by(granularity="year")
-             .order_by(AnguillaRevenue.period_label).all())
+             .order_by(AnguillaRevenue.period_start).all())
     session.close()
     return jsonify([
         {
