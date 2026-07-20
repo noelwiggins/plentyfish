@@ -68,6 +68,21 @@
   .tab-count { color:var(--dim); font-size:11px; margin-left:4px; }
   .tab-panel { display:none; }
   .tab-panel.active { display:block; }
+
+  .news-ticker { border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:var(--panel); overflow:hidden; position:relative; white-space:nowrap; }
+  .news-ticker .tag { position:absolute; left:0; top:0; bottom:0; z-index:2;
+    background:var(--accent); color:#03181a; font-weight:700; font-size:11px;
+    letter-spacing:.04em; display:flex; align-items:center; padding:0 12px; }
+  .news-ticker-track { display:inline-block; padding-left:110px; animation: ticker-scroll 55s linear infinite; }
+  .news-ticker:hover .news-ticker-track { animation-play-state: paused; }
+  .news-ticker-track a { color:var(--ink); text-decoration:none; font-size:13px; }
+  .news-ticker-track a:hover { color:var(--accent); }
+  .news-ticker-track .sep { color:var(--dim); margin:0 20px; }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
 </style>
 </head>
 <body>
@@ -92,6 +107,11 @@
   </div>
   <div id="lookup-result" style="margin-top:10px; font-size:14px;"></div>
 </section>
+
+<div class="news-ticker">
+  <span class="tag">ANGUILLA NEWS</span>
+  <div class="news-ticker-track" id="news-ticker-track">Loading headlines…</div>
+</div>
 
 <div class="grid">
   <div class="card">
@@ -623,6 +643,26 @@ fetch('/api/revenue.json').then(r => r.json()).then(data => {
     });
   }
 });
+</script>
+
+<script>
+(function () {
+  const track = document.getElementById('news-ticker-track');
+  fetch('/api/news.json?limit=12')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.items || !data.items.length) {
+        track.textContent = 'No headlines yet.';
+        return;
+      }
+      const linksHtml = data.items.map(item =>
+        '<a href="' + item.link + '" target="_blank" rel="noopener">' + item.title + '</a>'
+      ).join('<span class="sep">•</span>');
+      // Duplicate the sequence so the CSS animation (translateX -50%) loops seamlessly
+      track.innerHTML = linksHtml + '<span class="sep">•</span>' + linksHtml + '<span class="sep">•</span>';
+    })
+    .catch(() => { track.textContent = 'Couldn\'t load headlines.'; });
+})();
 </script>
 
 <script>
