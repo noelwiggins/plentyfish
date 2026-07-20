@@ -132,6 +132,82 @@ ANGUILLA_POPULATION = 16_000  # commonly-cited round figure; sources range
 # rounder ~16,000 figure used directly in press coverage of the .ai boom
 # (e.g. HLC.com: "home to around just 16,000 people").
 
+# --- Historical archive: maps, aerials, old photos -------------------------
+# Hand-curated after a research pass (see chat history for the full trail).
+# Deliberately small and honest about it -- Anguilla's free/public digital
+# footprint for historical material is thin compared to e.g. NYC. Each item
+# below was individually verified (real image URL, real license/source)
+# rather than assumed from a filename or category listing -- several
+# promising-looking leads (a Wikimedia file literally named
+# "Anguilla-1905.jpg", a DPLA "Anguilla Island" photo set) turned out to be
+# a modern infinity-pool photo and a *different* Anguilla (a cay in the
+# Bahamas) respectively, and were excluded.
+ARCHIVE_ITEMS = [
+    {
+        "title": "Carta esférica de las yslas de Sn. Martin, Sn. Bartolome y Anguila",
+        "year": "1794", "kind": "Nautical chart",
+        "image_url": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd5:g5032:g5032s:lh000040/full/pct:25/0/default.jpg",
+        "source": "Library of Congress", "license": "Public domain",
+        "source_url": "https://www.loc.gov/item/90683965/",
+        "description": "Spanish nautical chart of St. Martin, St. Barthélemy, "
+                        "and Anguilla -- the oldest item found in this archive.",
+    },
+    {
+        "title": "Map of The Leeward Islands",
+        "year": "1842", "kind": "Map",
+        "image_url": "https://www.davidrumsey.com/luna/servlet/iiif/RUMSEY~8~1~2778~270051/full/1200,/0/default.jpg",
+        "source": "David Rumsey Historical Map Collection", "license": "Public domain",
+        "source_url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~2778~270051:Map-of-The-Leeward-Islands-",
+        "description": "John Arrowsmith's map of Antigua, Montserrat, Barbuda, "
+                        "St. Christopher, Nevis, Anguilla, the Virgin Islands "
+                        "& Dominica, compiled from Colonial Office and Admiralty documents.",
+    },
+    {
+        "title": "Children's tennis group, Anguilla Tennis Academy",
+        "year": "2011", "kind": "Photo",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Children%27s_tennis_group%2C_Anguilla_%287457275146%29.jpg",
+        "source": "Government of Anguilla", "license": "Open Government Licence v1.0",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Children%27s_tennis_group,_Anguilla_(7457275146).jpg",
+        "description": "Government of Anguilla-credited photo, via Wikimedia Commons.",
+    },
+    {
+        "title": "Scrub Island, Anguilla",
+        "year": "Undated (recent)", "kind": "Aerial photo",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Scrub_Island_%28Anguilla%29_cropped.jpg",
+        "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Scrub_Island_(Anguilla)_cropped.jpg",
+        "description": "Aerial view of Scrub Island, off Anguilla's eastern tip.",
+    },
+    {
+        "title": "Little Scrub Island, Anguilla",
+        "year": "Undated (recent)", "kind": "Aerial photo",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Little_Scrub_Island_%28Anguilla%29.jpg",
+        "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Little_Scrub_Island_(Anguilla).jpg",
+        "description": "Aerial view of Little Scrub Island.",
+    },
+    {
+        "title": "South coast of Anguilla",
+        "year": "Undated (recent)", "kind": "Aerial photo",
+        "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/S%C3%BCdk%C3%BCste_von_Anguilla.jpg",
+        "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
+        "source_url": "https://commons.wikimedia.org/wiki/File:S%C3%BCdk%C3%BCste_von_Anguilla.jpg",
+        "description": "Aerial view of Anguilla's south coast.",
+    },
+]
+
+# What exists but couldn't be included, for transparency in the UI:
+ARCHIVE_KNOWN_GAPS = [
+    "Anguilla Heritage Museum (Colville Petty) holds genuine early-20th-century "
+    "photos -- salt industry, schooners, the 1964 Queen Elizabeth visit -- but "
+    "the collection isn't digitized or online.",
+    "British Library EAP596 digitized real Anguilla court records and Sombrero "
+    "Lighthouse logs (1895-1916), but access is restricted to research purposes "
+    "only, and the catalog is currently down after the British Library's 2023 "
+    "cyberattack.",
+]
+
+
 PEER_CCTLDS = [
     {
         "tld": ".ai", "territory": "Anguilla",
@@ -509,7 +585,9 @@ def admin_run_news_fetch():
 
 @app.route("/map")
 def anguilla_map():
-    return render_template("map.html", now=datetime.utcnow())
+    return render_template("map.html", now=datetime.utcnow(),
+                            archive_items=ARCHIVE_ITEMS,
+                            archive_gaps=ARCHIVE_KNOWN_GAPS)
 
 
 @app.route("/api/anguilla-businesses.json")
