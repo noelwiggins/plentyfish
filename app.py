@@ -62,6 +62,16 @@ app = Flask(__name__)
 # Used for the "today / this week / this month / this year / projected"
 # panel. Anguilla doesn't report daily figures, so days-in-period is used
 # to derive an average daily rate from the most recent period we have.
+#
+# IMPORTANT: this prefers the CURRENT calendar year's "(trend)" projection
+# scenario (if one exists) over simply carrying forward the prior actual
+# year's rate. Using last year's flat rate would silently understate a
+# year with real, sourced growth expectations -- e.g. right now (mid
+# 2026) using 2025's $85.3M/365 rate makes the "so far this month"
+# counter annualize back to exactly $85.3M, which contradicts the 2026
+# outlook chart showing $96.4M-$178M scenarios one section down. Using
+# the trend scenario keeps the live counters consistent with the same
+# numbers shown in the projections chart.
 
 def get_revenue_context():
     session = Session()
@@ -79,16 +89,32 @@ def get_revenue_context():
     latest_actual = actual_years[-1] if actual_years else None
     projected_years = [y for y in years if y.is_projection]
 
+    current_year = datetime.utcnow().year
+    current_year_trend = next(
+        (y for y in projected_years
+         if y.period_start.year == current_year and "trend" in y.period_label.lower()),
+        None
+    )
+
+    rate_basis = current_year_trend or latest_actual
+    rate_basis_label = None
     daily_estimate = None
-    if latest_actual:
-        days = (latest_actual.period_end - latest_actual.period_start).days + 1
-        daily_estimate = latest_actual.revenue_usd / days
+    if rate_basis:
+        days = (rate_basis.period_end - rate_basis.period_start).days + 1
+        daily_estimate = rate_basis.revenue_usd / days
+        rate_basis_label = (
+            f"{rate_basis.period_label} projection"
+            if rate_basis.is_projection
+            else f"{rate_basis.period_label} actuals"
+        )
 
     return {
         "years": years,
         "months": months,
         "latest_actual": latest_actual,
         "projected_years": projected_years,
+        "rate_basis": rate_basis,
+        "rate_basis_label": rate_basis_label,
         "daily_estimate": daily_estimate,
         "weekly_estimate": daily_estimate * 7 if daily_estimate else None,
         "monthly_estimate": daily_estimate * 30 if daily_estimate else None,
