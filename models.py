@@ -141,6 +141,29 @@ class NewsItem(Base):
     )
 
 
+class AnguillaBusiness(Base):
+    """
+    Business/POI data for Anguilla, sourced from OpenStreetMap (via the
+    Overpass API) -- free, no key, community-maintained. Refreshed
+    periodically rather than queried live per-visitor, since Overpass is
+    a shared public resource with rate limits and isn't meant for
+    high-frequency client-side polling.
+    """
+    __tablename__ = "anguilla_businesses"
+
+    id = Column(Integer, primary_key=True)
+    osm_id = Column(String(32), nullable=False, unique=True, index=True)
+    name = Column(String(255), nullable=True)
+    category = Column(String(64), nullable=False)  # e.g. "restaurant", "hotel"
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
+    fetched_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    __table_args__ = (
+        UniqueConstraint("osm_id", name="uq_osm_id"),
+    )
+
+
 class TrancoCheck(Base):
     """
     Result of checking {name}.ai via RDAP for a domain from the Tranco
