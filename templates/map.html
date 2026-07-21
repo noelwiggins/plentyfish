@@ -4,34 +4,45 @@
 <meta charset="UTF-8">
 <title>Anguilla Map — plentyfish.ai</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/css/md3-theme.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
   :root {
-    --bg: #0b0f14; --panel: #121821; --line: #232c38;
-    --ink: #e6edf3; --dim: #8b98a5; --accent: #4fd1c5; --warn: #f2a65a;
+    --bg: var(--md-sys-color-background);
+    --panel: var(--md-sys-color-surface-container);
+    --line: var(--md-sys-color-outline-variant);
+    --ink: var(--md-sys-color-on-surface);
+    --dim: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-primary);
+    --warn: var(--md-sys-color-tertiary);
   }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--bg); color:var(--ink);
-    font-family: -apple-system, "Inter", "Helvetica Neue", Arial, sans-serif; }
-  header { padding: 18px 24px 4px; display:flex; justify-content:space-between; align-items:baseline; }
-  header h1 { margin:0; font-size: 21px; letter-spacing: -0.02em; font-weight:700; }
-  header a { color:var(--accent); font-size:13px; text-decoration:none; }
-  .sub { color:var(--dim); font-size: 13px; padding: 0 24px 14px; }
-  .accent-rule { height:2px; background:linear-gradient(90deg, var(--accent), var(--warn)); opacity:.7; }
+  header { padding: 24px 24px 8px; display:flex; justify-content:space-between; align-items:baseline;
+    background: var(--md-sys-color-surface-container-low); }
+  header h1 { margin:0; font-size: 22px; line-height:28px; font-weight:400; letter-spacing:0;
+    font-family:'Roboto',sans-serif; }
+  header a { color:var(--accent); font-size:14px; text-decoration:none; font-family:'Roboto',sans-serif;
+    font-weight:500; display:flex; align-items:center; gap:4px; }
+  .sub { color:var(--dim); font-size:14px; line-height:20px; letter-spacing:.25px;
+    padding: 8px 24px 16px; font-family:'Roboto',sans-serif; }
 
-  .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:12px; padding: 16px 24px; }
-  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px; }
-  .card .label { color:var(--dim); font-size:11px; text-transform:uppercase; letter-spacing:.06em; }
-  .card .value { font-size:23px; font-weight:700; margin-top:4px; }
-  .card .foot { color:var(--dim); font-size:10.5px; margin-top:6px; }
+  .grid { display:grid; grid-template-columns: repeat(2, 1fr); gap:16px; padding: 16px 24px; }
+  .card { background:var(--panel); border:none; border-radius: var(--md-sys-shape-corner-medium);
+    padding:16px; box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15); }
+  .card .label { color:var(--dim); font-size:12px; font-weight:500; letter-spacing:.5px;
+    text-transform:uppercase; font-family:'Roboto',sans-serif; }
+  .card .value { font-size:24px; line-height:32px; font-weight:700; margin-top:4px;
+    font-family:'Roboto Mono','Roboto',sans-serif; }
+  .card .foot { color:var(--dim); font-size:11px; margin-top:8px; font-family:'Roboto',sans-serif; }
 
-  #map { height: 65vh; width: 100%; }
-  .note { color:var(--dim); font-size:11.5px; line-height:1.5; padding: 10px 24px 24px; }
+  #map { height: 65vh; width: 100%; border-radius: var(--md-sys-shape-corner-medium) var(--md-sys-shape-corner-medium) 0 0; }
+  .note { color:var(--dim); font-size:12px; line-height:16px; letter-spacing:.4px;
+    padding: 12px 24px 24px; font-family:'Roboto',sans-serif; }
   footer { padding:20px 24px 28px; border-top:1px solid var(--line); margin-top:12px;
-    color:var(--dim); font-size:11.5px; text-align:center; }
+    color:var(--dim); font-size:12px; text-align:center; font-family:'Roboto',sans-serif; }
 
-  .leaflet-popup-content-wrapper { background:var(--panel); color:var(--ink); }
+  .leaflet-popup-content-wrapper { background:var(--panel); color:var(--ink);
+    border-radius: var(--md-sys-shape-corner-small); }
   .leaflet-popup-tip { background:var(--panel); }
 </style>
 </head>
@@ -39,7 +50,7 @@
 
 <header>
   <h1>plentyfish.ai — Anguilla Map</h1>
-  <a href="/">← Back to dashboard</a>
+  <a href="/"><span class="material-symbols-outlined" style="font-size:16px;">arrow_back</span> Back to dashboard</a>
 </header>
 <div class="sub">Live weather, air quality, and business locations for Anguilla.</div>
 <div class="accent-rule"></div>
