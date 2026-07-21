@@ -146,7 +146,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "Carta esférica de las yslas de Sn. Martin, Sn. Bartolome y Anguila",
         "year": "1794", "kind": "Nautical chart",
-        "image_url": "https://tile.loc.gov/image-services/iiif/service:gmd:gmd5:g5032:g5032s:lh000040/full/pct:25/0/default.jpg",
+        "image_url": "/static/archive/1794-spanish-nautical-chart.jpg",
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/90683965/",
         "description": "Spanish nautical chart of St. Martin, St. Barthélemy, "
@@ -155,7 +155,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "Map of The Leeward Islands",
         "year": "1842", "kind": "Map",
-        "image_url": "https://www.davidrumsey.com/luna/servlet/iiif/RUMSEY~8~1~2778~270051/full/1200,/0/default.jpg",
+        "image_url": "/static/archive/1842-arrowsmith-leeward-islands.jpg",
         "source": "David Rumsey Historical Map Collection", "license": "Public domain",
         "source_url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~2778~270051:Map-of-The-Leeward-Islands-",
         "description": "John Arrowsmith's map of Antigua, Montserrat, Barbuda, "
@@ -165,7 +165,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "Children's tennis group, Anguilla Tennis Academy",
         "year": "2011", "kind": "Photo",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/db/Children%27s_tennis_group%2C_Anguilla_%287457275146%29.jpg",
+        "image_url": "/static/archive/2011-tennis-group.jpg",
         "source": "Government of Anguilla", "license": "Open Government Licence v1.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Children%27s_tennis_group,_Anguilla_(7457275146).jpg",
         "description": "Government of Anguilla-credited photo, via Wikimedia Commons.",
@@ -173,7 +173,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "Scrub Island, Anguilla",
         "year": "Undated (recent)", "kind": "Aerial photo",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/a/ac/Scrub_Island_%28Anguilla%29_cropped.jpg",
+        "image_url": "/static/archive/scrub-island-aerial.jpg",
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Scrub_Island_(Anguilla)_cropped.jpg",
         "description": "Aerial view of Scrub Island, off Anguilla's eastern tip.",
@@ -181,7 +181,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "Little Scrub Island, Anguilla",
         "year": "Undated (recent)", "kind": "Aerial photo",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/8/8f/Little_Scrub_Island_%28Anguilla%29.jpg",
+        "image_url": "/static/archive/little-scrub-island-aerial.jpg",
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Little_Scrub_Island_(Anguilla).jpg",
         "description": "Aerial view of Little Scrub Island.",
@@ -189,7 +189,7 @@ ARCHIVE_ITEMS = [
     {
         "title": "South coast of Anguilla",
         "year": "Undated (recent)", "kind": "Aerial photo",
-        "image_url": "https://upload.wikimedia.org/wikipedia/commons/d/d3/S%C3%BCdk%C3%BCste_von_Anguilla.jpg",
+        "image_url": "/static/archive/south-coast-aerial.jpg",
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:S%C3%BCdk%C3%BCste_von_Anguilla.jpg",
         "description": "Aerial view of Anguilla's south coast.",
