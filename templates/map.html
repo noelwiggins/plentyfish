@@ -111,6 +111,41 @@
   {% endif %}
 </section>
 
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Historical Accounts
+  </h2>
+  <p class="note">
+    Anguilla never developed a profitable plantation economy -- poor, dry
+    soil kept it the "poor stepchild" of the sugar islands -- so it drew
+    far less colonial attention, and far less of the surviving paper
+    trail, than its wealthier neighbors. These first-hand accounts and
+    testimonials were dug out via a wide research pass, each individually
+    verified.
+  </p>
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+    {% for acc in historical_accounts %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <div style="font-size:13px; font-weight:600;">{{ acc.title }}</div>
+        <div style="color:var(--accent); font-size:12px; font-weight:700;">{{ acc.year }}</div>
+      </div>
+      <div style="color:var(--ink); font-size:13px; line-height:1.5; margin-top:8px; font-style:italic;">
+        {{ acc.quote }}
+      </div>
+      <div style="color:var(--dim); font-size:11.5px; margin-top:8px; line-height:1.4;">
+        {{ acc.context }}
+      </div>
+      <div style="margin-top:6px;">
+        <a href="{{ acc.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
+          {{ acc.source }}
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
 <footer>
   © {{ now.year }} Noel Wiggins. All rights reserved.
 </footer>
@@ -155,9 +190,23 @@ fetch('/api/anguilla-businesses.json')
 
 businessLayer.addTo(map);
 
+// Bathymetry (water depth) -- GEBCO's free global shaded-relief grid, via WMS.
+// Note: GEBCO is a deep-water dataset and doesn't resolve fine detail in
+// shallow reef/coastal water, which is exactly where Anguilla's most
+// interesting depth variation is -- shown here as the best free option
+// available, not a precise reef chart.
+const bathymetryLayer = L.tileLayer.wms('https://wms.gebco.net/mapserv', {
+  layers: 'GEBCO_LATEST',
+  format: 'image/png',
+  transparent: true,
+  version: '1.1.1',
+  opacity: 0.65,
+  attribution: 'GEBCO Compilation Group (2024) GEBCO 2024 Grid',
+});
+
 L.control.layers(
   { 'Dark': darkLayer, 'Satellite': satelliteLayer },
-  { 'Businesses': businessLayer }
+  { 'Businesses': businessLayer, 'Water depth (GEBCO)': bathymetryLayer }
 ).addTo(map);
 
 // --- Weather + air quality (Open-Meteo, direct client-side, CORS-enabled) --
