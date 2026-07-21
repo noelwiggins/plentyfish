@@ -208,6 +208,61 @@ ARCHIVE_KNOWN_GAPS = [
 ]
 
 
+# --- Historical accounts: old testimonials mentioning Anguilla -------------
+# Anguilla never developed a profitable plantation economy (poor, dry soil),
+# so it drew far less colonial administrative attention -- and far less of
+# the paper trail -- than sugar-wealthy neighbors. These were found via a
+# wide research pass and individually verified. Two near-misses excluded:
+# an 1861 slave-smuggling account that explicitly named "Anguilla Island,
+# one of the Bahamas" (a different island, same name), and Pere Labat's
+# famous Antilles travel writing, whose documented itinerary doesn't
+# actually include Anguilla.
+HISTORICAL_ACCOUNTS = [
+    {
+        "year": "1667-68", "title": "Major John Scott's account",
+        "quote": "left the island \u201cin good condition\u201d; noted that in "
+                 "July 1668, \u201c200 or 300 people fled thither in time of war.\u201d",
+        "context": "One of the earliest surviving firsthand accounts of the "
+                    "English colony, from a visit less than 20 years after settlement.",
+        "source": "Wikipedia, citing colonial-era sources",
+        "source_url": "https://en.wikipedia.org/wiki/Anguilla",
+    },
+    {
+        "year": "1745", "title": "The Battle of Anguilla",
+        "quote": "A French force of 759 men landed at Rendezvous Bay; Governor "
+                 "Arthur Hodge's ~150 defenders ambushed them from hidden "
+                 "breastworks, then counterattacked -- 100 French casualties "
+                 "and 50 captured, against 7 British.",
+        "context": "A small, poor island with almost no military garrison "
+                    "routed a force five times its size.",
+        "source": "Wikipedia / Military history sources",
+        "source_url": "https://en.wikipedia.org/wiki/Battle_of_Anguilla",
+    },
+    {
+        "year": "1884", "title": "A fever-stricken vessel",
+        "quote": "\u201cA St. Thomas paper tells a story of the wreck of a "
+                 "Norwegian brigantine on the Anguilla reef during a gale, "
+                 "and when all on board, except the Captain and a boy, were "
+                 "down with the African coast fever... The Commander of the "
+                 "brigantine, with the aid of the boy, kept his vessel on "
+                 "her course for a month.\u201d",
+        "context": "Sacramento Daily Union, Feb 29, 1884 -- syndicated from a "
+                    "St. Thomas newspaper report.",
+        "source": "Sacramento Daily Union, via MaritimeHeritage.org",
+        "source_url": "https://www.maritimeheritage.org/ports/caribbeanAnguilla.html",
+    },
+    {
+        "year": "1969", "title": "\u201cThe mouse that roared\u201d",
+        "quote": "British paratroopers and Royal Marines landed on a "
+                 "virtually undefended island in \u201cOperation Sheepskin\u201d "
+                 "-- widely mocked by the British and American press at the time.",
+        "context": "Followed the 1967 Anguilla Revolution, when the island "
+                    "broke away from the Associated State of St. Kitts-Nevis-Anguilla.",
+        "source": "The Anguillian",
+        "source_url": "https://theanguillian.com/2017/03/the-last-invasion-of-anguilla/",
+    },
+]
+
 PEER_CCTLDS = [
     {
         "tld": ".ai", "territory": "Anguilla",
@@ -587,7 +642,8 @@ def admin_run_news_fetch():
 def anguilla_map():
     return render_template("map.html", now=datetime.utcnow(),
                             archive_items=ARCHIVE_ITEMS,
-                            archive_gaps=ARCHIVE_KNOWN_GAPS)
+                            archive_gaps=ARCHIVE_KNOWN_GAPS,
+                            historical_accounts=HISTORICAL_ACCOUNTS)
 
 
 @app.route("/api/anguilla-businesses.json")
