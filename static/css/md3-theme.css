@@ -1,0 +1,212 @@
+/*
+  plentyfish.ai — Material Design 3 theme
+  ----------------------------------------
+  A dark M3 scheme hand-derived from the site's existing teal/orange brand
+  (rather than run through the official Material Theme Builder tool, which
+  isn't available in this environment) -- structured with real M3 color
+  roles (primary/secondary/tertiary/surface/error, each with "on-" and
+  "-container" pairs) so it behaves like a proper M3 theme, not just a
+  reskin. Typography uses the Roboto type scale; components follow M3
+  shape/elevation/motion conventions; spacing follows the 8dp grid
+  (4dp used sparingly for fine adjustments only).
+*/
+
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
+
+:root {
+  /* --- Color roles: Primary (teal) --- */
+  --md-sys-color-primary: #6FF7EA;
+  --md-sys-color-on-primary: #003733;
+  --md-sys-color-primary-container: #004F49;
+  --md-sys-color-on-primary-container: #8DFFF1;
+
+  /* --- Secondary (muted teal-gray) --- */
+  --md-sys-color-secondary: #B0CCC7;
+  --md-sys-color-on-secondary: #1B3532;
+  --md-sys-color-secondary-container: #324B47;
+  --md-sys-color-on-secondary-container: #CCE8E3;
+
+  /* --- Tertiary (orange) --- */
+  --md-sys-color-tertiary: #FFB77C;
+  --md-sys-color-on-tertiary: #4A2800;
+  --md-sys-color-tertiary-container: #6A3D00;
+  --md-sys-color-on-tertiary-container: #FFDCB8;
+
+  /* --- Error --- */
+  --md-sys-color-error: #FFB4AB;
+  --md-sys-color-on-error: #690005;
+  --md-sys-color-error-container: #93000A;
+  --md-sys-color-on-error-container: #FFDAD6;
+
+  /* --- Neutral surfaces --- */
+  --md-sys-color-background: #0F1416;
+  --md-sys-color-on-background: #DDE4E2;
+  --md-sys-color-surface: #0F1416;
+  --md-sys-color-on-surface: #DDE4E2;
+  --md-sys-color-surface-variant: #3F4947;
+  --md-sys-color-on-surface-variant: #BEC9C6;
+  --md-sys-color-outline: #899391;
+  --md-sys-color-outline-variant: #3F4947;
+
+  /* Surface container tones (M3 elevation-via-tint scale, dark theme) */
+  --md-sys-color-surface-container-lowest: #0A0F11;
+  --md-sys-color-surface-container-low: #171D1F;
+  --md-sys-color-surface-container: #1B2123;
+  --md-sys-color-surface-container-high: #252B2D;
+  --md-sys-color-surface-container-highest: #303638;
+
+  /* --- Shape (M3 corner radius scale) --- */
+  --md-sys-shape-corner-small: 8px;
+  --md-sys-shape-corner-medium: 12px;
+  --md-sys-shape-corner-large: 16px;
+  --md-sys-shape-corner-full: 999px;
+
+  /* --- Motion (M3 easing + duration tokens) --- */
+  --md-sys-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+  --md-sys-motion-easing-emphasized: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --md-sys-motion-duration-short: 150ms;
+  --md-sys-motion-duration-medium: 250ms;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--md-sys-color-background);
+  color: var(--md-sys-color-on-background);
+  font-family: 'Roboto', -apple-system, sans-serif;
+}
+
+a { color: var(--md-sys-color-primary); }
+
+/* --- M3 Typography scale (subset used across the app) --- */
+.md-title-large { font-size: 22px; line-height: 28px; font-weight: 400; letter-spacing: 0; }
+.md-title-medium { font-size: 16px; line-height: 24px; font-weight: 500; letter-spacing: .15px; }
+.md-title-small { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: .1px; }
+.md-body-large { font-size: 16px; line-height: 24px; font-weight: 400; letter-spacing: .5px; }
+.md-body-medium { font-size: 14px; line-height: 20px; font-weight: 400; letter-spacing: .25px; }
+.md-body-small { font-size: 12px; line-height: 16px; font-weight: 400; letter-spacing: .4px; }
+.md-label-large { font-size: 14px; line-height: 20px; font-weight: 500; letter-spacing: .1px; }
+.md-label-medium { font-size: 12px; line-height: 16px; font-weight: 500; letter-spacing: .5px; }
+.md-label-small { font-size: 11px; line-height: 16px; font-weight: 500; letter-spacing: .5px; }
+
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-size: 20px;
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* --- Top App Bar --- */
+.md-top-app-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16px 24px;
+  background: var(--md-sys-color-surface-container-low);
+}
+.md-top-app-bar .brand { display: flex; flex-direction: column; gap: 2px; }
+
+/* --- Cards (M3 elevated card) --- */
+.md-card {
+  background: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-medium);
+  padding: 16px;
+  box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+  transition: box-shadow var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+              background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+}
+.md-card:hover {
+  background: var(--md-sys-color-surface-container-high);
+  box-shadow: 0 2px 6px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.2);
+}
+
+/* --- Buttons --- */
+.md-button-filled {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--md-sys-color-primary); color: var(--md-sys-color-on-primary);
+  border: none; border-radius: var(--md-sys-shape-corner-full);
+  padding: 0 24px; height: 40px;
+  font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  cursor: pointer;
+  transition: box-shadow var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+              opacity var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.md-button-filled:hover { box-shadow: 0 1px 3px rgba(0,0,0,.3); opacity: .92; }
+.md-button-filled:active { opacity: .85; }
+
+.md-button-text {
+  background: none; border: none; color: var(--md-sys-color-primary);
+  font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  padding: 8px 12px; border-radius: var(--md-sys-shape-corner-full); cursor: pointer;
+  transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.md-button-text:hover { background: rgba(111, 247, 234, .08); }
+
+/* --- Outlined text field --- */
+.md-text-field {
+  background: transparent;
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: var(--md-sys-shape-corner-small);
+  color: var(--md-sys-color-on-surface);
+  padding: 0 16px; height: 48px;
+  font-family: 'Roboto', sans-serif; font-size: 16px;
+  transition: border-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.md-text-field:focus {
+  outline: none; border-color: var(--md-sys-color-primary); border-width: 2px;
+}
+.md-text-field::placeholder { color: var(--md-sys-color-on-surface-variant); }
+
+/* --- Chips (used for status/category badges) --- */
+.md-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  height: 24px; padding: 0 10px; border-radius: var(--md-sys-shape-corner-full);
+  font-size: 11px; font-weight: 500; letter-spacing: .5px;
+  background: var(--md-sys-color-secondary-container); color: var(--md-sys-color-on-secondary-container);
+}
+.md-chip.tertiary { background: var(--md-sys-color-tertiary-container); color: var(--md-sys-color-on-tertiary-container); }
+
+/* --- Tabs (M3 primary tabs) --- */
+.md-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--md-sys-color-outline-variant); }
+.md-tab {
+  background: none; border: none; cursor: pointer;
+  color: var(--md-sys-color-on-surface-variant);
+  font-family: 'Roboto', sans-serif; font-size: 14px; font-weight: 500; letter-spacing: .1px;
+  padding: 12px 16px; border-bottom: 2px solid transparent; margin-bottom: -1px;
+  transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+              background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard);
+}
+.md-tab:hover { background: var(--md-sys-color-surface-container-low); color: var(--md-sys-color-on-surface); }
+.md-tab.active { color: var(--md-sys-color-primary); border-bottom-color: var(--md-sys-color-primary); font-weight: 700; }
+
+/* --- Data table --- */
+.md-table { width: 100%; border-collapse: collapse; }
+.md-table th {
+  text-align: left; color: var(--md-sys-color-on-surface-variant);
+  font-size: 12px; font-weight: 500; letter-spacing: .5px;
+  padding: 12px 8px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+.md-table td {
+  padding: 12px 8px; border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  font-size: 14px;
+}
+.md-table tr { transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+.md-table tbody tr:hover { background: var(--md-sys-color-surface-container-low); }
+
+/* --- Divider --- */
+.md-divider { height: 1px; background: var(--md-sys-color-outline-variant); border: none; margin: 0; }
+
+/* --- Live indicator dot --- */
+.md-live-dot {
+  display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+  background: var(--md-sys-color-primary); margin-right: 8px; vertical-align: middle;
+  animation: md-pulse 1.6s ease-in-out infinite;
+}
+@keyframes md-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(111,247,234,.4); }
+  50% { opacity: .6; box-shadow: 0 0 0 4px rgba(111,247,234,0); }
+}
+
+/* Value-changed flash, using the primary color role */
+.md-value-flash { animation: md-value-flash 500ms var(--md-sys-motion-easing-standard); }
+@keyframes md-value-flash { 0% { color: var(--md-sys-color-primary); } 100% { color: var(--md-sys-color-on-surface); } }
