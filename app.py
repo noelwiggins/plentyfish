@@ -153,16 +153,6 @@ ARCHIVE_ITEMS = [
                         "and Anguilla -- the oldest item found in this archive.",
     },
     {
-        "title": "Map of The Leeward Islands",
-        "year": "1842", "kind": "Map",
-        "image_url": "/static/archive/1842-arrowsmith-leeward-islands.jpg",
-        "source": "David Rumsey Historical Map Collection", "license": "Public domain",
-        "source_url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~2778~270051:Map-of-The-Leeward-Islands-",
-        "description": "John Arrowsmith's map of Antigua, Montserrat, Barbuda, "
-                        "St. Christopher, Nevis, Anguilla, the Virgin Islands "
-                        "& Dominica, compiled from Colonial Office and Admiralty documents.",
-    },
-    {
         "title": "Children's tennis group, Anguilla Tennis Academy",
         "year": "2011", "kind": "Photo",
         "image_url": "/static/archive/2011-tennis-group.jpg",
@@ -205,6 +195,11 @@ ARCHIVE_KNOWN_GAPS = [
     "Lighthouse logs (1895-1916), but access is restricted to research purposes "
     "only, and the catalog is currently down after the British Library's 2023 "
     "cyberattack.",
+    "Several other maps of Anguilla exist at David Rumsey Historical Map "
+    "Collection (e.g. an 1842 Arrowsmith Leeward Islands map) and Gallica/BnF "
+    "(French Antilles charts), but both institutions require paid permission "
+    "for commercial use even of public-domain originals -- so they aren't "
+    "included here.",
 ]
 
 
