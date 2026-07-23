@@ -182,6 +182,17 @@ ARCHIVE_ITEMS = [
         "clear_before_launch": True,
     },
     {
+        "title": "Carta general de las Islas Antillas Menores, llamadas de Barlovento, y también Caribes",
+        "year": "1781", "kind": "Map",
+        "image_url": "/static/archive/1781-lopez-antillas-menores.jpg",
+        "source": "Library of Congress", "license": "Public domain",
+        "source_url": "http://www.loc.gov/item/74695785/",
+        "description": "Tomás López, Geographer to the King of Spain -- explicitly "
+                        "titled as covering the Lesser Antilles \"desde la isla de la "
+                        "Anguila hasta la de Tobago\" (from the island of Anguilla to Tobago).",
+        "clear_before_launch": False,
+    },
+    {
         "title": "The Virgin Islands from English and Danish Surveys",
         "year": "1775", "kind": "Map",
         "image_url": "/static/archive/1775-jefferys-virgin-islands-anguilla.jpg",
