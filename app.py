@@ -160,6 +160,68 @@ ANGUILLA_POPULATION = 16_000  # commonly-cited round figure; sources range
 # launch. Do not lose track of this flag when editing this list.
 ARCHIVE_ITEMS = [
     {
+        "title": "Carta Universal (Caribbean detail)",
+        "year": "1500", "kind": "Map",
+        "image_url": "/static/archive/1500-juan-de-la-cosa-caribbean.jpg",
+        "source": "Museo Naval, Madrid, via Wikimedia Commons", "license": "Public domain",
+        "source_url": "https://en.wikipedia.org/wiki/Map_of_Juan_de_la_Cosa",
+        "description": "Detail from Juan de la Cosa's map -- the oldest surviving map "
+                        "that unambiguously shows the Caribbean. De la Cosa sailed with "
+                        "Columbus as captain of the Santa María. Nothing earlier survives; "
+                        "this is as close to a 15th-century Caribbean map as exists.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Cantino Planisphere (Caribbean detail)",
+        "year": "1502", "kind": "Map",
+        "image_url": "/static/archive/1502-cantino-map-caribbean.jpg",
+        "source": "Biblioteca Estense, Modena, via Wikimedia Commons", "license": "Public domain",
+        "source_url": "https://en.wikipedia.org/wiki/Cantino_planisphere",
+        "description": "Detail showing Cuba, Hispaniola, Puerto Rico and other Caribbean "
+                        "islands from the Cantino Planisphere -- smuggled out of Portugal "
+                        "in 1502 by an Italian spy.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Mapa del Caribe y América Central",
+        "year": "1500s", "kind": "Map",
+        "image_url": "/static/archive/1500s-mapa-caribe-america-central.jpg",
+        "source": "Wikimedia Commons", "license": "Public domain",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Mapa_del_Caribe_y_Am%C3%A9rica_Central_(Siglo_XVI).jpg",
+        "description": "16th-century manuscript map showing the Florida peninsula, "
+                        "Caribbean islands, and northern South America.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Map of the 16th-century Caribbean",
+        "year": "1500s", "kind": "Map",
+        "image_url": "/static/archive/1500s-wellcome-caribbean.jpg",
+        "source": "Wellcome Collection", "license": "CC BY 4.0",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Map_of_16th_century_Caribbean._Wellcome_L0001228.jpg",
+        "description": "16th-century map of the Caribbean basin, Wellcome Collection.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Central America (Theodor de Bry)",
+        "year": "1594", "kind": "Map",
+        "image_url": "/static/archive/1594-debry-central-america.jpg",
+        "source": "Wikimedia Commons", "license": "Public domain",
+        "source_url": "https://commons.wikimedia.org/wiki/File:Theodor_De_Bry_-_Central_America_1594.jpg",
+        "description": "Theodor de Bry's engraved map of Central America and the "
+                        "Caribbean, from his famous illustrated voyage compilations.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Insulae Americanae in Oceano Septentrionali",
+        "year": "1681", "kind": "Map",
+        "image_url": "/static/archive/1681-dutch-caribbean-kb.jpg",
+        "source": "Koninklijke Bibliotheek (Dutch Royal Library)", "license": "Public domain",
+        "source_url": "https://commons.wikimedia.org/wiki/File:AMH-7755-KB_Map_of_Central_American_and_the_Caribbean_region.jpg",
+        "description": "17th-century Dutch map of Central America and the Caribbean, "
+                        "held by the Dutch Royal Library.",
+        "clear_before_launch": False,
+    },
+    {
         "title": "Carta esférica de las yslas de Sn. Martin, Sn. Bartolome y Anguila",
         "year": "1794", "kind": "Nautical chart",
         "image_url": "/static/archive/1794-spanish-nautical-chart.jpg",
