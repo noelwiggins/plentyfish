@@ -253,6 +253,7 @@ ARCHIVE_ITEMS = [
                         "titled as covering the Lesser Antilles \"desde la isla de la "
                         "Anguila hasta la de Tobago\" (from the island of Anguilla to Tobago).",
         "clear_before_launch": False,
+        "dzi_url": "/static/dzi/1781-lopez-antillas-menores.dzi",
     },
     {
         "title": "The Virgin Islands from English and Danish Surveys",
