@@ -170,6 +170,18 @@ ARCHIVE_ITEMS = [
         "clear_before_launch": False,
     },
     {
+        "title": "Porto Rico (Sheet 69, Atlas Universel)",
+        "year": "1827", "kind": "Map",
+        "image_url": "/static/archive/1827-vandermaelen-porto-rico.jpg",
+        "source": "David Rumsey Historical Map Collection", "license": "CC BY-NC-SA (non-commercial)",
+        "source_url": "https://www.dp.la/item/?q=Vandermaelen+Porto+Rico+1827",
+        "description": "Philippe Vandermaelen's Atlas Universel (Brussels, 1825-1827) -- "
+                        "the first lithographed world atlas, and the first atlas with every "
+                        "map on the same scale. This sheet's own catalog description confirms "
+                        "it \"covers also the Virgin Islands, Anguilla and Saint Martin.\"",
+        "clear_before_launch": True,
+    },
+    {
         "title": "The Virgin Islands from English and Danish Surveys",
         "year": "1775", "kind": "Map",
         "image_url": "/static/archive/1775-jefferys-virgin-islands-anguilla.jpg",
