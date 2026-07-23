@@ -89,7 +89,9 @@
     {% for item in archive_items %}
     <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden;">
       <img src="{{ item.image_url }}" alt="{{ item.title }}"
-        style="width:100%; height:150px; object-fit:cover; display:block;" loading="lazy" />
+        style="width:100%; height:150px; object-fit:cover; display:block; cursor:zoom-in;"
+        loading="lazy"
+        onclick="openLightbox('{{ item.image_url }}', {{ item.title|tojson }})" />
       <div style="padding:10px 12px;">
         <div style="font-size:13px; font-weight:600;">{{ item.title }}</div>
         <div style="color:var(--dim); font-size:11px; margin-top:3px;">
@@ -155,9 +157,42 @@
   </div>
 </section>
 
+<!-- Lightbox: shows the same locally-hosted image at full size. Reusable
+     pattern -- keep this markup/JS/CSS block when building other apps. -->
+<div id="lightbox-overlay" onclick="closeLightbox(event)" style="display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.85); z-index:1000; align-items:center; justify-content:center; padding:24px;
+  cursor:zoom-out;">
+  <button onclick="closeLightbox(event)" aria-label="Close" style="position:absolute; top:16px; right:16px;
+    background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:50%;
+    width:40px; height:40px; font-size:20px; cursor:pointer; z-index:1001;">&times;</button>
+  <figure style="margin:0; max-width:100%; max-height:100%; display:flex; flex-direction:column; align-items:center;">
+    <img id="lightbox-img" src="" alt=""
+      style="max-width:90vw; max-height:82vh; object-fit:contain; border-radius:4px; cursor:default;"
+      onclick="event.stopPropagation()" />
+    <figcaption id="lightbox-caption" style="color:var(--dim); font-size:13px; margin-top:12px; text-align:center;"></figcaption>
+  </figure>
+</div>
+
 <footer>
   © {{ now.year }} Noel Wiggins. All rights reserved.
 </footer>
+
+<script>
+function openLightbox(imageUrl, caption) {
+  document.getElementById('lightbox-img').src = imageUrl;
+  document.getElementById('lightbox-caption').textContent = caption;
+  document.getElementById('lightbox-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  document.getElementById('lightbox-overlay').style.display = 'none';
+  document.getElementById('lightbox-img').src = '';
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox(e);
+});
+</script>
 
 <script>
 const ANGUILLA_CENTER = [18.2206, -63.0686];
