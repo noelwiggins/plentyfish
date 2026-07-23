@@ -686,10 +686,17 @@ def admin_run_news_fetch():
     return jsonify({"status": "done"})
 
 
+def _archive_sort_key(item):
+    import re
+    m = re.match(r"^\d{3,4}", item["year"])
+    return int(m.group()) if m else 9999  # undated items sort last
+
+
 @app.route("/map")
 def anguilla_map():
+    sorted_items = sorted(ARCHIVE_ITEMS, key=_archive_sort_key)
     return render_template("map.html", now=datetime.utcnow(),
-                            archive_items=ARCHIVE_ITEMS,
+                            archive_items=sorted_items,
                             archive_gaps=ARCHIVE_KNOWN_GAPS,
                             historical_accounts=HISTORICAL_ACCOUNTS)
 
