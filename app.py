@@ -142,6 +142,22 @@ ANGUILLA_POPULATION = 16_000  # commonly-cited round figure; sources range
 # "Anguilla-1905.jpg", a DPLA "Anguilla Island" photo set) turned out to be
 # a modern infinity-pool photo and a *different* Anguilla (a cay in the
 # Bahamas) respectively, and were excluded.
+# Deliberately small and honest about it -- Anguilla's free/public digital
+# footprint for historical material is thin compared to e.g. NYC. Each item
+# below was individually verified (real image URL, real license/source)
+# rather than assumed from a filename or category listing -- several
+# promising-looking leads (a Wikimedia file literally named
+# "Anguilla-1905.jpg", a DPLA "Anguilla Island" photo set) turned out to be
+# a modern infinity-pool photo and a *different* Anguilla (a cay in the
+# Bahamas) respectively, and were excluded.
+#
+# NOTE ON "clear_before_launch": items flagged True are sourced from
+# institutions (David Rumsey, Gallica/BnF) whose reuse terms require paid
+# permission for commercial use, even though the underlying historical work
+# itself is centuries out of copyright. Per Noel's decision, these are
+# included for now (non-commercial testing/build phase) but MUST be
+# licensed properly, replaced, or removed before any official/commercial
+# launch. Do not lose track of this flag when editing this list.
 ARCHIVE_ITEMS = [
     {
         "title": "Carta esférica de las yslas de Sn. Martin, Sn. Bartolome y Anguila",
@@ -151,6 +167,39 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/90683965/",
         "description": "Spanish nautical chart of St. Martin, St. Barthélemy, "
                         "and Anguilla -- the oldest item found in this archive.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "The Virgin Islands from English and Danish Surveys",
+        "year": "1775", "kind": "Map",
+        "image_url": "/static/archive/1775-jefferys-virgin-islands-anguilla.jpg",
+        "source": "Royal Danish Library, via Digital Commonwealth", "license": "No known copyright restrictions",
+        "source_url": "https://ark.digitalcommonwealth.org/ark:/50959/gt54tg64s",
+        "description": "Thomas Jefferys' map covering the Virgin Islands, Anguilla, "
+                        "St. Martin, Saba, and St. Eustatius, from The West-India Atlas. "
+                        "Digitized copy held by the Royal Danish Library.",
+        "clear_before_launch": False,
+    },
+    {
+        "title": "Map of The Leeward Islands",
+        "year": "1858", "kind": "Map",
+        "image_url": "/static/archive/1858-arrowsmith-leeward-islands.jpg",
+        "source": "David Rumsey Historical Map Collection", "license": "CC BY-NC-SA (non-commercial)",
+        "source_url": "https://www.davidrumsey.com/luna/servlet/detail/RUMSEY~8~1~2778~270051:Map-of-The-Leeward-Islands-",
+        "description": "John Arrowsmith's map of Antigua, Montserrat, Barbuda, "
+                        "St. Christopher, Nevis, Anguilla, the Virgin Islands "
+                        "& Dominica, compiled from Colonial Office and Admiralty documents.",
+        "clear_before_launch": True,
+    },
+    {
+        "title": "Carte générale des îles Antilles",
+        "year": "1832", "kind": "Map",
+        "image_url": "/static/archive/1832-brue-antilles-general.jpg",
+        "source": "Gallica / Bibliothèque nationale de France", "license": "BnF non-commercial terms",
+        "source_url": "https://gallica.bnf.fr/ark:/12148/btv1b53035331p",
+        "description": "A.H. Brué's general chart of the Antilles, Bahama islands "
+                        "and banks, Central America, and the Gulf of Mexico.",
+        "clear_before_launch": True,
     },
     {
         "title": "Children's tennis group, Anguilla Tennis Academy",
@@ -159,6 +208,7 @@ ARCHIVE_ITEMS = [
         "source": "Government of Anguilla", "license": "Open Government Licence v1.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Children%27s_tennis_group,_Anguilla_(7457275146).jpg",
         "description": "Government of Anguilla-credited photo, via Wikimedia Commons.",
+        "clear_before_launch": False,
     },
     {
         "title": "Scrub Island, Anguilla",
@@ -167,6 +217,7 @@ ARCHIVE_ITEMS = [
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Scrub_Island_(Anguilla)_cropped.jpg",
         "description": "Aerial view of Scrub Island, off Anguilla's eastern tip.",
+        "clear_before_launch": False,
     },
     {
         "title": "Little Scrub Island, Anguilla",
@@ -175,6 +226,7 @@ ARCHIVE_ITEMS = [
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Little_Scrub_Island_(Anguilla).jpg",
         "description": "Aerial view of Little Scrub Island.",
+        "clear_before_launch": False,
     },
     {
         "title": "South coast of Anguilla",
@@ -183,6 +235,7 @@ ARCHIVE_ITEMS = [
         "source": "Wikimedia Commons", "license": "CC BY-SA 3.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:S%C3%BCdk%C3%BCste_von_Anguilla.jpg",
         "description": "Aerial view of Anguilla's south coast.",
+        "clear_before_launch": False,
     },
 ]
 
@@ -195,11 +248,11 @@ ARCHIVE_KNOWN_GAPS = [
     "Lighthouse logs (1895-1916), but access is restricted to research purposes "
     "only, and the catalog is currently down after the British Library's 2023 "
     "cyberattack.",
-    "Several other maps of Anguilla exist at David Rumsey Historical Map "
-    "Collection (e.g. an 1842 Arrowsmith Leeward Islands map) and Gallica/BnF "
-    "(French Antilles charts), but both institutions require paid permission "
-    "for commercial use even of public-domain originals -- so they aren't "
-    "included here.",
+    "Two items below (marked in their card) are sourced from David Rumsey "
+    "Historical Map Collection and Gallica/BnF, whose terms require paid "
+    "permission for commercial use even of public-domain originals. Included "
+    "for now during this non-commercial build/testing phase -- must be "
+    "properly licensed, replaced, or removed before official launch.",
 ]
 
 
