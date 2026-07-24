@@ -202,6 +202,7 @@ function openLightbox(imageUrl, caption, dziUrl) {
     osdViewer = OpenSeadragon({
       element: osd,
       tileSources: dziUrl,
+      prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/',
       showNavigationControl: true,
       zoomInButton: null, zoomOutButton: null, homeButton: null, fullPageButton: null,
       maxZoomPixelRatio: 4,
