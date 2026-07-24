@@ -104,6 +104,11 @@
         <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">
           {{ item.description }}
         </div>
+        {% if item.history %}
+        <div style="color:var(--ink); font-size:11px; margin-top:8px; padding-top:8px; line-height:1.5; border-top:1px solid var(--line);">
+          {{ item.history }}
+        </div>
+        {% endif %}
         <div style="margin-top:6px;">
           <a href="{{ item.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
             {{ item.source }} · {{ item.license }}

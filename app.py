@@ -167,6 +167,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/2003630536/",
         "description": "Willem Janszoon Blaeu (Amsterdam) -- one of the most iconic "
                         "Dutch Golden Age maps of the Americas and Caribbean.",
+        "history": "Willem Blaeu founded what became the most celebrated map-publishing dynasty of the 17th century; his son Joan later expanded the firm into the largest publishing house in the world. This map represents Dutch cartography at its commercial and artistic peak.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2003630536.dzi",
     },
@@ -177,6 +178,8 @@ ARCHIVE_ITEMS = [
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/2007633672/",
         "description": "John Thornton, London -- English maritime chart of the Caribbean.",
+        "history": "John Thornton was the leading English chart-maker of the late 17th century and official hydrographer to both the East India Company and Hudson's Bay Company -- a sign of how English maritime power was catching up to the Dutch by 1680.",
+        "history": "John Thornton was the leading English chart-maker of the late 17th century and official hydrographer to both the East India Company and Hudson's Bay Company -- a sign of how English maritime power was catching up to the Dutch by 1680.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2007633672.dzi",
     },
@@ -188,6 +191,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/95684858/",
         "description": "Vincenzo Coronelli, Venice -- Italian map of the Antilles, "
                         "Cuba, and Hispaniola.",
+        "history": "Vincenzo Coronelli was a Franciscan friar who became official cosmographer of the Republic of Venice and later founded one of the world's first geographical societies. He's better remembered for his enormous globes than his charts, but this map shows the same meticulous draftsmanship.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/95684858.dzi",
     },
@@ -199,6 +203,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/2004629008/",
         "description": "Peter Schenk, Amsterdam -- Dutch map of Mexico, Florida, "
                         "and the surrounding American islands.",
+        "history": "Peter Schenk was part of Amsterdam's prominent Schenk publishing house, which specialized in acquiring and reissuing older Dutch copperplates -- meaning much of what looks like fresh 1710 cartography is actually inherited from earlier 17th-century originals.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2004629008.dzi",
     },
@@ -211,6 +216,7 @@ ARCHIVE_ITEMS = [
         "description": "Herman Moll and Thomas Bowles -- shows English, French, "
                         "Spanish, and Dutch territorial claims across the Caribbean, "
                         "plus galleon/flota trade routes.",
+        "history": "Herman Moll was a German engraver who settled in London and became one of the most popular English mapmakers of his day, known for filling his charts with opinionated marginal notes about territorial disputes -- visible here in how explicitly it marks out English, French, Spanish, and Dutch claims.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/gm71005442.dzi",
     },
@@ -221,6 +227,8 @@ ARCHIVE_ITEMS = [
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/74693283/",
         "description": "Emanuel Bowen, London -- harbor plans across the West Indies.",
+        "history": 'Emanuel Bowen served as royal cartographer to both King George II and Louis XV of France simultaneously, an unusual dual appointment for the era. He was also apprentice-master to Thomas Jefferys, whose own West Indies atlas appears elsewhere in this archive.',
+        "history": "Emanuel Bowen served as royal cartographer to both King George II and Louis XV of France simultaneously, an unusual dual appointment for the era. He was also apprentice-master to Thomas Jefferys, whose own West Indies atlas appears elsewhere in this archive.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/74693283.dzi",
     },
@@ -232,6 +240,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/2006629763/",
         "description": "Bryan Edwards -- accompanied his landmark \"History, Civil and "
                         "Commercial, of the British Colonies in the West Indies.\"",
+        "history": "Bryan Edwards was a planter and slaveholder whose \"History, Civil and Commercial, of the British West Indies\" became the standard British reference on the region for decades -- shaping metropolitan understanding of the Caribbean even as it defended the plantation system that built Edwards's own fortune.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2006629763.dzi",
     },
@@ -243,6 +252,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/74696185/",
         "description": "Robert Sayer and John Bennett -- a sweeping chart spanning "
                         "the Pacific to the West Indies and the coasts of Europe/Africa.",
+        "history": "Robert Sayer and John Bennett ran one of London's largest map and print businesses; their firm's stock later passed to Laurie and Whittle, whose maps remained in print well into the 19th century -- a reminder that popular charts were often reprinted and updated across generations of publishers.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/74696185.dzi",
     },
@@ -254,6 +264,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/2010593328/",
         "description": "Thomas Kitchin -- prepared for Rev. Dr. Robertson's "
                         "\"History of America.\"",
+        "history": "Thomas Kitchin was hydrographer to King George III and one of the most prolific engravers of the 18th century, reputedly producing over 1,000 maps in his lifetime. This one was commissioned as an illustration for a bestselling history book, not a standalone chart.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2010593328.dzi",
     },
@@ -264,6 +275,8 @@ ARCHIVE_ITEMS = [
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/2001622457/",
         "description": "Louis Denis, Paris -- French chart of the Gulf of Mexico.",
+        "history": 'Louis Denis was a French globe- and instrument-maker as well as an engraver, active in Paris during the period when French cartography was competing directly with British mapmakers for authority over Caribbean geography.',
+        "history": "Louis Denis was a French globe- and instrument-maker as well as an engraver, active in Paris during a period when French cartography was competing directly with British mapmakers for authority over Caribbean geography.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/2001622457.dzi",
     },
@@ -274,6 +287,8 @@ ARCHIVE_ITEMS = [
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/75694334/",
         "description": "US Central Intelligence Agency reference map.",
+        "history": 'Produced in 1961, the same year as the Bay of Pigs invasion -- a period when US intelligence agencies were mapping the Caribbean with unusual intensity as Cold War tensions in the region peaked.',
+        "history": "Produced in 1961, the same year as the Bay of Pigs invasion -- a period when US intelligence agencies were mapping the Caribbean with unusual intensity as Cold War tensions in the region peaked.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/75694334.dzi",
     },
@@ -284,6 +299,8 @@ ARCHIVE_ITEMS = [
         "source": "Library of Congress", "license": "Public domain",
         "source_url": "https://www.loc.gov/item/75693348/",
         "description": "US Central Intelligence Agency reference map.",
+        "history": "A 1958 CIA reference map from the final years before Caribbean decolonization accelerated -- within a decade, most of the British possessions it depicts would begin the path toward independence or, in Anguilla's case, a renegotiated relationship with Britain.",
+        "history": "A 1958 CIA reference map from the final years before Caribbean decolonization accelerated -- within a decade, most of the British possessions it depicts would begin the path toward independence or, in Anguilla's case, a renegotiated relationship with Britain.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/75693348.dzi",
     },
@@ -297,6 +314,7 @@ ARCHIVE_ITEMS = [
                         "that unambiguously shows the Caribbean. De la Cosa sailed with "
                         "Columbus as captain of the Santa María. Nothing earlier survives; "
                         "this is as close to a 15th-century Caribbean map as exists.",
+        "history": "De la Cosa was a Basque navigator who owned and captained the Santa Maria before it wrecked on Columbus's first voyage. He drew this chart from firsthand experience of four transatlantic crossings, making it as much a personal record as a map.",
         "clear_before_launch": False,
     },
     {
@@ -308,6 +326,7 @@ ARCHIVE_ITEMS = [
         "description": "Detail showing Cuba, Hispaniola, Puerto Rico and other Caribbean "
                         "islands from the Cantino Planisphere -- smuggled out of Portugal "
                         "in 1502 by an Italian spy.",
+        "history": "Alberto Cantino was an agent for the Duke of Ferrara, sent to Lisbon specifically to smuggle out Portugal's closely-guarded discoveries. He paid an anonymous cartographer for this copy and shipped it home in 1502 -- an early act of industrial espionage in the map trade.",
         "clear_before_launch": False,
     },
     {
@@ -318,6 +337,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://commons.wikimedia.org/wiki/File:Mapa_del_Caribe_y_Am%C3%A9rica_Central_(Siglo_XVI).jpg",
         "description": "16th-century manuscript map showing the Florida peninsula, "
                         "Caribbean islands, and northern South America.",
+        "history": "An anonymous 16th-century manuscript map from the earliest wave of Spanish charting of the Caribbean basin, made as imperial administrators and pilots worked to formalize what Columbus's voyages had only sketched.",
         "clear_before_launch": False,
     },
     {
@@ -327,6 +347,8 @@ ARCHIVE_ITEMS = [
         "source": "Wellcome Collection", "license": "CC BY 4.0",
         "source_url": "https://commons.wikimedia.org/wiki/File:Map_of_16th_century_Caribbean._Wellcome_L0001228.jpg",
         "description": "16th-century map of the Caribbean basin, Wellcome Collection.",
+        "history": "Held by the Wellcome Collection, whose historical map holdings trace largely back to Sir Henry Wellcome's early-20th-century collecting of medical and scientific history -- explaining why a pharmaceutical magnate's archive holds a Caribbean chart.",
+        "history": "Held by the Wellcome Collection, whose historical map holdings trace largely back to Sir Henry Wellcome's early-20th-century collecting of medical and scientific history -- explaining why a pharmaceutical magnate's archive holds a Caribbean chart.",
         "clear_before_launch": False,
     },
     {
@@ -337,6 +359,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://commons.wikimedia.org/wiki/File:Theodor_De_Bry_-_Central_America_1594.jpg",
         "description": "Theodor de Bry's engraved map of Central America and the "
                         "Caribbean, from his famous illustrated voyage compilations.",
+        "history": "Theodor de Bry was a Flemish Protestant engraver who fled religious persecution and settled in Frankfurt, where his illustrated \"Grands Voyages\" compilations became Europe's dominant visual source for the Americas -- shaping how an entire continent imagined the New World.",
         "clear_before_launch": False,
     },
     {
@@ -347,6 +370,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://commons.wikimedia.org/wiki/File:AMH-7755-KB_Map_of_Central_American_and_the_Caribbean_region.jpg",
         "description": "17th-century Dutch map of Central America and the Caribbean, "
                         "held by the Dutch Royal Library.",
+        "history": "Held by the Koninklijke Bibliotheek, the Dutch Royal Library, from the height of the Dutch Golden Age -- when Amsterdam briefly rivaled and then overtook the older Iberian cartographic houses as Europe's mapmaking capital.",
         "clear_before_launch": False,
     },
     {
@@ -357,6 +381,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://www.loc.gov/item/90683965/",
         "description": "Spanish nautical chart of St. Martin, St. Barthélemy, "
                         "and Anguilla -- the oldest item found in this archive.",
+        "history": "A Spanish nautical chart from an era when Madrid still closely guarded its American survey data -- Spain's crown treated accurate charts of its colonial waters as a strategic secret for much of the 16th-18th centuries.",
         "clear_before_launch": False,
     },
     {
@@ -369,6 +394,7 @@ ARCHIVE_ITEMS = [
                         "the first lithographed world atlas, and the first atlas with every "
                         "map on the same scale. This sheet's own catalog description confirms "
                         "it \"covers also the Virgin Islands, Anguilla and Saint Martin.\"",
+        "history": "Philippe Vandermaelen founded the world's first geographical institute in Brussels and used the newly-perfected technique of lithography to produce this atlas -- the first ever printed with every sheet at a single, consistent scale, letting readers piece together maps of anywhere on Earth.",
         "clear_before_launch": True,
     },
     {
@@ -380,6 +406,7 @@ ARCHIVE_ITEMS = [
         "description": "Tomás López, Geographer to the King of Spain -- explicitly "
                         "titled as covering the Lesser Antilles \"desde la isla de la "
                         "Anguila hasta la de Tobago\" (from the island of Anguilla to Tobago).",
+        "history": "Tomas Lopez trained in Paris under the leading French geographers of the day before returning to Madrid, where he became the dominant Spanish cartographer of the Enlightenment -- explicitly anchoring this chart's scope on Anguilla itself.",
         "clear_before_launch": False,
         "dzi_url": "/static/dzi/1781-lopez-antillas-menores.dzi",
     },
@@ -403,6 +430,7 @@ ARCHIVE_ITEMS = [
         "description": "John Arrowsmith's map of Antigua, Montserrat, Barbuda, "
                         "St. Christopher, Nevis, Anguilla, the Virgin Islands "
                         "& Dominica, compiled from Colonial Office and Admiralty documents.",
+        "history": "Part of the 19th-century wave of commercial atlases, when improving lithographic printing let publishers issue far more detailed and affordable regional maps than the old engraved-copperplate era allowed.",
         "clear_before_launch": True,
     },
     {
@@ -413,6 +441,7 @@ ARCHIVE_ITEMS = [
         "source_url": "https://gallica.bnf.fr/ark:/12148/btv1b53035331p",
         "description": "A.H. Brué's general chart of the Antilles, Bahama islands "
                         "and banks, Central America, and the Gulf of Mexico.",
+        "history": "A.H. Brue held the title of official geographer to King Louis-Philippe of France, part of a 19th-century state tradition of appointing a royal cartographer to oversee France's official mapping output.",
         "clear_before_launch": True,
     },
     {
@@ -424,6 +453,7 @@ ARCHIVE_ITEMS = [
         "description": "CIA-produced reference map (Records of the CIA, RG 263), "
                         "explicitly labeling Sombrero, Dog Island, and Scrub Island "
                         "as belonging to Anguilla (U.K.).",
+        "history": "A Cold War-era reference map produced by the CIA's own cartographic division, part of a vast mid-century US intelligence mapping effort that quietly became one of the largest sources of detailed geographic data ever produced.",
         "clear_before_launch": False,
     },
 ]
