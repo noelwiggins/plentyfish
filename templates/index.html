@@ -53,7 +53,9 @@
 <div id="map"></div>
 
 <p class="note">
-  Weather &amp; air quality: live from Open-Meteo. Business locations: OpenStreetMap
+  Weather &amp; air quality: live from Open-Meteo. Sargassum coverage: NOAA/AOML's
+  satellite-derived 7-day index (University of South Florida method), shown by
+  default since conditions change often. Business locations: OpenStreetMap
   community data. Toggle layers (top-right of the map) for water depth and
   different business categories. Tap any dot for details.
 </p>
@@ -136,9 +138,29 @@ const bathymetryLayer = L.tileLayer.wms('https://wms.gebco.net/mapserv', {
   attribution: 'GEBCO Compilation Group (2024) GEBCO 2024 Grid',
 });
 
+// Sargassum (floating algae) -- NOAA/AOML's satellite-derived Alternate
+// Floating Algae Index (AFAI), developed by USF. 7-day cumulative version
+// used rather than the 1-day pass, since daily satellite coverage has
+// real cloud/glint gaps that the cumulative product smooths over -- more
+// reliable for "where has sargassum actually been showing up," slightly
+// less real-time than a single day's pass.
+const sargassumLayer = L.tileLayer.wms(
+  'https://cwcgom.aoml.noaa.gov/erddap/wms/noaa_aoml_atlantic_oceanwatch_AFAI_7D/request?',
+  {
+    layers: 'noaa_aoml_atlantic_oceanwatch_AFAI_7D:AFAI',
+    format: 'image/png',
+    transparent: true,
+    version: '1.3.0',
+    opacity: 0.85,
+    attribution: 'NOAA/AOML &amp; University of South Florida (Hu et al.)',
+  }
+);
+sargassumLayer.addTo(map);
+
 L.control.layers(
   { 'Dark': darkLayer, 'Satellite': satelliteLayer },
   {
+    'Sargassum (7-day, NOAA/USF)': sargassumLayer,
     'Restaurants': businessLayers['Restaurants'],
     'Accommodation': businessLayers['Accommodation'],
     'Shopping': businessLayers['Shopping'],
