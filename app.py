@@ -33,6 +33,10 @@ def _auto_migrate():
                 "ALTER TABLE anguilla_revenue "
                 "ADD COLUMN IF NOT EXISTS pct_of_govt_revenue FLOAT"
             ))
+            conn.execute(text(
+                "ALTER TABLE anguilla_businesses "
+                "ADD COLUMN IF NOT EXISTS layer_group VARCHAR(32)"
+            ))
     except Exception as e:
         print(f"[warn] auto-migration failed (non-Postgres dev DB is expected to hit this): {e}")
 
@@ -459,6 +463,34 @@ ARCHIVE_ITEMS = [
 ]
 
 # What exists but couldn't be included, for transparency in the UI:
+# --- Anguilla 2026 public holidays / events -------------------------------
+# Dates are the official 2026 calendar as finalized by the Anguilla
+# government (confirmed via Anguilla Focus reporting, Jan 2026). Facts
+# (dates, holiday names) aren't copyrightable; descriptions below are
+# written fresh, not copied from any single source.
+ANGUILLA_EVENTS_2026 = [
+    {"date": "2026-01-01", "name": "New Year's Day", "note": "Public holiday."},
+    {"date": "2026-03-02", "name": "James Ronald Webster Day",
+     "note": "Honors the leader of the 1967 and 1969 Anguilla Revolution, established as a holiday in 2010."},
+    {"date": "2026-04-03", "name": "Good Friday", "note": "Public holiday; church services held across the island."},
+    {"date": "2026-04-06", "name": "Easter Monday", "note": "Public holiday."},
+    {"date": "2026-05-01", "name": "Labour Day", "note": "Public holiday, often marked with sports days between government departments and private companies."},
+    {"date": "2026-05-25", "name": "Whit Monday", "note": "Public holiday, seven weeks after Easter."},
+    {"date": "2026-06-01", "name": "Anguilla Day",
+     "note": "The most significant date on the Anguillian calendar, marking the start of the summer festival season; traditionally features A-class boat racing at Sandy Ground."},
+    {"date": "2026-06-22", "name": "Celebration of the Birthday of His Majesty The King",
+     "note": "Public holiday; uniformed organizations parade, and boat races are held at Crocus Bay."},
+    {"date": "2026-08-03", "name": "August Monday", "note": "Marks the start of Summer Festival/Carnival week."},
+    {"date": "2026-08-06", "name": "August Thursday", "note": "Traditionally a day for picnics and family reunions, with boat racing at Meads Bay."},
+    {"date": "2026-08-07", "name": "Constitution Day",
+     "note": "Culmination of Summer Festival, with a costumed parade through The Valley and the Road March competition."},
+    {"date": "2026-12-18", "name": "National Heroes and Heroines Day",
+     "note": "Honors the figures of the 1967 Anguilla Revolution."},
+    {"date": "2026-12-25", "name": "Christmas Day", "note": "Public holiday."},
+    {"date": "2026-12-28", "name": "Boxing Day", "note": "Observed on the Monday since Dec 26, 2026 falls on a weekend."},
+]
+
+
 ARCHIVE_KNOWN_GAPS = [
     "Anguilla Heritage Museum (Colville Petty) holds genuine early-20th-century "
     "photos -- salt industry, schooners, the 1964 Queen Elizabeth visit -- but "
@@ -917,7 +949,8 @@ def anguilla_map():
     return render_template("map.html", now=datetime.utcnow(),
                             archive_items=sorted_items,
                             archive_gaps=ARCHIVE_KNOWN_GAPS,
-                            historical_accounts=HISTORICAL_ACCOUNTS)
+                            historical_accounts=HISTORICAL_ACCOUNTS,
+                            events=ANGUILLA_EVENTS_2026)
 
 
 @app.route("/api/anguilla-businesses.json")
@@ -927,6 +960,7 @@ def api_anguilla_businesses():
     session.close()
     return jsonify([
         {"name": b.name or "Unnamed", "category": b.category,
+         "layer_group": b.layer_group or "Other",
          "lat": b.latitude, "lon": b.longitude}
         for b in rows
     ])

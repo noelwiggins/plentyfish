@@ -155,6 +155,7 @@ class AnguillaBusiness(Base):
     osm_id = Column(String(32), nullable=False, unique=True, index=True)
     name = Column(String(255), nullable=True)
     category = Column(String(64), nullable=False)  # e.g. "restaurant", "hotel"
+    layer_group = Column(String(32), nullable=True)  # e.g. "Restaurants", "Accommodation"
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     fetched_at = Column(DateTime, nullable=False, default=datetime.utcnow)
