@@ -188,6 +188,58 @@
   </div>
 </section>
 
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Restaurants
+  </h2>
+  <p class="note">
+    Independently researched across multiple sources -- not pulled from any
+    single directory. {{ restaurants|length }} listed.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:10px; margin-top:12px;">
+    {% for r in restaurants %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px;">
+      <div style="font-size:13px; font-weight:600;">{{ r[0] }}</div>
+      <div style="color:var(--accent); font-size:11px; margin-top:2px;">{{ r[1] }}</div>
+      <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">{{ r[2] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Villa Areas
+  </h2>
+  <p class="note">
+    By neighborhood rather than named properties -- specific villa listings
+    belong to individual rental agencies' commercial portfolios.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:10px; margin-top:12px;">
+    {% for v in villa_areas %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px;">
+      <div style="font-size:13px; font-weight:600;">{{ v[0] }}</div>
+      <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">{{ v[1] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Activities
+  </h2>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:10px; margin-top:12px;">
+    {% for a in activities %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px;">
+      <div style="font-size:13px; font-weight:600;">{{ a[0] }}</div>
+      <div style="color:var(--accent); font-size:11px; margin-top:2px;">{{ a[1] }}</div>
+      <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">{{ a[2] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
 <!-- Lightbox: shows the same locally-hosted image at full size. Reusable
      pattern -- keep this markup/JS/CSS block when building other apps.
      When a deep-zoom (DZI) tile pyramid is available for an item, this

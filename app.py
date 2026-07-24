@@ -468,6 +468,75 @@ ARCHIVE_ITEMS = [
 # government (confirmed via Anguilla Focus reporting, Jan 2026). Facts
 # (dates, holiday names) aren't copyrightable; descriptions below are
 # written fresh, not copied from any single source.
+# --- Restaurants, villa areas, and activities -----------------------------
+# Independently researched across multiple sources (AFAR, Eating With Ziggy,
+# Tripadvisor/Viator aggregation, etc.) and written up fresh -- deliberately
+# NOT scraped from any single site's curated directory, since that would be
+# reproducing someone else's proprietary selection rather than building our
+# own. Villas are handled as areas/neighborhoods rather than named individual
+# properties, since specific villa listings are tied to particular rental
+# agencies' commercial portfolios.
+RESTAURANTS = [
+    ("Straw Hat Restaurant", "Meads Bay", "Beachfront Caribbean-fusion, over 20 years running; known for red snapper ceviche and grilled crayfish."),
+    ("Blanchard's Beach Shack", "Meads Bay", "Casual sister spot to the well-known Blanchard's; fish tacos and jerk chicken steps from the sand."),
+    ("Veya Restaurant", "North Hill", "Upscale globally-inspired dining in a garden setting; a frequent pick for special-occasion meals."),
+    ("Da'Vida Beach Club", "Crocus Bay", "Beachfront club blending Caribbean flavors with sweeping bay views."),
+    ("Gwen's Reggae Grill", "Shoal Bay East", "Beachfront grill built around reggae music and Caribbean barbecue."),
+    ("Madeariman Beach Bar & Restaurant", "Shoal Bay East", "Long-running beach bar and kitchen right on Shoal Bay's sand."),
+    ("Tropical Sunset Restaurant & Bar", "Shoal Bay East", "Caribbean dining with an ocean view, geared toward sunset dinners."),
+    ("Andy's Restaurant & Bar", "Shoal Bay East", "Local Caribbean cooking in a relaxed beachside setting."),
+    ("Ola's Bar & Grill", "Shoal Bay East", "Beachfront grill known for Mexican-leaning dishes alongside Caribbean staples."),
+    ("Falcon Nest Bar & Grill", "Island Harbour", "Caribbean bar and grill overlooking Island Harbour's fishing-village waterfront."),
+    ("Ken's BBQ", "Roadside, Anguilla", "A well-known roadside barbecue stop for authentic local-style grilling."),
+    ("Artisan Pizza Napoletana", "Island Harbour", "Neapolitan-style pizza in Island Harbour."),
+    ("Roy's Bayside Grill", "Sandy Ground", "Long-standing bayside grill known for fresh seafood and harbor views."),
+    ("Stone", "Anguilla", "Climate-controlled fine dining built around sea-to-table seafood and an award-recognized wine list."),
+    ("Dune Preserve", "Rendezvous Bay", "A driftwood-and-boat-built beach bar owned by reggae musician Bankie Banx; as much a live-music venue as a restaurant."),
+    ("Tasty's Point of View", "South Hill", "Known especially for its Johnny cake, a classic Anguillian staple."),
+    ("Leon's at Meads Bay", "Meads Bay", "Beachfront spot known for playful takes on local classics, including a jerk-beef Johnny cake burger."),
+    ("Hank's Hillside Bar & Restaurant", "Shoal Bay Village", "A well-regarded hillside spot near Shoal Bay."),
+    ("Serenity Restaurant", "Anguilla", "A quieter dining setting, often noted for a more upscale price point."),
+    ("Sharky's", "Sandy Ground", "Casual waterfront restaurant and bar in Sandy Ground."),
+    ("The Fish Trap", "Meads Bay", "Seafood-forward restaurant in the Meads Bay dining cluster."),
+    ("Jacala", "Meads Bay", "French-Caribbean fine dining directly on Meads Bay."),
+    ("Julians", "Anguilla", "Caribbean restaurant with a reputation for creative plating."),
+    ("SALT at Four Seasons Anguilla", "Barnes Bay", "Resort fine-dining venue at the Four Seasons property."),
+    ("Sunset Lounge at Four Seasons Anguilla", "Barnes Bay", "Resort lounge geared around sunset views over Barnes Bay."),
+    ("Coral Beach Bar", "Anguilla", "Casual beach bar and light-fare kitchen."),
+    ("Johnno's on the Beach", "Sandy Ground", "A long-running Sandy Ground beach bar with a strong live-music tradition."),
+    ("SandBar", "Anguilla", "Casual beachfront bar and grill."),
+    ("Ocean Echo Restaurant", "Anguilla", "Beachfront dining focused on fresh seafood."),
+    ("D Richard's", "Anguilla", "Fine-dining spot known among repeat visitors."),
+    ("Garvey's Lobster House", "Anguilla", "Seafood specialist, built around fresh-caught lobster."),
+    ("Mango's Seaside Grill", "Barnes Bay", "Seaside grill with a long-standing local following."),
+]
+
+VILLA_AREAS = [
+    ("Meads Bay", "The most walkable villa area -- restaurants, beach bars, and boutiques are steps from most properties. Busiest of the villa clusters, but still relatively quiet by Caribbean standards."),
+    ("Shoal Bay East", "Home to one of the Caribbean's most-cited beaches -- over two miles of sand and reef. Villas here tend toward larger beachfront estates."),
+    ("Barnes Bay", "Quieter, more secluded villa cluster near the Four Seasons property; popular for honeymoons."),
+    ("Long Bay", "Secluded stretches of sand with some of the more exclusive, larger estates on the island."),
+    ("Rendezvous Bay", "Wide, calm-water beach facing St. Martin across the channel -- a common pick for families given the gentler surf."),
+    ("Little Harbour", "A quieter, more private area alongside Barnes Bay."),
+    ("Crocus Bay", "North-coast bay near The Valley, Anguilla's capital."),
+]
+
+ACTIVITIES = [
+    ("Prickly Pear Cays boat trip", "Snorkeling / Boat", "Uninhabited cays with reef protected under Anguilla's marine park rules; morning trips give the calmest water and the most cay time."),
+    ("Sandy Island sunset cruise", "Boat", "A tiny sandbar cay with a beach bar, popular as an evening cocktail-cruise destination."),
+    ("Little Bay snorkeling / Discover Scuba", "Snorkeling / Diving", "A marine park site with shallow (20ft) water well suited to first-time divers and snorkelers alike."),
+    ("Shoal Bay East reef snorkeling", "Snorkeling", "Directly off one of Anguilla's most-cited beaches; regularly reports turtles, stingrays, and dense reef fish."),
+    ("Scuba Shack Anguilla", "Diving", "A long-established 5-star PADI dive operation with access to 20+ reefs and several wreck sites."),
+    ("Special D Diving & Charters", "Diving / Charters", "Locally-run dive charter operation, also offering day trips and fishing expeditions."),
+    ("Tradition sailing charter", "Boat / Sailing", "A converted 1978 cargo sailboat turned leisure charter, used for sunset sails and Prickly Pear trips."),
+    ("Glass-bottom boat tour, Shoal Bay to Little Bay", "Boat / Snorkeling", "A roughly 2-hour route with both snorkeling stops and glass-bottom viewing of turtles and reef fish."),
+    ("St. Martin day trip by boat", "Boat", "Short charter crossings to neighboring St. Martin/St. Maarten for a day of island-hopping."),
+    ("Golf at CuisinArt Golf Club", "Golf", "An 18-hole course designed by Greg Norman, one of the Caribbean's few championship-level courses."),
+    ("Heritage Collection Museum", "Culture", "A locally-run museum covering Anguilla's history, from Amerindian settlement through the 1967 Revolution."),
+    ("Sandy Ground beach walk", "Sightseeing", "The historic salt-trading harbor village, still home to the annual A-class boat races."),
+]
+
+
 ANGUILLA_EVENTS_2026 = [
     {"date": "2026-01-01", "name": "New Year's Day", "note": "Public holiday."},
     {"date": "2026-03-02", "name": "James Ronald Webster Day",
@@ -950,7 +1019,10 @@ def anguilla_map():
                             archive_items=sorted_items,
                             archive_gaps=ARCHIVE_KNOWN_GAPS,
                             historical_accounts=HISTORICAL_ACCOUNTS,
-                            events=ANGUILLA_EVENTS_2026)
+                            events=ANGUILLA_EVENTS_2026,
+                            restaurants=RESTAURANTS,
+                            villa_areas=VILLA_AREAS,
+                            activities=ACTIVITIES)
 
 
 @app.route("/api/anguilla-businesses.json")
