@@ -1,0 +1,139 @@
+{% extends "base.html" %}
+{% block title %}Historical Maps — plentyfish.ai{% endblock %}
+
+{% block extra_head %}
+<style>
+  .note { color:var(--md-sys-color-on-surface-variant); font-size:12px; line-height:16px; padding: 4px 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding: 16px 24px 0;">
+  <h1 class="md-title-large" style="margin:0;">Historical Maps &amp; Sounding Charts</h1>
+</div>
+<section id="historical-archive" style="padding: 8px 24px 8px; scroll-margin-top:16px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Historical Archive
+  </h2>
+  <p class="note">
+    Hand-curated maps and sounding charts, individually verified (real source, real
+    license) rather than pulled automatically. This is intentionally small —
+    see the note below on what exists but couldn't be included.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:14px; margin-top:12px;">
+    {% for item in archive_items %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; position:relative;">
+      {% if item.clear_before_launch %}
+      <div style="position:absolute; top:8px; right:8px; z-index:2; background:var(--warn); color:#2a1a00;
+        font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;">CLEAR BEFORE LAUNCH</div>
+      {% endif %}
+      <img src="{{ item.image_url }}" alt="{{ item.title }}"
+        style="width:100%; height:150px; object-fit:cover; display:block; cursor:zoom-in;"
+        loading="lazy"
+        onclick='openLightbox({{ item.image_url|tojson }}, {{ item.title|tojson }}, {{ (item.dzi_url or None)|tojson }})' />
+      <div style="padding:10px 12px;">
+        <div style="font-size:13px; font-weight:600;">{{ item.title }}</div>
+        <div style="color:var(--dim); font-size:11px; margin-top:3px;">
+          {{ item.year }} · {{ item.kind }}
+        </div>
+        <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">
+          {{ item.description }}
+        </div>
+        {% if item.history %}
+        <div style="color:var(--ink); font-size:11px; margin-top:8px; padding-top:8px; line-height:1.5; border-top:1px solid var(--line);">
+          {{ item.history }}
+        </div>
+        {% endif %}
+        <div style="margin-top:6px;">
+          <a href="{{ item.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
+            {{ item.source }} · {{ item.license }}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if archive_gaps %}
+  <p class="note" style="margin-top:16px;">
+    <strong>What exists but isn't here:</strong>
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      {% for gap in archive_gaps %}
+      <li style="margin-bottom:6px;">{{ gap }}</li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Lightbox: shows the same locally-hosted image at full size. Reusable
+     pattern -- keep this markup/JS/CSS block when building other apps.
+     When a deep-zoom (DZI) tile pyramid is available for an item, this
+     uses OpenSeadragon instead of a plain <img> -- lets people zoom into
+     fine map/chart detail (small text, soundings) without ever loading
+     the full original file at once, the same technique LOC/Rumsey use. -->
+<div id="lightbox-overlay" onclick="closeLightbox(event)" style="display:none; position:fixed; inset:0;
+  background:rgba(0,0,0,.85); z-index:1000; align-items:center; justify-content:center; padding:24px;
+  cursor:zoom-out;">
+  <button onclick="closeLightbox(event)" aria-label="Close" style="position:absolute; top:16px; right:16px;
+    background:var(--panel); color:var(--ink); border:1px solid var(--line); border-radius:50%;
+    width:40px; height:40px; font-size:20px; cursor:pointer; z-index:1001;">&times;</button>
+  <figure style="margin:0; width:100%; height:100%; max-width:1400px; display:flex; flex-direction:column; align-items:center;">
+    <img id="lightbox-img" src="" alt=""
+      style="max-width:90vw; max-height:82vh; object-fit:contain; border-radius:4px; cursor:default;"
+      onclick="event.stopPropagation()" />
+    <div id="lightbox-osd" style="display:none; width:100%; height:82vh; border-radius:4px; background:#000;"
+      onclick="event.stopPropagation()"></div>
+    <figcaption id="lightbox-caption" style="color:var(--dim); font-size:13px; margin-top:12px; text-align:center;"></figcaption>
+  </figure>
+</div>
+
+<footer>
+  © {{ now.year }} Noel Wiggins. All rights reserved.
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/openseadragon.min.js"></script>
+<script>
+let osdViewer = null;
+
+function openLightbox(imageUrl, caption, dziUrl) {
+  const img = document.getElementById('lightbox-img');
+  const osd = document.getElementById('lightbox-osd');
+  const capEl = document.getElementById('lightbox-caption');
+
+  if (dziUrl) {
+    img.style.display = 'none';
+    osd.style.display = 'block';
+    osdViewer = OpenSeadragon({
+      element: osd,
+      tileSources: dziUrl,
+      prefixUrl: 'https://cdnjs.cloudflare.com/ajax/libs/openseadragon/4.1.0/images/',
+      showNavigationControl: true,
+      zoomInButton: null, zoomOutButton: null, homeButton: null, fullPageButton: null,
+      maxZoomPixelRatio: 4,
+    });
+    capEl.textContent = caption + ' -- pinch or scroll to zoom in on detail';
+  } else {
+    osd.style.display = 'none';
+    img.style.display = 'block';
+    img.src = imageUrl;
+    capEl.textContent = caption;
+  }
+  document.getElementById('lightbox-overlay').style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+}
+function closeLightbox(e) {
+  document.getElementById('lightbox-overlay').style.display = 'none';
+  document.getElementById('lightbox-img').src = '';
+  if (osdViewer) { osdViewer.destroy(); osdViewer = null; }
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') closeLightbox(e);
+});
+</script>
+
+
+{% endblock %}

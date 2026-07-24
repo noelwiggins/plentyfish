@@ -730,8 +730,8 @@ def get_civic_context(revenue_ctx):
     }
 
 
-@app.route("/")
-def dashboard():
+@app.route("/ai-info")
+def ai_info():
     ctx = get_revenue_context()
     civic = get_civic_context(ctx)
 
@@ -754,7 +754,7 @@ def dashboard():
     session.close()
 
     return render_template(
-        "dashboard.html",
+        "ai-info.html",
         revenue=ctx,
         civic=civic,
         unclaimed=unclaimed,
@@ -765,7 +765,15 @@ def dashboard():
         has_discovery_feed=len(recent_discovered) > 0,
         top_ai_sites=top_ai_sites,
         now=datetime.utcnow(),
+        active_page="ai-info",
     )
+
+
+@app.route("/")
+def index():
+    """New lean homepage: the live interactive map is the key engagement
+    point, per Noel's direction -- not dominated by .ai metrics anymore."""
+    return render_template("index.html", now=datetime.utcnow(), active_page="map")
 
 
 @app.route("/api/revenue.json")
@@ -1013,16 +1021,51 @@ def _archive_sort_key(item):
 
 
 @app.route("/map")
-def anguilla_map():
+def map_redirect():
+    """Old combined map page -- now split into focused pages. Redirect to
+    the new homepage so old links/bookmarks still work."""
+    from flask import redirect
+    return redirect("/", code=301)
+
+
+@app.route("/historical-maps")
+def historical_maps():
     sorted_items = sorted(ARCHIVE_ITEMS, key=_archive_sort_key)
-    return render_template("map.html", now=datetime.utcnow(),
+    return render_template("historical-maps.html", now=datetime.utcnow(),
                             archive_items=sorted_items,
                             archive_gaps=ARCHIVE_KNOWN_GAPS,
+                            active_page="historical-maps")
+
+
+@app.route("/island-history")
+def island_history():
+    return render_template("island-history.html", now=datetime.utcnow(),
                             historical_accounts=HISTORICAL_ACCOUNTS,
                             events=ANGUILLA_EVENTS_2026,
-                            restaurants=RESTAURANTS,
-                            villa_areas=VILLA_AREAS,
-                            activities=ACTIVITIES)
+                            active_page="island-history")
+
+
+@app.route("/news")
+def news_page():
+    return render_template("news.html", now=datetime.utcnow(), active_page="news")
+
+
+@app.route("/restaurants")
+def restaurants_page():
+    return render_template("restaurants.html", now=datetime.utcnow(),
+                            restaurants=RESTAURANTS, active_page="restaurants")
+
+
+@app.route("/villas")
+def villas_page():
+    return render_template("villas.html", now=datetime.utcnow(),
+                            villa_areas=VILLA_AREAS, active_page="villas")
+
+
+@app.route("/activities")
+def activities_page():
+    return render_template("activities.html", now=datetime.utcnow(),
+                            activities=ACTIVITIES, active_page="activities")
 
 
 @app.route("/api/anguilla-businesses.json")

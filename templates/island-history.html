@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Island History — plentyfish.ai{% endblock %}
+{% block extra_head %}
+<style>.note { color:var(--md-sys-color-on-surface-variant); font-size:12px; line-height:16px; padding:4px 0; }</style>
+{% endblock %}
+{% block content %}
+<div style="padding: 16px 24px 0;">
+  <h1 class="md-title-large" style="margin:0;">Island History</h1>
+</div>
+<section id="historical-archive" style="padding: 8px 24px 8px; scroll-margin-top:16px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Historical Archive
+  </h2>
+  <p class="note">
+    Hand-curated maps and sounding charts, individually verified (real source, real
+    license) rather than pulled automatically. This is intentionally small —
+    see the note below on what exists but couldn't be included.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:14px; margin-top:12px;">
+    {% for item in archive_items %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; position:relative;">
+      {% if item.clear_before_launch %}
+      <div style="position:absolute; top:8px; right:8px; z-index:2; background:var(--warn); color:#2a1a00;
+        font-size:10px; font-weight:700; padding:2px 8px; border-radius:20px;">CLEAR BEFORE LAUNCH</div>
+      {% endif %}
+      <img src="{{ item.image_url }}" alt="{{ item.title }}"
+        style="width:100%; height:150px; object-fit:cover; display:block; cursor:zoom-in;"
+        loading="lazy"
+        onclick='openLightbox({{ item.image_url|tojson }}, {{ item.title|tojson }}, {{ (item.dzi_url or None)|tojson }})' />
+      <div style="padding:10px 12px;">
+        <div style="font-size:13px; font-weight:600;">{{ item.title }}</div>
+        <div style="color:var(--dim); font-size:11px; margin-top:3px;">
+          {{ item.year }} · {{ item.kind }}
+        </div>
+        <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">
+          {{ item.description }}
+        </div>
+        {% if item.history %}
+        <div style="color:var(--ink); font-size:11px; margin-top:8px; padding-top:8px; line-height:1.5; border-top:1px solid var(--line);">
+          {{ item.history }}
+        </div>
+        {% endif %}
+        <div style="margin-top:6px;">
+          <a href="{{ item.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
+            {{ item.source }} · {{ item.license }}
+          </a>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if archive_gaps %}
+  <p class="note" style="margin-top:16px;">
+    <strong>What exists but isn't here:</strong>
+    <ul style="margin:6px 0 0; padding-left:18px;">
+      {% for gap in archive_gaps %}
+      <li style="margin-bottom:6px;">{{ gap }}</li>
+      {% endfor %}
+    </ul>
+  </p>
+  {% endif %}
+</section>
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Historical Accounts
+  </h2>
+  <p class="note">
+    Anguilla never developed a profitable plantation economy -- poor, dry
+    soil kept it the "poor stepchild" of the sugar islands -- so it drew
+    far less colonial attention, and far less of the surviving paper
+    trail, than its wealthier neighbors. These first-hand accounts and
+    testimonials were dug out via a wide research pass, each individually
+    verified.
+  </p>
+  <div style="display:flex; flex-direction:column; gap:12px; margin-top:12px;">
+    {% for acc in historical_accounts %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:14px 16px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline;">
+        <div style="font-size:13px; font-weight:600;">{{ acc.title }}</div>
+        <div style="color:var(--accent); font-size:12px; font-weight:700;">{{ acc.year }}</div>
+      </div>
+      <div style="color:var(--ink); font-size:13px; line-height:1.5; margin-top:8px; font-style:italic;">
+        {{ acc.quote }}
+      </div>
+      <div style="color:var(--dim); font-size:11.5px; margin-top:8px; line-height:1.4;">
+        {{ acc.context }}
+      </div>
+      <div style="margin-top:6px;">
+        <a href="{{ acc.source_url }}" target="_blank" rel="noopener" style="font-size:11px;">
+          {{ acc.source }}
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

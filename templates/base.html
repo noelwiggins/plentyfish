@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>{% block title %}plentyfish.ai{% endblock %}</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/static/css/md3-theme.css">
+{% block extra_head %}{% endblock %}
+<style>
+  body { padding-top: 56px; } /* space for fixed top app bar */
+
+  .top-app-bar { position:fixed; top:0; left:0; right:0; height:56px; z-index:900;
+    background:var(--md-sys-color-surface-container-low); display:flex; align-items:center;
+    gap:12px; padding:0 8px; box-shadow:0 1px 3px rgba(0,0,0,.3); }
+  .top-app-bar .menu-btn { background:none; border:none; color:var(--md-sys-color-on-surface);
+    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+    cursor:pointer; transition:background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  .top-app-bar .menu-btn:hover { background:rgba(255,255,255,.08); }
+  .top-app-bar .brand { font-size:18px; font-weight:500; color:var(--md-sys-color-on-surface); }
+
+  .nav-scrim { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:998; display:none; }
+  .nav-scrim.open { display:block; }
+  .nav-drawer { position:fixed; top:0; left:0; bottom:0; width:280px; max-width:85vw;
+    background:var(--md-sys-color-surface-container-low); z-index:999; overflow-y:auto;
+    transform:translateX(-100%); transition:transform var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard);
+    padding-bottom:24px; }
+  .nav-drawer.open { transform:translateX(0); }
+  .nav-drawer .drawer-header { padding:24px 24px 16px; }
+  .nav-drawer .drawer-header .title { font-size:18px; font-weight:500; color:var(--md-sys-color-on-surface); }
+  .nav-drawer .drawer-header .sub { font-size:12px; color:var(--md-sys-color-on-surface-variant); margin-top:4px; }
+  .nav-section-label { padding:16px 24px 4px; font-size:11px; font-weight:700; letter-spacing:.1em;
+    text-transform:uppercase; color:var(--md-sys-color-primary); }
+  .nav-item { display:flex; align-items:center; gap:16px; padding:12px 24px; margin:2px 12px;
+    border-radius:28px; color:var(--md-sys-color-on-surface-variant); text-decoration:none; font-size:14px;
+    transition:background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  .nav-item:hover { background:rgba(255,255,255,.06); }
+  .nav-item.active { background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); font-weight:600; }
+  .nav-item .material-symbols-outlined { font-size:22px; }
+  .nav-divider { height:1px; background:var(--md-sys-color-outline-variant); margin:12px 24px; }
+
+  footer.site-footer { padding:20px 24px 28px; border-top:1px solid var(--md-sys-color-outline-variant);
+    margin-top:12px; color:var(--md-sys-color-on-surface-variant); font-size:11.5px; text-align:center; }
+</style>
+</head>
+<body>
+
+<header class="top-app-bar">
+  <button class="menu-btn" onclick="toggleNav(true)" aria-label="Menu">
+    <span class="material-symbols-outlined">menu</span>
+  </button>
+  <span class="brand">plentyfish.ai</span>
+</header>
+
+<div class="nav-scrim" id="nav-scrim" onclick="toggleNav(false)"></div>
+<nav class="nav-drawer" id="nav-drawer">
+  <div class="drawer-header">
+    <div class="title">plentyfish.ai</div>
+    <div class="sub">Anguilla, in full</div>
+  </div>
+
+  <a href="/" class="nav-item {{ 'active' if active_page == 'map' else '' }}">
+    <span class="material-symbols-outlined">map</span> Live Map
+  </a>
+  <a href="/ai-info" class="nav-item {{ 'active' if active_page == 'ai-info' else '' }}">
+    <span class="material-symbols-outlined">query_stats</span> .ai Domain Intelligence
+  </a>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section-label">History &amp; Culture</div>
+  <a href="/historical-maps" class="nav-item {{ 'active' if active_page == 'historical-maps' else '' }}">
+    <span class="material-symbols-outlined">map</span> Historical Maps
+  </a>
+  <a href="/island-history" class="nav-item {{ 'active' if active_page == 'island-history' else '' }}">
+    <span class="material-symbols-outlined">history_edu</span> Island History
+  </a>
+  <a href="/news" class="nav-item {{ 'active' if active_page == 'news' else '' }}">
+    <span class="material-symbols-outlined">newspaper</span> News
+  </a>
+
+  <div class="nav-divider"></div>
+  <div class="nav-section-label">Plan Your Visit</div>
+  <a href="/restaurants" class="nav-item {{ 'active' if active_page == 'restaurants' else '' }}">
+    <span class="material-symbols-outlined">restaurant</span> Restaurants
+  </a>
+  <a href="/villas" class="nav-item {{ 'active' if active_page == 'villas' else '' }}">
+    <span class="material-symbols-outlined">villa</span> Villas
+  </a>
+  <a href="/activities" class="nav-item {{ 'active' if active_page == 'activities' else '' }}">
+    <span class="material-symbols-outlined">snorkeling</span> Activities
+  </a>
+</nav>
+
+{% block content %}{% endblock %}
+
+<footer class="site-footer">
+  © {{ now.year }} Noel Wiggins. All rights reserved.
+</footer>
+
+<script>
+function toggleNav(open) {
+  document.getElementById('nav-drawer').classList.toggle('open', open);
+  document.getElementById('nav-scrim').classList.toggle('open', open);
+}
+</script>
+{% block extra_scripts %}{% endblock %}
+
+</body>
+</html>

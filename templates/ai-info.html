@@ -1,0 +1,748 @@
+{% extends "base.html" %}
+{% block title %}.ai Domain Intelligence — plentyfish.ai{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  :root {
+    --bg: var(--md-sys-color-background);
+    --panel: var(--md-sys-color-surface-container);
+    --line: var(--md-sys-color-outline-variant);
+    --ink: var(--md-sys-color-on-surface);
+    --dim: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-primary);
+    --warn: var(--md-sys-color-tertiary);
+  }
+
+  /*
+    Page-specific styles only -- color roles, type scale, shape, motion,
+    and component base styles (.md-card, .md-tab, .md-chip, etc.) all come
+    from /static/css/md3-theme.css. Existing class names used by this
+    page's JS (.card, .value, .flash, .tab-btn, .tab-panel, .badge,
+    .live-dot, .note) are kept so no script logic needed to change --
+    they're just restyled here to reference the shared MD3 tokens instead
+    of the old one-off hex variables.
+  */
+  :root {
+    --bg: var(--md-sys-color-background);
+    --panel: var(--md-sys-color-surface-container);
+    --line: var(--md-sys-color-outline-variant);
+    --ink: var(--md-sys-color-on-surface);
+    --dim: var(--md-sys-color-on-surface-variant);
+    --accent: var(--md-sys-color-primary);
+    --warn: var(--md-sys-color-tertiary);
+  }
+  .accent-rule { height:2px; background:linear-gradient(90deg, var(--accent), var(--warn)); opacity:.8; }
+
+  header { padding: 24px 24px 8px; background: var(--md-sys-color-surface-container-low); }
+  header h1 { margin:0; font-size: 22px; line-height:28px; letter-spacing: 0; font-weight:400;
+    font-family:'Roboto',sans-serif; }
+  header .sub { color:var(--dim); font-size: 14px; line-height:20px; margin-top:4px;
+    font-family:'Roboto',sans-serif; letter-spacing:.25px; }
+
+  .hero { padding: 16px 24px 24px; }
+  .hero .headline { font-size:16px; line-height:24px; color:var(--ink); margin:0 0 16px;
+    font-weight:400; font-family:'Roboto',sans-serif; letter-spacing:.5px; }
+  .hero .headline strong { color:var(--accent); font-weight:700; }
+
+  .grid { display:grid; grid-template-columns: repeat(4, 1fr); gap:16px; padding: 8px 24px 16px; }
+  .card { background:var(--panel); border:none; border-radius: var(--md-sys-shape-corner-medium);
+    padding:16px; box-shadow: 0 1px 2px rgba(0,0,0,.3), 0 1px 3px 1px rgba(0,0,0,.15);
+    transition: box-shadow var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard),
+                background-color var(--md-sys-motion-duration-medium) var(--md-sys-motion-easing-standard); }
+  .card:hover { background: var(--md-sys-color-surface-container-high);
+    box-shadow: 0 2px 6px rgba(0,0,0,.35), 0 1px 2px rgba(0,0,0,.2); }
+  .card .label { color:var(--dim); font-size:12px; line-height:16px; font-weight:500;
+    letter-spacing:.5px; text-transform:uppercase; font-family:'Roboto',sans-serif; }
+  .card .value { font-size:24px; line-height:32px; font-weight:700; margin-top:4px;
+    font-family:'Roboto Mono','Roboto',sans-serif; font-variant-numeric: tabular-nums;
+    transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  .card .value.flash { animation: md-value-flash 500ms var(--md-sys-motion-easing-standard); }
+  .card .foot { color:var(--dim); font-size:11px; line-height:16px; margin-top:8px;
+    font-family:'Roboto',sans-serif; }
+
+  .live-dot { display:inline-block; width:8px; height:8px; border-radius:50%;
+    background:var(--accent); margin-right:8px; vertical-align:middle;
+    animation: md-pulse 1.6s ease-in-out infinite; }
+
+  section { padding: 8px 24px 24px; }
+  section h2 { font-size:16px; line-height:24px; color:var(--ink); font-weight:500;
+    border-bottom:1px solid var(--line); padding-bottom:8px; margin-bottom:16px;
+    font-family:'Roboto',sans-serif; letter-spacing:.15px; }
+
+  table { width:100%; border-collapse:collapse; font-size:14px; font-family:'Roboto',sans-serif; }
+  th { text-align:left; color:var(--dim); font-weight:500; font-size:12px; letter-spacing:.5px;
+    padding:12px 8px; border-bottom:1px solid var(--line); }
+  td { padding:12px 8px; border-bottom:1px solid var(--line); }
+  tr { transition: background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  tbody tr:hover, table tr:hover td { background-color: var(--md-sys-color-surface-container-low); }
+
+  .badge { display:inline-flex; align-items:center; height:24px; padding:0 10px;
+    border-radius: var(--md-sys-shape-corner-full); font-size:11px; font-weight:500;
+    letter-spacing:.5px; font-family:'Roboto',sans-serif;
+    background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); }
+  .badge.warn { background:var(--md-sys-color-tertiary-container); color:var(--md-sys-color-on-tertiary-container); }
+  .note { color:var(--dim); font-size:12px; line-height:16px; letter-spacing:.4px;
+    margin-top:8px; font-family:'Roboto',sans-serif; }
+  canvas { max-height: 320px; }
+
+  .tabs { display:flex; gap:4px; padding: 8px 24px 0; border-bottom:1px solid var(--line); }
+  .tab-btn { background:none; border:none; color:var(--dim); font-size:14px; font-weight:500;
+    letter-spacing:.1px; font-family:'Roboto',sans-serif; padding:12px 16px; cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px; border-radius:8px 8px 0 0;
+    transition: color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard),
+                background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  .tab-btn:hover { color:var(--ink); background:var(--md-sys-color-surface-container-low); }
+  .tab-btn.active { color:var(--accent); border-bottom-color:var(--accent); font-weight:700; }
+  .tab-count { color:var(--dim); font-size:11px; margin-left:4px; }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  .news-ticker { border-top:1px solid var(--line); border-bottom:1px solid var(--line);
+    background:var(--panel); overflow:hidden; position:relative; white-space:nowrap; }
+  .news-ticker .tag { position:absolute; left:0; top:0; bottom:0; z-index:2;
+    background:var(--accent); color:var(--md-sys-color-on-primary); font-weight:700; font-size:11px;
+    letter-spacing:.5px; font-family:'Roboto',sans-serif; display:flex; align-items:center; padding:0 16px; }
+  .news-ticker-track { display:inline-block; padding-left:110px; animation: ticker-scroll 55s linear infinite;
+    font-family:'Roboto',sans-serif; }
+  .news-ticker:hover .news-ticker-track { animation-play-state: paused; }
+  .news-ticker-track a { color:var(--ink); text-decoration:none; font-size:14px; }
+  .news-ticker-track a:hover { color:var(--accent); }
+  .news-ticker-track .sep { color:var(--dim); margin:0 24px; }
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div style="padding: 16px 24px 0;">
+  <h1 class="md-title-large" style="margin:0;">.ai Domain Intelligence</h1>
+  <div class="sub" style="color:var(--dim); font-size:14px; margin-top:4px;">Anguilla revenue tracking &amp; unclaimed-name scanner</div>
+</div>
+<div class="accent-rule"></div>
+
+
+<section class="hero">
+  <p class="headline"><strong>Find your .ai name</strong> before someone else does — checked live against the real registry.</p>
+  <div style="display:flex; gap:8px; max-width:520px;">
+    <input id="lookup-input" type="text" placeholder="e.g. hydra" class="md-text-field" style="flex:1;" />
+    <button id="lookup-btn" class="md-button-filled">
+      <span class="material-symbols-outlined" style="font-size:18px;">search</span>
+      Check .ai + .com
+    </button>
+  </div>
+  <div id="lookup-result" style="margin-top:12px; font-size:14px;"></div>
+</section>
+
+<div class="news-ticker">
+  <span class="tag">ANGUILLA NEWS</span>
+  <div class="news-ticker-track" id="news-ticker-track">Loading headlines…</div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <div class="label"><span class="live-dot"></span>Revenue today (so far)</div>
+    <div class="value" id="counter-today">$0</div>
+    <div class="foot">derived from {{ revenue.rate_basis_label or "—" }}</div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="live-dot"></span>This week (so far)</div>
+    <div class="value" id="counter-week">$0</div>
+  </div>
+  <div class="card">
+    <div class="label"><span class="live-dot"></span>This month (so far)</div>
+    <div class="value" id="counter-month">$0</div>
+  </div>
+  <div class="card">
+    <div class="label">{{ revenue.latest_actual.period_label if revenue.latest_actual }} actual (year)</div>
+    <div class="value" id="counter-year">$0</div>
+    <div class="foot">
+      {% if revenue.latest_actual and revenue.latest_actual.source_url %}
+        <a href="{{ revenue.latest_actual.source_url }}" target="_blank">source</a>
+      {% endif %}
+    </div>
+  </div>
+</div>
+<p class="note" style="padding:0 24px; margin-top:-6px;">
+  "So far" counters are a live model, not a metered feed: constant per-second
+  rate from Anguilla's {{ revenue.rate_basis_label or "latest reported" }}
+  total, resetting each day/week/month (UTC).
+</p>
+
+<section>
+  <h2>Anguilla .ai revenue — actuals &amp; 2026 outlook</h2>
+  <canvas id="revenueChart"></canvas>
+  <div class="note">
+    Solid bars are actual reported revenue. 2026 shows three scenarios
+    instead of one number, because a single point estimate would be
+    misleading here: the government's own past forecasts have undershot
+    actuals by 1.75-1.9x in the most recent cycle alone. <strong>Govt.</strong>
+    is the current official 2026 budget figure. <strong>Trend</strong> is
+    estimated from a reported monthly run-rate. <strong>Upper</strong> is
+    <em>not</em> from published reporting -- it reflects a secondhand claim
+    ("registrations are doubling every year") shown only as an illustrative
+    ceiling, not something we're independently verifying or standing behind.
+  </div>
+</section>
+
+<section>
+  <h2>What this means for Anguilla</h2>
+
+  <div class="grid" style="padding:0 0 16px;">
+    <div class="card">
+      <div class="label"><span class="live-dot"></span>Per resident, {{ now.year }} (so far)</div>
+      <div class="value" id="counter-per-resident">$0</div>
+      <div class="foot">{{ "{:,}".format(civic.population) }} residents (commonly-cited estimate)</div>
+    </div>
+    <div class="card">
+      <div class="label">Renewal base, current</div>
+      <div class="value">{{ "{:,}".format(civic.renewal_base_estimate) if civic.renewal_base_estimate else "—" }}</div>
+      <div class="foot">domains likely to renew next cycle, at a ~{{ (civic.renewal_rate*100)|round|int }}% renewal rate</div>
+    </div>
+  </div>
+  <p class="note" style="margin-top:-4px;">
+    Per-resident divides the live counter above by population -- makes an
+    abstract number concrete, not a claim funds are distributed per person.
+    Renewal base is a simple model (cumulative registrations × the ~90%
+    renewal rate widely cited in reporting), not an exact revenue split.
+  </p>
+
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">Government revenue dependency</h3>
+  <canvas id="dependencyChart" style="max-height:200px;"></canvas>
+  <p class="note">
+    Share of Anguilla's government revenue from .ai fees, by year -- from
+    roughly a fifth in 2023 to nearly half in 2025. A success story and a
+    concentration-risk signal at once.
+  </p>
+
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">How Anguilla compares to other windfall ccTLDs</h3>
+  <table>
+    <tr><th>TLD</th><th>Territory</th><th>Recent revenue</th><th>% of govt revenue</th><th>Population</th><th>Outlook</th></tr>
+    {% for p in civic.peer_cctlds %}
+    <tr>
+      <td>{{ p.tld }}</td>
+      <td>{{ p.territory }}</td>
+      <td>${{ "{:,.0f}".format(p.revenue_usd_year) }} ({{ p.revenue_year_label }})</td>
+      <td>{{ p.pct_of_govt_revenue }}</td>
+      <td>{{ p.population }}</td>
+      <td style="max-width:280px;">{{ p.status }} <a href="{{ p.source_url }}" target="_blank">source</a></td>
+    </tr>
+    {% endfor %}
+  </table>
+
+  <h3 style="font-size:13px; margin:16px 0 4px; color:var(--ink);">Where the money is going</h3>
+  <p class="note">
+    {{ civic.budget_allocation.text }}
+    <a href="{{ civic.budget_allocation.source_url }}" target="_blank">source</a>
+  </p>
+</section>
+
+<div class="tabs">
+  <button class="tab-btn active" data-tab="active-sites">Most Active .ai Sites</button>
+  <button class="tab-btn" data-tab="recent">Most Recent</button>
+  <button class="tab-btn" data-tab="unregistered">Unregistered
+    <span class="tab-count">({{ unclaimed_count }})</span></button>
+  <button class="tab-btn" data-tab="news">Anguilla News</button>
+</div>
+
+
+<section class="tab-panel active" id="panel-active-sites">
+  <p class="note" style="margin-top:8px;">
+    .ai domains ranked directly in Tranco's global top-sites list -- real
+    DNS traffic data, not derived by guessing. Genuinely active sites, not
+    just claimed names.
+  </p>
+  <div id="active-sites-list"></div>
+  <p id="active-sites-status" class="note" style="text-align:center; padding:12px 0;"></p>
+</section>
+
+<section class="tab-panel" id="panel-recent">
+  <p class="note" style="margin-top:8px;">
+    Sightings from Certificate Transparency logs -- first-seen-with-a-cert
+    date, not registration date, and undercounts parked/speculative names.
+    See the Anguilla panel above for real aggregate totals.
+  </p>
+  <div id="discovered-list"></div>
+  <p id="discovered-status" class="note" style="text-align:center; padding:12px 0;"></p>
+</section>
+
+<section class="tab-panel" id="panel-unregistered">
+  <p class="note" style="margin-top:12px;">
+    {{ claimed_count }} of the top {{ claimed_count + unclaimed_count }} Tranco-ranked
+    consumer sites have a matching .ai registered; {{ unclaimed_count }} do not.
+    {% if last_checked %}Last RDAP check: {{ last_checked.checked_at.strftime("%Y-%m-%d %H:%M UTC") }}.{% endif %}
+  </p>
+  <table>
+    <tr><th>Tranco rank</th><th>.com</th><th>.ai candidate</th><th></th></tr>
+    {% for u in unclaimed %}
+    <tr>
+      <td>{{ u.tranco_rank }}</td>
+      <td>{{ u.com_domain }}</td>
+      <td>{{ u.ai_candidate }}</td>
+      <td><span class="badge">available</span></td>
+    </tr>
+    {% else %}
+    <tr><td colspan="4" class="note">No checks run yet — run scripts/tranco_check.py to populate.</td></tr>
+    {% endfor %}
+  </table>
+</section>
+
+<section class="tab-panel" id="panel-news">
+  <p class="note" style="margin-top:8px;">
+    Headlines from Anguilla's own local news outlets -- Anguilla Focus and
+    The Anguillian -- linking out to the source. We show headlines and
+    dates only, never article text.
+  </p>
+  <div id="news-list"></div>
+  <p id="news-status" class="note" style="text-align:center; padding:12px 0;"></p>
+</section>
+
+<script>
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+  });
+});
+</script>
+
+<script>
+(function () {
+  const list = document.getElementById('discovered-list');
+  const status = document.getElementById('discovered-status');
+  let cursor = null;
+  let loading = false;
+  let exhausted = false;
+
+  function fmtDate(iso) {
+    const d = new Date(iso);
+    return d.toLocaleString(undefined, {
+      year: 'numeric', month: 'short', day: 'numeric',
+      hour: '2-digit', minute: '2-digit'
+    });
+  }
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; ' +
+      'padding:8px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<span>' + item.domain + '</span>' +
+      '<span style="color:var(--dim)">' + fmtDate(item.discovered_at) + '</span>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/discovered.json', window.location.origin);
+    url.searchParams.set('limit', '25');
+    if (cursor) url.searchParams.set('before', cursor);
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && !cursor) {
+        status.textContent = 'No domains discovered yet -- the CT-log ' +
+          'ingestion pipeline hasn\'t successfully populated this yet ' +
+          '(see note above).';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      cursor = data.next_before;
+      if (!cursor) {
+        exhausted = true;
+        status.textContent = data.items.length
+          ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
+
+<script>
+(function () {
+  const list = document.getElementById('active-sites-list');
+  const status = document.getElementById('active-sites-status');
+  let offset = 0;
+  let loading = false;
+  let exhausted = false;
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex; justify-content:space-between; ' +
+      'padding:8px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<span>#' + item.rank + '</span>' +
+      '<a href="https://' + item.domain + '" target="_blank" rel="noopener" ' +
+      'style="flex:1; margin:0 12px;">' + item.domain + '</a>' +
+      '<span class="badge">active</span>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/top-ai-sites.json', window.location.origin);
+    url.searchParams.set('limit', '25');
+    url.searchParams.set('offset', String(offset));
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && offset === 0) {
+        status.textContent = 'No data yet — the daily refresh hasn\'t ' +
+          'populated this yet.';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      offset += data.items.length;
+      if (data.next_offset === null || data.next_offset === undefined) {
+        exhausted = true;
+        status.textContent = data.items.length ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
+
+<script>
+(function () {
+  const list = document.getElementById('news-list');
+  const status = document.getElementById('news-status');
+  let offset = 0;
+  let loading = false;
+  let exhausted = false;
+
+  function fmtDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+  }
+
+  function renderRow(item) {
+    const row = document.createElement('div');
+    row.style.cssText = 'padding:10px 6px; border-bottom:1px solid var(--line); font-size:13px;';
+    row.innerHTML =
+      '<a href="' + item.link + '" target="_blank" rel="noopener" style="color:var(--ink); font-weight:500;">' +
+      item.title + '</a>' +
+      '<div style="color:var(--dim); font-size:11px; margin-top:3px;">' +
+      item.source + (item.published_at ? ' · ' + fmtDate(item.published_at) : '') + '</div>';
+    list.appendChild(row);
+  }
+
+  async function loadMore() {
+    if (loading || exhausted) return;
+    loading = true;
+    status.textContent = 'Loading…';
+
+    const url = new URL('/api/news.json', window.location.origin);
+    url.searchParams.set('limit', '20');
+    url.searchParams.set('offset', String(offset));
+
+    try {
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.items.length === 0 && offset === 0) {
+        status.textContent = 'No headlines yet — the news fetch hasn\'t run.';
+        exhausted = true;
+        loading = false;
+        return;
+      }
+
+      data.items.forEach(renderRow);
+      offset += data.items.length;
+      if (data.next_offset === null || data.next_offset === undefined) {
+        exhausted = true;
+        status.textContent = data.items.length ? 'End of list.' : '';
+      } else {
+        status.textContent = '';
+      }
+    } catch (e) {
+      status.textContent = 'Failed to load more.';
+    }
+    loading = false;
+  }
+
+  const sentinel = document.createElement('div');
+  sentinel.style.height = '1px';
+  status.parentNode.insertBefore(sentinel, status);
+  new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMore();
+  }, { rootMargin: '200px' }).observe(sentinel);
+
+  loadMore();
+})();
+</script>
+
+<script>
+// Live "so far" counters: grow at a constant per-second rate derived from
+// real published revenue figures, anchored to the start of the current
+// UTC day/week/month. This is a model, not a metered feed -- see the note
+// under the cards.
+(function () {
+  const dailyEstimate = {{ (revenue.daily_estimate or 0)|tojson }};
+  const weeklyEstimate = {{ (revenue.weekly_estimate or 0)|tojson }};
+  const monthlyEstimate = {{ (revenue.monthly_estimate or 0)|tojson }};
+  const yearActual = {{ (revenue.latest_actual.revenue_usd if revenue.latest_actual else 0)|tojson }};
+
+  function fmt(n) {
+    return '$' + Math.floor(n).toLocaleString('en-US');
+  }
+
+  function startOfUTCDay(d) {
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  }
+  function startOfUTCWeek(d) {
+    const day = d.getUTCDay(); // 0=Sun
+    const diff = (day === 0 ? 6 : day - 1); // Monday as week start
+    return startOfUTCDay(d) - diff * 86400000;
+  }
+  function startOfUTCMonth(d) {
+    return Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1);
+  }
+
+  const now0 = new Date();
+  const dayStart = startOfUTCDay(now0);
+  const weekStart = startOfUTCWeek(now0);
+  const monthStart = startOfUTCMonth(now0);
+  const daysInMonth = new Date(Date.UTC(now0.getUTCFullYear(), now0.getUTCMonth() + 1, 0)).getUTCDate();
+
+  const dayRatePerMs = dailyEstimate / 86400000;
+  const weekRatePerMs = weeklyEstimate / (7 * 86400000);
+  const monthRatePerMs = monthlyEstimate / (daysInMonth * 86400000);
+
+  const population = {{ civic.population|tojson }};
+  const yearStart = Date.UTC(now0.getUTCFullYear(), 0, 1);
+  const perResidentRatePerMs = population ? dayRatePerMs / population : 0;
+
+  const elToday = document.getElementById('counter-today');
+  const elWeek = document.getElementById('counter-week');
+  const elMonth = document.getElementById('counter-month');
+  const elPerResident = document.getElementById('counter-per-resident');
+
+  function fmtCents(n) {
+    return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  function flash(el) {
+    el.classList.remove('flash');
+    void el.offsetWidth;
+    el.classList.add('flash');
+    el.addEventListener('animationend', () => el.classList.remove('flash'), { once: true });
+  }
+
+  function updateOnce() {
+    const now = Date.now();
+    const newToday = fmt((now - dayStart) * dayRatePerMs);
+    const newWeek = fmt((now - weekStart) * weekRatePerMs);
+    const newMonth = fmt((now - monthStart) * monthRatePerMs);
+    if (newToday !== elToday.textContent) { elToday.textContent = newToday; flash(elToday); }
+    if (newWeek !== elWeek.textContent) { elWeek.textContent = newWeek; flash(elWeek); }
+    if (newMonth !== elMonth.textContent) { elMonth.textContent = newMonth; flash(elMonth); }
+    if (elPerResident && population) {
+      const newPerResident = fmtCents((now - yearStart) * perResidentRatePerMs);
+      if (newPerResident !== elPerResident.textContent) {
+        elPerResident.textContent = newPerResident;
+        flash(elPerResident);
+      }
+    }
+  }
+
+  // Irregular tick timing (0.4s-3s, randomized each time) rather than a
+  // smooth per-frame update -- real accrual only moves a few dollars a
+  // second, so a perfectly regular high-frequency tick reads as fake.
+  // Random-interval updates showing the true elapsed-time value look more
+  // like real sporadic activity landing, without inflating the numbers
+  // beyond what's actually accrued.
+  function scheduleNext() {
+    const delay = 400 + Math.random() * 2600;
+    setTimeout(() => { updateOnce(); scheduleNext(); }, delay);
+  }
+  if (dailyEstimate) { updateOnce(); scheduleNext(); }
+
+  // Count-up animation for the year total (runs once on load)
+  const elYear = document.getElementById('counter-year');
+  if (yearActual) {
+    const duration = 1200;
+    const start = performance.now();
+    function animateYear(ts) {
+      const p = Math.min((ts - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - p, 3);
+      elYear.textContent = fmt(yearActual * eased);
+      if (p < 1) requestAnimationFrame(animateYear);
+    }
+    requestAnimationFrame(animateYear);
+  }
+})();
+</script>
+
+<script>
+fetch('/api/revenue.json').then(r => r.json()).then(data => {
+  const ctx = document.getElementById('revenueChart');
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.map(d => d.label),
+      datasets: [{
+        label: 'Revenue (USD)',
+        data: data.map(d => d.revenue_usd),
+        backgroundColor: data.map(d => d.is_projection ? 'rgba(242,166,90,.5)' : 'rgba(79,209,197,.7)'),
+      }]
+    },
+    options: {
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { color: '#8b98a5' }, grid: { color: '#232c38' } },
+        x: { ticks: { color: '#8b98a5' }, grid: { display: false } },
+      }
+    }
+  });
+
+  const depData = data.filter(d => d.pct_of_govt_revenue !== null && d.pct_of_govt_revenue !== undefined);
+  const depCanvas = document.getElementById('dependencyChart');
+  if (depCanvas && depData.length) {
+    new Chart(depCanvas, {
+      type: 'line',
+      data: {
+        labels: depData.map(d => d.label),
+        datasets: [{
+          label: '% of government revenue',
+          data: depData.map(d => d.pct_of_govt_revenue),
+          borderColor: 'rgba(242,166,90,.9)',
+          backgroundColor: 'rgba(242,166,90,.15)',
+          fill: true,
+          tension: 0.25,
+          pointBackgroundColor: 'rgba(242,166,90,1)',
+        }]
+      },
+      options: {
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { color: '#8b98a5', callback: v => v + '%' }, grid: { color: '#232c38' } },
+          x: { ticks: { color: '#8b98a5' }, grid: { display: false } },
+        }
+      }
+    });
+  }
+});
+</script>
+
+<script>
+(function () {
+  const track = document.getElementById('news-ticker-track');
+  fetch('/api/news.json?limit=12')
+    .then(r => r.json())
+    .then(data => {
+      if (!data.items || !data.items.length) {
+        track.textContent = 'No headlines yet.';
+        return;
+      }
+      const linksHtml = data.items.map(item =>
+        '<a href="' + item.link + '" target="_blank" rel="noopener">' + item.title + '</a>'
+      ).join('<span class="sep">•</span>');
+      // Duplicate the sequence so the CSS animation (translateX -50%) loops seamlessly
+      track.innerHTML = linksHtml + '<span class="sep">•</span>' + linksHtml + '<span class="sep">•</span>';
+    })
+    .catch(() => { track.textContent = 'Couldn\'t load headlines.'; });
+})();
+</script>
+
+<script>
+(function () {
+  const input = document.getElementById('lookup-input');
+  const btn = document.getElementById('lookup-btn');
+  const result = document.getElementById('lookup-result');
+
+  function renderOne(r) {
+    if (r.error) {
+      return '<div><strong style="color:var(--warn)">' + r.domain +
+        '</strong> — couldn\'t check (' + r.error + ')</div>';
+    }
+    if (r.registered) {
+      return '<div><strong style="color:var(--ink)">' + r.domain + '</strong> — taken</div>';
+    }
+    return '<div><strong style="color:var(--accent)">' + r.domain + '</strong> — available ' +
+      '<a href="https://www.namecheap.com/domains/registration/results/?domain=' +
+      encodeURIComponent(r.domain) + '" target="_blank" rel="noopener" ' +
+      'style="margin-left:6px; display:inline-flex; align-items:center; gap:2px;">Register ' +
+      '<span class="material-symbols-outlined" style="font-size:14px;">arrow_forward</span></a></div>';
+  }
+
+  async function doLookup() {
+    const name = input.value.trim();
+    if (!name) return;
+    result.style.color = 'var(--dim)';
+    result.textContent = 'Checking…';
+    try {
+      const res = await fetch('/api/check-domain.json?name=' + encodeURIComponent(name));
+      const data = await res.json();
+      if (!res.ok) {
+        result.style.color = 'var(--warn)';
+        result.textContent = data.error || 'Something went wrong.';
+        return;
+      }
+      result.style.color = 'var(--ink)';
+      result.innerHTML =
+        '<div style="display:flex; gap:24px; flex-wrap:wrap;">' +
+        renderOne(data.results.ai) + renderOne(data.results.com) +
+        '</div>';
+    } catch (e) {
+      result.style.color = 'var(--warn)';
+      result.textContent = 'Something went wrong. Try again.';
+    }
+  }
+
+  btn.addEventListener('click', doLookup);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') doLookup(); });
+})();
+</script>
+
+
+{% endblock %}

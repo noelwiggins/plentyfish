@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Villas — plentyfish.ai{% endblock %}
+{% block content %}
+<div style="padding: 16px 24px 0;">
+  <h1 class="md-title-large" style="margin:0;">Villas</h1>
+</div>
+<section style="padding: 8px 24px 24px;">
+  <h2 style="font-size:15px; border-bottom:1px solid var(--line); padding-bottom:8px;">
+    Villa Areas
+  </h2>
+  <p class="note">
+    By neighborhood rather than named properties -- specific villa listings
+    belong to individual rental agencies' commercial portfolios.
+  </p>
+  <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap:10px; margin-top:12px;">
+    {% for v in villa_areas %}
+    <div style="background:var(--panel); border:1px solid var(--line); border-radius:8px; padding:10px 14px;">
+      <div style="font-size:13px; font-weight:600;">{{ v[0] }}</div>
+      <div style="color:var(--dim); font-size:11px; margin-top:4px; line-height:1.4;">{{ v[1] }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
