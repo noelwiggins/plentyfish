@@ -737,6 +737,21 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91000120/",
     },
     {
+        "year": "1866", "title": "A different French attack, and outnumbered defenders who won",
+        "quote": "Describes 600 French troops landing in 1746 against a defending force of "
+                 "only 150 armed Anguillans -- who nonetheless killed 150 of the "
+                 "attackers and forced the rest to retreat. Also details 1861 revenue "
+                 "(\u00a3414) and expenditure (\u00a3240), and the island's governance "
+                 "structure under a Stipendiary Magistrate and elected Vestry.",
+        "context": "A separate incident from the 1796 French attack described in "
+                    "Coleridge's 1826 account elsewhere on this page -- Anguilla was "
+                    "attacked by the French more than once. Note: this source gives "
+                    "the settlement date as \"1450,\" almost certainly an OCR/printing "
+                    "error for 1650, the well-documented actual date.",
+        "source": "\"Trinidad and the Other West India Islands and Colonies\" (1866), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/24031382/",
+    },
+    {
         "year": "1867", "title": "Anguilla in a 1627 royal land grant (translated from French)",
         "quote": "Lists Anguilla among a long chain of islands -- from Grenada up through "
                  "the Virgin Islands -- included in King Charles I's grants intended to "
