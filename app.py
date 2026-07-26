@@ -1412,6 +1412,16 @@ READABLE_BOOKS = [
         "description": "The richest single account of 1820s Anguilla found in this "
                         "project -- a full dedicated chapter on the island.",
     },
+    {
+        "slug": "down-islands-1887",
+        "title": "Down the Islands: A Voyage to the Caribbees",
+        "author": "William Agnew Paton", "year": "1887",
+        "spine_color": "#2a4a5a",
+        "source_url": "https://www.loc.gov/item/02013426/",
+        "description": "A full chapter on Anguilla, including a 200-year-old French "
+                        "spy's report echoing the island's \"not worth keeping\" "
+                        "reputation, and documented history of Irish settlers.",
+    },
 ]
 
 
