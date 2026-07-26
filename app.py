@@ -862,6 +862,20 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/24031382/",
     },
     {
+        "year": "1917", "title": "Another nickname, and a pirate-haunt footnote",
+        "quote": "Confirms the island as \"sometimes known as Eel Island and Little Snake\" -- "
+                 "a second nickname corroborating the 1835 gazetteer's \"Snake Island\" -- "
+                 "notes a population of about 3,000, cattle and pony export, and that it "
+                 "was \"formerly a resort of freebooters.\"",
+        "context": "A traveler's gazetteer appendix entry, brief but useful for "
+                    "corroborating details found independently in other sources on "
+                    "this page (the snake-related nicknames, and the same pirate "
+                    "history documented separately via the Captain Kidd connection "
+                    "in this site's Library).",
+        "source": "\"The Book of the West Indies\" (1917), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/17029601/",
+    },
+    {
         "year": "1893", "title": "A vivid, literary sense of isolation",
         "quote": "Describes an Administrator's posting to Anguilla as a desolate, "
                  "vegetation-scarce islet visited only monthly by a ship bringing mail -- "
