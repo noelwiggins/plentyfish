@@ -835,6 +835,18 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/24031382/",
     },
     {
+        "year": "1893", "title": "A vivid, literary sense of isolation",
+        "quote": "Describes an Administrator's posting to Anguilla as a desolate, "
+                 "vegetation-scarce islet visited only monthly by a ship bringing mail -- "
+                 "the wait for it described as the one bright point in an otherwise "
+                 "isolated existence for the small white administrative household.",
+        "context": "A literary, atmospheric sketch of West Indian social life rather than "
+                    "a strict statistical account -- captures the psychological experience "
+                    "of an isolated colonial posting in a way the gazetteers don't.",
+        "source": "\"Gossip of the Caribbees: Sketches of Anglo-West-Indian Life\" (1893), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/08028484/",
+    },
+    {
         "year": "1867", "title": "Anguilla in a 1627 royal land grant (translated from French)",
         "quote": "Lists Anguilla among a long chain of islands -- from Grenada up through "
                  "the Virgin Islands -- included in King Charles I's grants intended to "
