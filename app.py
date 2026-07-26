@@ -737,6 +737,21 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91000120/",
     },
     {
+        "year": "1887", "title": "A French spy's report, and a documented Irish chapter",
+        "quote": "Cites a French agent sent from St. Christopher over 200 years earlier "
+                 "(so, mid-1600s) to assess Anguilla, who reported it \"not deemed worth "
+                 "the trouble of keeping or cultivating\" -- independently echoing the "
+                 "1678 English account elsewhere on this page. Also cites the historian "
+                 "Oldmixon on a group of Irish settlers (\"Wild Irish\") who reportedly "
+                 "displaced earlier fishermen and fell into internal conflict before "
+                 "Britain assumed direct governance.",
+        "context": "By 1887, population was estimated at ~2,500 (100 white), annual "
+                    "revenue under \u00a3600, taxation about five shillings per capita -- "
+                    "governed by a stipendiary magistrate and a seven-member vestry.",
+        "source": "\"Down the Islands: A Voyage to the Caribbees\" (1887), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/02013426/",
+    },
+    {
         "year": "1868", "title": "Confirming the \"Eel\" etymology, and mapping the surrounding cays",
         "quote": "Explicitly attributes the name Anguilla to the island's \"long and narrow... "
                  "irregular and much twisted\" shoreline, resembling an eel. Details the "
