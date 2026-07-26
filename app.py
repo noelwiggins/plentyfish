@@ -737,6 +737,18 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91000120/",
     },
     {
+        "year": "1868", "title": "Confirming the \"Eel\" etymology, and mapping the surrounding cays",
+        "quote": "Explicitly attributes the name Anguilla to the island's \"long and narrow... "
+                 "irregular and much twisted\" shoreline, resembling an eel. Details the "
+                 "reef-lined south coast, and the surrounding rocks and cays -- Grand and "
+                 "Little Scrub, Sandy Island, and the Anguilletta (also called Blowing "
+                 "Rock, for a blowhole resembling a whale).",
+        "context": "From official British Admiralty sailing directions -- pairs naturally "
+                    "with the historical sounding charts elsewhere on this site.",
+        "source": "\"Sailing Directions for the West Indies\" (1868), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/ltf91089143/",
+    },
+    {
         "year": "1866", "title": "A different French attack, and outnumbered defenders who won",
         "quote": "Describes 600 French troops landing in 1746 against a defending force of "
                  "only 150 armed Anguillans -- who nonetheless killed 150 of the "
