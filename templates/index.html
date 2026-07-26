@@ -48,9 +48,52 @@
     <div class="value" id="aqi-value">Loading…</div>
     <div class="foot" id="aqi-foot"></div>
   </div>
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="label">Sargassum Outlook — Caribbean Sea</div>
+    <div class="value" style="font-size:16px;">2026 is tracking as a major bloom year</div>
+    <div class="foot">
+      Per USF Optical Oceanography Lab's official monthly bulletin (Jun 30, 2026): the Caribbean Sea
+      is at record-high levels for the month, and beaching events have continued around the
+      Lesser Antilles and Florida's southeast coast. Expected to change only modestly through
+      the coming weeks, with beaching likely to continue or increase.
+      <a href="https://optics.marine.usf.edu/projects/SaWS.html" target="_blank" rel="noopener">Full official bulletin →</a>
+    </div>
+  </div>
 </div>
 
 <div id="map"></div>
+
+<details class="note" style="margin-top:8px;">
+  <summary style="cursor:pointer; color:var(--md-sys-color-primary); font-weight:600;">
+    What is the sargassum layer actually tracking, and which way does it move?
+  </summary>
+  <div style="margin-top:8px; line-height:1.6;">
+    <strong>What it measures:</strong> the Alternate Floating Algae Index (AFAI), a satellite
+    method (Hu et al., 2015) that detects sargassum's distinct light signature against open
+    water, developed by the University of South Florida. It's shown here as a 7-day cumulative
+    composite rather than a single day's pass, since daily satellite coverage has real gaps
+    from cloud cover and sun glint that the cumulative version smooths over.
+    <br><br>
+    <strong>Resolution:</strong> the underlying satellite data (MODIS/VIIRS) resolves to about
+    1.5-2 km per pixel -- at Anguilla's scale, that's genuinely coarse, which is why the layer
+    looks blocky up close. This is a real limit of the current public satellite product, not
+    a display setting -- USF/NOAA are actively developing higher-resolution regional products
+    (currently piloted for Puerto Rico/USVI) that combine finer imagery with ocean circulation
+    models to forecast movement days in advance; that capability isn't yet available for
+    Anguilla specifically.
+    <br><br>
+    <strong>Which way it's heading:</strong> there's no precise per-location trajectory forecast
+    publicly available for this area yet. In general, sargassum in this part of the Caribbean is
+    carried westward by the Caribbean Current, with local wind and eddies causing real
+    day-to-day variation -- so "generally moving west, unpredictably" is the honest general
+    answer, not a specific heading.
+    <br><br>
+    <strong>Where the actual forecast comes from:</strong> USF's Optical Oceanography Lab
+    publishes a real monthly bulletin with expert regional outlooks (linked above) -- that's
+    the closest thing to a genuine "forecast" that currently exists for this phenomenon; a
+    true 10-day forecast doesn't yet exist publicly for this specific area.
+  </div>
+</details>
 
 <p class="note">
   Weather &amp; air quality: live from Open-Meteo. Sargassum coverage: NOAA/AOML's
@@ -156,6 +199,8 @@ const sargassumLayer = L.tileLayer.wms(
     transparent: true,
     version: '1.3.0',
     crs: L.CRS.EPSG4326, // this WMS server only supports EPSG:4326, rejects Leaflet's default EPSG:3857
+    tileSize: 512, // request larger tiles -- the server interpolates more smoothly at higher
+    zoomOffset: -1, // output resolution even though the underlying satellite data is ~1.7km native
     opacity: 0.85,
     attribution: 'NOAA/AOML &amp; University of South Florida (Hu et al.)',
   }
