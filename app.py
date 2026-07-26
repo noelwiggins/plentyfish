@@ -1250,7 +1250,36 @@ def activities_page():
 @app.route("/library")
 def library_page():
     return render_template("library.html", now=datetime.utcnow(),
-                            books=LIBRARY_BOOKS, active_page="library")
+                            books=LIBRARY_BOOKS, readable_books=READABLE_BOOKS,
+                            active_page="library")
+
+
+# Public-domain books with full reader support (confirmed PD, unlike the
+# under-copyright bibliography above). Each needs a static page-data JSON
+# file at static/reader-data/{slug}.json (page text + image URL per page).
+READABLE_BOOKS = [
+    {
+        "slug": "coleridge-1826",
+        "title": "Six Months in the West Indies in 1825",
+        "author": "Henry Nelson Coleridge", "year": "1826",
+        "spine_color": "#5a3319",  # leather brown
+        "source_url": "https://www.loc.gov/item/ltf91000120/",
+        "description": "The richest single account of 1820s Anguilla found in this "
+                        "project -- a full dedicated chapter on the island.",
+    },
+]
+
+
+@app.route("/library/read/<slug>")
+def library_reader(slug):
+    book = next((b for b in READABLE_BOOKS if b["slug"] == slug), None)
+    if not book:
+        from flask import abort
+        abort(404)
+    return render_template("reader.html", now=datetime.utcnow(),
+                            book_title=book["title"], book_author=book["author"],
+                            book_year=book["year"], book_source_url=book["source_url"],
+                            data_url=f"/static/reader-data/{slug}.json")
 
 
 @app.route("/api/anguilla-businesses.json")

@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}{{ book_title }} — Reader — plentyfish.ai{% endblock %}
+
+{% block extra_head %}
+<style>
+  body { padding-top: 56px; overflow-x: hidden; }
+  .reader-layout { display:flex; height: calc(100vh - 56px); }
+  .reader-image-panel { width:45%; background:#000; display:flex; align-items:center;
+    justify-content:center; position:sticky; top:56px; height: calc(100vh - 56px); overflow:hidden; }
+  .reader-image-panel img { max-width:100%; max-height:100%; object-fit:contain;
+    box-shadow: 0 4px 24px rgba(0,0,0,.5); }
+  .reader-text-panel { width:55%; overflow-y:auto; height: calc(100vh - 56px); padding: 24px 32px; }
+  .reader-page-block { margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid var(--md-sys-color-outline-variant); }
+  .reader-page-block:last-child { border-bottom:none; }
+  .reader-page-number { color:var(--md-sys-color-primary); font-size:11px; font-weight:700;
+    letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
+  .reader-page-text { font-size:15px; line-height:1.7; white-space:pre-wrap; font-family: Georgia, serif; }
+  .reader-header { padding: 16px 32px 8px; }
+  .reader-header .book-title { font-size:20px; font-weight:500; }
+  .reader-header .book-meta { color:var(--md-sys-color-on-surface-variant); font-size:12px; margin-top:4px; }
+  @media (max-width: 800px) {
+    .reader-layout { flex-direction: column; height: auto; }
+    .reader-image-panel { width:100%; position:relative; top:0; height:50vh; }
+    .reader-text-panel { width:100%; height:auto; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="reader-header">
+  <div class="book-title">{{ book_title }}</div>
+  <div class="book-meta">{{ book_author }} · {{ book_year }} · Public domain, full text · <a href="{{ book_source_url }}" target="_blank" rel="noopener">View at Library of Congress</a></div>
+</div>
+<div class="reader-layout">
+  <div class="reader-image-panel">
+    <img id="reader-current-image" src="" alt="Current page" />
+  </div>
+  <div class="reader-text-panel" id="reader-text-panel">
+    <!-- Page blocks injected by JS -->
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+fetch('{{ data_url }}')
+  .then(r => r.json())
+  .then(pages => {
+    const panel = document.getElementById('reader-text-panel');
+    const img = document.getElementById('reader-current-image');
+    img.src = pages[0].image;
+
+    pages.forEach(p => {
+      if (!p.text || p.text.trim().length < 3) return;
+      const block = document.createElement('div');
+      block.className = 'reader-page-block';
+      block.dataset.image = p.image;
+      block.innerHTML = `<div class="reader-page-number">Page ${p.page}</div>` +
+        `<div class="reader-page-text"></div>`;
+      block.querySelector('.reader-page-text').textContent = p.text;
+      panel.appendChild(block);
+    });
+
+    const blocks = panel.querySelectorAll('.reader-page-block');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          img.src = entry.target.dataset.image;
+        }
+      });
+    }, { root: panel, threshold: 0.5 });
+    blocks.forEach(b => observer.observe(b));
+  })
+  .catch(err => {
+    document.getElementById('reader-text-panel').textContent = 'Could not load book text.';
+  });
+</script>
+{% endblock %}
