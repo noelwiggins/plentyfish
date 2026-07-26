@@ -1460,6 +1460,17 @@ READABLE_BOOKS = [
         "description": "A massive world gazetteer with a real find buried inside: "
                         "Anguillian settlers credited with founding the Virgin Islands colony.",
     },
+    {
+        "slug": "west-indies-1911",
+        "title": "The West Indies",
+        "author": "John Fiske (posthumous)", "year": "1911",
+        "spine_color": "#5a2a4a",
+        "source_url": "https://www.loc.gov/item/21007149/",
+        "description": "An entire chapter (XX) devoted to Anguilla, St. Martin, St. "
+                        "Bartholomew, Barbuda, and Antigua -- opens by explaining the "
+                        "island's \"snake\" name etymology and its bleak volcanic-versus-"
+                        "coralline island geology.",
+    },
 ]
 
 
