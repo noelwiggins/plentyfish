@@ -11,11 +11,9 @@ Last updated: 2026-07-26
 *(Nothing currently incomplete as of this update — full pass just completed and verified live.)*
 
 ## Recently completed (this session)
-- Added 1675 Roggeveen Dutch nautical chart to Historical Maps (confirmed public domain via Europeana/BnF)
-- Reader UX: swipe-only page turning, fixed long-press image-save-dialog conflict, added bottom nav bar (prev/next/exit)
-- Reader UX: chapter/TOC detection heuristic in jump-to-page dropdown
-- Reader UX: subtle garbled-OCR-text visual flagging (heuristic, not a real confidence score)
-- Reader UX: inline illustration thumbnails on likely-illustration pages (heuristic: unusually short OCR text vs. book average)
+- Reader: consolidated bookmark/print-to-PDF/share menu (text view + zoom view), thumbnail grid page browser, read-aloud (Speech Synthesis)
+- Added 3 more Historical Accounts: 1912 German geography source (translated), 1917 Book of the West Indies gazetteer entry
+- Continued LOC non-newspaper research: checked Danish West Indies (1917), Alone in the Caribbean (1917), Mittelamerika (1912, German), Book of the West Indies (1917) — 2 solid finds, 2 minor
 
 ## Standing project facts (won't change often)
 - Stack: Flask + PostgreSQL + Railway, repo `noelwiggins/plentyfish`
