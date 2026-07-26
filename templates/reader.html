@@ -79,6 +79,8 @@
   #reader-zoom-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.92);
     align-items:center; justify-content:center; }
   #reader-zoom-overlay img { max-width:95vw; max-height:95vh; object-fit:contain; }
+  #reader-zoom-page-label { position:absolute; top:16px; left:50%; transform:translateX(-50%);
+    color:rgba(255,255,255,.85); font-size:12px; background:rgba(0,0,0,.5); padding:4px 12px; border-radius:12px; }
   #reader-zoom-hint { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:1001;
     color:rgba(255,255,255,.7); font-size:12px; display:none; }
 
@@ -150,8 +152,9 @@
 
 <div id="reader-zoom-overlay">
   <img id="reader-zoom-img" src="" alt="Zoomed page" />
+  <div id="reader-zoom-page-label"></div>
 </div>
-<div id="reader-zoom-hint">Long-press again, or tap, to close</div>
+<div id="reader-zoom-hint">Swipe or tap left/right to turn pages · tap the middle, or long-press, to close</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -428,21 +431,62 @@ document.getElementById('reader-sepia-btn').addEventListener('click', (e) => {
 });
 
 // --- Image zoom: click on desktop, long-press on mobile ---
+// Uses the History API so the device/browser back button closes the
+// overlay (restoring the underlying reading view) instead of navigating
+// away from the page entirely -- the overlay is app-level UI state, not
+// a real navigation destination.
 const zoomOverlay = document.getElementById('reader-zoom-overlay');
 const zoomImg = document.getElementById('reader-zoom-img');
-function openZoom() {
-  zoomImg.src = img.src;
-  zoomOverlay.style.display = 'flex';
+const zoomPageLabel = document.getElementById('reader-zoom-page-label');
+let zoomCurrentIdx = 0;
+let zoomOpenedViaHistory = false;
+
+function currentPageIdx() {
+  const pageNum = parseInt(pageIndicator.textContent.match(/Page (\d+)/)?.[1] || allPages[0].page, 10);
+  const idx = allPages.findIndex(p => p.page === pageNum);
+  return idx === -1 ? 0 : idx;
 }
-function closeZoom() { zoomOverlay.style.display = 'none'; }
-zoomOverlay.addEventListener('click', closeZoom);
+
+function showZoomPage(idx) {
+  idx = Math.max(0, Math.min(allPages.length - 1, idx));
+  zoomCurrentIdx = idx;
+  zoomImg.src = allPages[idx].image;
+  zoomPageLabel.textContent = 'Page ' + allPages[idx].page + ' of ' + allPages[allPages.length - 1].page;
+}
+
+function openZoom() {
+  zoomCurrentIdx = currentPageIdx();
+  showZoomPage(zoomCurrentIdx);
+  zoomOverlay.style.display = 'flex';
+  history.pushState({ readerZoom: true }, '');
+  zoomOpenedViaHistory = true;
+}
+function closeZoom(fromPopstate) {
+  zoomOverlay.style.display = 'none';
+  // Sync the main reading view to wherever the reader flipped to in zoom mode
+  renderUpTo(allPages[zoomCurrentIdx].page);
+  setTimeout(() => {
+    const target = panel.querySelector(`.reader-page-block[data-page="${allPages[zoomCurrentIdx].page}"]`);
+    if (target) target.scrollIntoView({ block: 'start' });
+  }, 30);
+  if (zoomOpenedViaHistory && !fromPopstate) {
+    history.back(); // pop our pushed state so back-history stays clean
+  }
+  zoomOpenedViaHistory = false;
+}
+window.addEventListener('popstate', (e) => {
+  if (zoomOverlay.style.display === 'flex') {
+    closeZoom(true);
+  }
+});
 
 const isMobile = window.matchMedia('(max-width: 800px)').matches;
 if (!isMobile) {
   imagePanel.addEventListener('click', openZoom);
+  zoomOverlay.addEventListener('click', (e) => { if (e.target === zoomOverlay) closeZoom(); });
 } else {
   // Long-press anywhere on the text panel reveals the current page's original
-  // scan full-screen; a second long-press (or a tap) closes it again.
+  // scan full-screen; a second long-press, a tap, or the back button closes it.
   let pressTimer = null;
   panel.addEventListener('touchstart', () => {
     pressTimer = setTimeout(() => {
@@ -452,6 +496,28 @@ if (!isMobile) {
   ['touchend', 'touchmove', 'touchcancel'].forEach(evt =>
     panel.addEventListener(evt, () => clearTimeout(pressTimer))
   );
+
+  // Page-flipping within the mobile zoom view: swipe left/right to turn
+  // pages without leaving the full-screen original-scan view, plus tap
+  // zones on the left/right thirds of the image as an easier alternative
+  // to swiping for some readers.
+  let touchStartX = null;
+  zoomImg.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
+  zoomImg.addEventListener('touchend', (e) => {
+    if (touchStartX === null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 50) {
+      showZoomPage(zoomCurrentIdx + (dx < 0 ? 1 : -1));
+    } else {
+      // A tap rather than a swipe: left third = previous page, right third = next,
+      // middle third = close (matches the long-press-to-close gesture people expect)
+      const rect = zoomImg.getBoundingClientRect();
+      const tapX = e.changedTouches[0].clientX - rect.left;
+      if (tapX < rect.width / 3) showZoomPage(zoomCurrentIdx - 1);
+      else if (tapX > rect.width * 2 / 3) showZoomPage(zoomCurrentIdx + 1);
+    }
+    touchStartX = null;
+  });
 }
 </script>
 {% endblock %}
