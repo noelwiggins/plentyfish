@@ -529,6 +529,62 @@ VILLA_AREAS = [
 # copyrighted work regardless of how it's presented.
 LIBRARY_BOOKS = [
     {
+        "title": "The Search for the Giant Rodent of Anguilla", "author": "Donald A. McFarland",
+        "year": "1991", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#4a5a3a",
+        "description": "A scientific report on Amblyrhiza inundata, an extinct giant rodent whose fossils have been found on Anguilla.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/the_search_for_the_giant_rodent_of_anguill1.pdf",
+    },
+    {
+        "title": "A Study of Ceramic Sherds from Hughes Estate", "author": "Desmond Nicholson",
+        "year": "1985", "publisher": "The Antigua Archaeological and Historical Society",
+        "spine_color": "#6a4a2a",
+        "description": "Analysis of pottery fragments from the Hughes Estate ruins, dating the site's occupation to roughly 1775-1825.",
+        "find_url": "https://www.aahsanguilla.com/hughes-estate-research-project-2021-2023.html",
+    },
+    {
+        "title": "Captain Kidd and his Anguilla Connection", "author": "Nik Douglas",
+        "year": "Undated", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#2a2a4a",
+        "description": "Traces the pirate Captain Kidd's documented visit to Anguilla and a 1706 Privy Council accusation against the island's governor for dealing in his goods.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/captain_kidd.pdf",
+    },
+    {
+        "title": "The History of Boat Racing in Anguilla", "author": "David Carty",
+        "year": "Undated", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#3a6a8a",
+        "description": "An essay on Anguilla's national sport, distinct from Carty's full book \"Nuttin Bafflin\" elsewhere in this library.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/boat_racing_.pdf",
+    },
+    {
+        "title": "Historic Wallblake House: A Historic Past", "author": "David Carty",
+        "year": "Undated", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#5a4a3a",
+        "description": "History of one of the few surviving plantation houses on Anguilla, built in the late 18th century by Valentine Blake.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/wallblake_house.pdf",
+    },
+    {
+        "title": "The Salt Industry of Anguilla: A Brief History", "author": "Sir Emile Gumbs",
+        "year": "Undated", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#7a7a8a",
+        "description": "History of Anguilla's salt-raking industry, once producing up to 71,000 barrels a year, from a former Chief Minister of Anguilla.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/salt.pdf",
+    },
+    {
+        "title": "Tobacco, Cotton, Salt and Dye-Trees", "author": "Don Mitchell",
+        "year": "Undated (covers 1650-1700)", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#4a6a3a",
+        "description": "Early Anguilla industries derived directly from colonial archives, by a noted Anguillian judge and historian.",
+        "find_url": "https://www.aahsanguilla.com/uploads/7/3/7/1/7371196/other_industries.pdf",
+    },
+    {
+        "title": "People of African Ancestry in Anguilla", "author": "Prof. Don E. Walicek",
+        "year": "Undated", "publisher": "Anguilla Archaeological & Historical Society",
+        "spine_color": "#6a2a2a",
+        "description": "Traces African and Afro-Caribbean presence in Anguilla from the earliest colonial period through emancipation, including the 1698 arrival of the Sally Rose.",
+        "find_url": "https://www.aahsanguilla.com/",
+    },
+    {
         "title": "Annals of Anguilla, 1650-1923", "author": "S. B. Jones",
         "year": "1936", "publisher": "Christian Journals Limited, Belfast",
         "spine_color": "#8b6f47",
@@ -712,7 +768,7 @@ HISTORICAL_ACCOUNTS = [
                     "after British slave emancipation (1834) across the West Indies. "
                     "A rare direct account of how the moment itself was actually "
                     "experienced in Anguilla, rather than a description from outside.",
-        "source": "\"Emancipation in the West Indies\" (1838), via Library of Congress",
+        "source": "James A. Thome & J. Horace Kimball, \"Emancipation in the West Indies\" (1837/38), via Library of Congress",
         "source_url": "https://www.loc.gov/item/02017739/",
     },
     {
