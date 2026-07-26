@@ -25,6 +25,19 @@
     letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
   .reader-page-text { font-size:15px; line-height:1.7; white-space:pre-wrap; font-family: Georgia, serif; }
 
+  /* Inline illustration indicator -- shown on pages whose OCR text is
+     unusually short relative to the book's average, a heuristic for
+     "this is probably a plate/illustration, not a text page." Gives a
+     small clickable preview directly in the scrollable text rather than
+     making people discover illustrations only by opening the full scan. */
+  .reader-illustration-thumb { margin-top:12px; padding:10px; border:1px dashed var(--md-sys-color-outline-variant);
+    border-radius:8px; cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:6px;
+    color:var(--md-sys-color-on-surface-variant); font-size:12px; text-align:center; }
+  .reader-illustration-thumb img { max-width:220px; max-height:220px; object-fit:contain; border-radius:4px;
+    box-shadow:0 2px 8px rgba(0,0,0,.3); }
+  .reader-illustration-thumb .material-symbols-outlined { font-size:16px; vertical-align:middle; }
+  .reader-illustration-thumb:hover { border-color:var(--md-sys-color-primary); color:var(--md-sys-color-primary); }
+
   /* Sepia reading mode -- affects only the text panel, a classic e-reader comfort option */
   .reader-text-panel.sepia { background:#f4ecd8; color:#3b2f22; }
   .reader-text-panel.sepia .reader-page-block { border-bottom-color:#d8cba8; }
@@ -78,24 +91,36 @@
   /* Full-image zoom modal (desktop click + mobile long-press both use this) */
   #reader-zoom-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.92);
     align-items:center; justify-content:center; }
-  #reader-zoom-overlay img { max-width:95vw; max-height:95vh; object-fit:contain; }
+  #reader-zoom-overlay img { max-width:95vw; max-height:95vh; object-fit:contain;
+    -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
   #reader-zoom-page-label { position:absolute; top:16px; left:50%; transform:translateX(-50%);
     color:rgba(255,255,255,.85); font-size:12px; background:rgba(0,0,0,.5); padding:4px 12px; border-radius:12px; }
-  #reader-zoom-hint { position:fixed; bottom:16px; left:50%; transform:translateX(-50%); z-index:1001;
-    color:rgba(255,255,255,.7); font-size:12px; display:none; }
+
+  /* Bottom navigation bar for the zoomed image view -- explicit tap targets
+     rather than relying on gestures alone, since gesture-only nav (tap
+     zones especially) was unreliable and collided with the browser's own
+     long-press-to-save-image menu. */
+  #reader-zoom-nav { position:fixed; bottom:0; left:0; right:0; z-index:1001; display:none;
+    justify-content:space-between; align-items:center; padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+    background:rgba(0,0,0,.75); }
+  #reader-zoom-nav button { background:rgba(255,255,255,.12); border:none; color:#fff;
+    border-radius:24px; padding:10px 16px; display:flex; align-items:center; gap:4px;
+    font-size:13px; font-weight:600; }
+  #reader-zoom-nav button:active { background:rgba(255,255,255,.24); }
 
   @media (max-width: 800px) {
     /* Mobile: text-only by default (full width, full immersion). The scanned
        original is reachable via long-press anywhere on the text, showing it
-       as a full overlay -- toggled off with a second long-press or tap.
-       No always-visible image panel on mobile; screen space is too tight
-       for it to stay useful, unlike desktop. */
+       as a full overlay -- toggled off via the bottom nav's "Text view"
+       button, the back button, or another long-press. No always-visible
+       image panel on mobile; screen space is too tight for it to stay
+       useful, unlike desktop. */
     .reader-layout { flex-direction: column; height: auto; }
     .reader-image-panel { display: none; }
     .reader-text-panel { width:100%; height:auto; padding: 16px 20px; }
     .reader-header { padding: 10px 16px 6px; }
     .reader-search-box input { width:90px; }
-    #reader-zoom-hint { display:block; }
+    #reader-zoom-nav { display: flex; }
   }
 </style>
 {% endblock %}
@@ -151,10 +176,14 @@
 <div id="reader-toast"></div>
 
 <div id="reader-zoom-overlay">
-  <img id="reader-zoom-img" src="" alt="Zoomed page" />
+  <img id="reader-zoom-img" src="" alt="Zoomed page" draggable="false" />
   <div id="reader-zoom-page-label"></div>
+  <div id="reader-zoom-nav">
+    <button id="reader-zoom-prev" aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
+    <button id="reader-zoom-exit" aria-label="Close, return to text"><span class="material-symbols-outlined">close</span> Text view</button>
+    <button id="reader-zoom-next" aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
+  </div>
 </div>
-<div id="reader-zoom-hint">Swipe or tap left/right to turn pages · tap the middle, or long-press, to close</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -167,6 +196,7 @@ const RESUME_COOKIE = 'reader_pos_' + BOOK_SLUG;
 const PAGE_BATCH_SIZE = 40; // lazily render this many page-blocks at a time
 
 let allPages = [];
+let avgTextLength = 200; // recalculated once real page data loads; used for illustration detection
 let renderedCount = 0;
 const panel = document.getElementById('reader-text-panel');
 const img = document.getElementById('reader-current-image');
@@ -192,6 +222,28 @@ function renderBlock(p) {
   block.dataset.page = p.page;
   block.innerHTML = `<div class="reader-page-number">Page ${p.page}</div><div class="reader-page-text"></div>`;
   block.querySelector('.reader-page-text').textContent = p.text;
+
+  // Illustration detection: pages with unusually little OCR text relative
+  // to the book's typical page are probably a plate/illustration rather
+  // than a text page (a full-page image OCRs to almost nothing). There's
+  // no way to detect this with certainty without real image analysis, so
+  // this is a heuristic -- but a genuinely useful one, since it lets us
+  // surface likely illustrations directly in the scrollable text instead
+  // of leaving people to discover them only by opening the full scan.
+  if (p.text.trim().length < avgTextLength * 0.15 && p.text.trim().length < 200) {
+    const thumb = document.createElement('div');
+    thumb.className = 'reader-illustration-thumb';
+    thumb.innerHTML = `<img src="${p.image}" alt="Illustration on page ${p.page}" loading="lazy" />` +
+      `<span class="material-symbols-outlined">image</span> Illustration on this page -- tap to view full size`;
+    thumb.addEventListener('click', () => {
+      zoomCurrentIdx = allPages.findIndex(pg => pg.page === p.page);
+      showZoomPage(zoomCurrentIdx);
+      zoomOverlay.style.display = 'flex';
+      history.pushState({ readerZoom: true }, '');
+      zoomOpenedViaHistory = true;
+    });
+    block.appendChild(thumb);
+  }
   return block;
 }
 
@@ -249,6 +301,7 @@ fetch('{{ data_url }}')
     allPages = pages.filter(p => p.text && p.text.trim().length >= 3);
     if (!allPages.length) throw new Error('empty');
     img.src = allPages[0].image;
+    avgTextLength = allPages.reduce((sum, p) => sum + p.text.trim().length, 0) / allPages.length;
 
     // Populate jump-to-page dropdown
     allPages.forEach(p => {
@@ -486,21 +539,26 @@ if (!isMobile) {
   zoomOverlay.addEventListener('click', (e) => { if (e.target === zoomOverlay) closeZoom(); });
 } else {
   // Long-press anywhere on the text panel reveals the current page's original
-  // scan full-screen; a second long-press, a tap, or the back button closes it.
+  // scan full-screen. Prevent the browser's native long-press "save image"
+  // menu from appearing over our own image -- that dialog was intercepting
+  // the gesture instead of our overlay opening.
+  zoomImg.addEventListener('contextmenu', (e) => e.preventDefault());
+  zoomImg.style.webkitTouchCallout = 'none';
+
   let pressTimer = null;
   panel.addEventListener('touchstart', () => {
     pressTimer = setTimeout(() => {
-      if (zoomOverlay.style.display === 'flex') { closeZoom(); } else { openZoom(); }
+      if (zoomOverlay.style.display !== 'flex') openZoom();
     }, 500);
   });
   ['touchend', 'touchmove', 'touchcancel'].forEach(evt =>
     panel.addEventListener(evt, () => clearTimeout(pressTimer))
   );
 
-  // Page-flipping within the mobile zoom view: swipe left/right to turn
-  // pages without leaving the full-screen original-scan view, plus tap
-  // zones on the left/right thirds of the image as an easier alternative
-  // to swiping for some readers.
+  // Page-flipping within the mobile zoom view: swipe left/right only --
+  // tapping was removed since it made accidental page turns too easy and
+  // conflicted with tapping to dismiss. Use the bottom nav bar buttons
+  // (prev/next/exit) for tap-based control instead.
   let touchStartX = null;
   zoomImg.addEventListener('touchstart', (e) => { touchStartX = e.touches[0].clientX; });
   zoomImg.addEventListener('touchend', (e) => {
@@ -508,16 +566,15 @@ if (!isMobile) {
     const dx = e.changedTouches[0].clientX - touchStartX;
     if (Math.abs(dx) > 50) {
       showZoomPage(zoomCurrentIdx + (dx < 0 ? 1 : -1));
-    } else {
-      // A tap rather than a swipe: left third = previous page, right third = next,
-      // middle third = close (matches the long-press-to-close gesture people expect)
-      const rect = zoomImg.getBoundingClientRect();
-      const tapX = e.changedTouches[0].clientX - rect.left;
-      if (tapX < rect.width / 3) showZoomPage(zoomCurrentIdx - 1);
-      else if (tapX > rect.width * 2 / 3) showZoomPage(zoomCurrentIdx + 1);
     }
     touchStartX = null;
   });
 }
+
+// Bottom nav bar: explicit tap targets for prev/next/exit, available on
+// both mobile and desktop whenever the zoom overlay is open.
+document.getElementById('reader-zoom-prev').addEventListener('click', () => showZoomPage(zoomCurrentIdx - 1));
+document.getElementById('reader-zoom-next').addEventListener('click', () => showZoomPage(zoomCurrentIdx + 1));
+document.getElementById('reader-zoom-exit').addEventListener('click', () => closeZoom());
 </script>
 {% endblock %}
