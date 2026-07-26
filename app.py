@@ -737,6 +737,26 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91000120/",
     },
     {
+        "year": "1857", "title": "A Dutch pilot mistakes Anguilla for its neighbor",
+        "quote": "Sailing to New Netherland (later New York) in 1632, a Dutch ship's "
+                 "helmsman mistook Anguilla for the nearby island of Sombrero as they "
+                 "passed by at evening -- a small, human moment of period navigation.",
+        "context": "From a Dutch sea captain's journal of transatlantic voyages "
+                    "(1632-1644), published in English translation in 1857.",
+        "source": "\"Voyages from Holland to America, A.D. 1632 to 1644\" (1857), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/11021759/",
+    },
+    {
+        "year": "1855", "title": "A mid-century statistical snapshot",
+        "quote": "Gives Anguilla's area (34 square miles), population (3,052), and economy "
+                 "(cattle-breeding, salt-raking, small-scale sugar/cotton/tobacco), notes "
+                 "governance by a locally-elected magistrate answerable to Antigua's "
+                 "governor, and dates English settlement to 1659.",
+        "context": "From a comprehensive statistical gazetteer of the West India Islands.",
+        "source": "\"A Statistical Account of the West India Islands\" (1855), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/01000662/",
+    },
+    {
         "year": "1811", "title": "Anguillians as founders, not just forgotten",
         "quote": "Describes how, after the Dutch were expelled from Tortola and made "
                  "little progress developing it, credit for the colony's growth went to "
