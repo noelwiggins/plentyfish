@@ -703,6 +703,21 @@ ARCHIVE_KNOWN_GAPS = [
 # actually include Anguilla.
 HISTORICAL_ACCOUNTS = [
     {
+        "year": "1811", "title": "Anguillians as founders, not just forgotten",
+        "quote": "Describes how, after the Dutch were expelled from Tortola and made "
+                 "little progress developing it, credit for the colony's growth went to "
+                 "English settlers from Anguilla, who emigrated with their families and "
+                 "founded a nearly tax-free, self-governing community there.",
+        "context": "From John Pinkerton's \"Modern Geography\" (1811) -- a rare "
+                    "documented instance of Anguilla as a source of settlers who went "
+                    "on to build up a neighboring colony, rather than the usual story "
+                    "of being overlooked. Notes the Virgin Islands' 1756 population "
+                    "(1,263 white, 6,121 Black) and that formal courts weren't "
+                    "established there until 1773.",
+        "source": "John Pinkerton, 1811, via Library of Congress",
+        "source_url": "https://www.loc.gov/item/30033189/",
+    },
+    {
         "year": "1678", "title": "\"A Description of the Island of Anguilla\"",
         "quote": "A dedicated section giving the island's coordinates and dimensions, "
                  "then bluntly assessing its ~200-300 English inhabitants as poor, "
