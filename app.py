@@ -737,6 +737,21 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91000120/",
     },
     {
+        "year": "1867", "title": "Anguilla in a 1627 royal land grant (translated from French)",
+        "quote": "Lists Anguilla among a long chain of islands -- from Grenada up through "
+                 "the Virgin Islands -- included in King Charles I's grants intended to "
+                 "form a single colony to be called \u201cthe Carlisles.\u201d A footnote "
+                 "identifies Anguilla as \u201cthe most northern of the Windward Isles\u201d "
+                 "(this French source's period classification differs slightly from the "
+                 "modern English convention of grouping it with the Leeward Islands).",
+        "context": "Translated from a French-language history of early English "
+                    "Caribbean colonization, tracing land grants back to Charles I's "
+                    "1627 and 1628 charters -- placing Anguilla's inclusion in English "
+                    "colonial planning earlier than its actual 1650 settlement.",
+        "source": "\"Les colonies anglaises de 1574 \u00e0 1660\" (1867), via Library of Congress -- translated from French",
+        "source_url": "https://www.loc.gov/item/13022174/",
+    },
+    {
         "year": "1857", "title": "A Dutch pilot mistakes Anguilla for its neighbor",
         "quote": "Sailing to New Netherland (later New York) in 1632, a Dutch ship's "
                  "helmsman mistook Anguilla for the nearby island of Sombrero as they "
