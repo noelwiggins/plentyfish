@@ -521,6 +521,122 @@ VILLA_AREAS = [
     ("Crocus Bay", "North-coast bay near The Valley, Anguilla's capital."),
 ]
 
+# --- Library: bibliography, NOT full text ----------------------------------
+# Every title below is under active copyright (unlike the pre-1900 maps
+# elsewhere on this site). This deliberately shows citation + a brief
+# original description + a legitimate link to find/buy/borrow each one --
+# never the full text or scanned pages, which would be reproducing
+# copyrighted work regardless of how it's presented.
+LIBRARY_BOOKS = [
+    {
+        "title": "Annals of Anguilla, 1650-1923", "author": "S. B. Jones",
+        "year": "1936", "publisher": "Christian Journals Limited, Belfast",
+        "spine_color": "#8b6f47",
+        "description": "The foundational documentary history of the island, covering nearly three centuries from early settlement through the 1920s.",
+        "find_url": "https://www.worldcat.org/search?q=Annals+of+Anguilla+Jones",
+    },
+    {
+        "title": "The Dilemma of a Ministate: Anguilla", "author": "William J. Brisk",
+        "year": "1969", "publisher": "Institute of International Studies, Columbia",
+        "spine_color": "#4a5a6a",
+        "description": "An early academic study of Anguilla's political status question, written contemporaneously with the 1967 Revolution.",
+        "find_url": "https://www.worldcat.org/search?q=Dilemma+of+a+Ministate+Anguilla+Brisk",
+    },
+    {
+        "title": "Political Fragmentation in the Caribbean", "author": "Colin G. Clarke",
+        "year": "1971", "publisher": "The Canadian Geographer, 15(1), 13-29",
+        "spine_color": "#5c4a6a",
+        "description": "A geographer's academic analysis of the small-island secession movements across the Caribbean, using Anguilla as a central case.",
+        "find_url": "https://onlinelibrary.wiley.com/journal/15410064",
+    },
+    {
+        "title": "Myths of Caribbean Identity", "author": "Stuart Hall",
+        "year": "1981", "publisher": "The Open University (Walter Rodney Memorial Lecture)",
+        "spine_color": "#6a2a2a",
+        "description": "A landmark lecture by the pioneering cultural theorist, on the construction of Caribbean identity after colonialism.",
+        "find_url": "https://www.worldcat.org/search?q=Myths+of+Caribbean+Identity+Stuart+Hall",
+    },
+    {
+        "title": "Caribbean Cultural Identity: The Case of Jamaica", "author": "Rex M. Nettleford",
+        "year": "1978", "publisher": "Institute of Jamaica",
+        "spine_color": "#2a5a4a",
+        "description": "An essay in cultural dynamics from one of the Caribbean's foremost cultural theorists and founder of the National Dance Theatre Company of Jamaica.",
+        "find_url": "https://www.worldcat.org/search?q=Caribbean+Cultural+Identity+Nettleford",
+    },
+    {
+        "title": "Anguilla's Battle for Freedom, 1967", "author": "Colville L. Petty",
+        "year": "1984", "publisher": "Self-published",
+        "spine_color": "#7a4a2a",
+        "description": "Petty's first account of the 1967 Revolution -- later expanded into the 1987/2010 co-authored edition with Nat Hodge.",
+        "find_url": "https://www.amazon.com/Anguillas-battle-freedom-Colville-Petty/dp/B0006EQPMM",
+    },
+    {
+        "title": "Anguilla: Where There is a Will There is a Way", "author": "Colville L. Petty",
+        "year": "1984", "publisher": "Express Lithographics, Surrey",
+        "spine_color": "#4a6a7a",
+        "description": "Petty's account of Anguilla's post-Revolution development and institution-building.",
+        "find_url": "https://www.worldcat.org/search?q=Anguilla+Where+There+is+a+Will+Petty",
+    },
+    {
+        "title": "The Sea and We", "author": "Marcel Fahie",
+        "year": "1981-1985", "publisher": "Anguilla Archaeological and Historical Review",
+        "spine_color": "#2a4a6a",
+        "description": "A serialized reflection on Anguilla's deep maritime tradition, published across several issues of the AAHS Review.",
+        "find_url": "https://aahsanguilla.com/",
+    },
+    {
+        "title": "Anguilla's Battle for Freedom, 1967-1969", "author": "Colville L. Petty & A. Nat Hodge",
+        "year": "1987 / 2010", "publisher": "PETNAT Publishing, Anguilla",
+        "spine_color": "#7a2a2a",
+        "description": "The definitive, expanded account of the Revolution, adding a full chapter on the 1969 British invasion to Petty's earlier work.",
+        "find_url": "https://books.google.com/books/about/Anguilla_s_Battle_for_Freedom_1967.html?id=61EYAAAAYAAJ",
+    },
+    {
+        "title": "\"Nuttin Bafflin\": The Story of the Anguilla Racing Boat", "author": "David Carty",
+        "year": "1997", "publisher": "Anguilla",
+        "spine_color": "#3a6a8a",
+        "description": "The definitive history of Anguilla's national sport, tracing hand-built racing boats back to the island's 17th-century smuggling trade. A 2011 companion documentary of the same name followed.",
+        "find_url": "https://www.imdb.com/title/tt2104949/",
+    },
+    {
+        "title": "Caribbean Life and Culture: A Citizen Reflects", "author": "Sir Fred Phillips",
+        "year": "1991", "publisher": "Heinemann Publishers (Caribbean), Jamaica",
+        "spine_color": "#5a3a2a",
+        "description": "Memoir and reflection from a distinguished Caribbean jurist on regional life, law, and culture.",
+        "find_url": "https://www.worldcat.org/search?q=Caribbean+Life+and+Culture+Fred+Phillips",
+    },
+    {
+        "title": "Questioning Creole: Creolisation Discourses in Caribbean Culture", "author": "Verene A. Shepherd & Glen L. Richards (eds.)",
+        "year": "2002", "publisher": "Ian Randle Publishers, Kingston",
+        "spine_color": "#6a5a2a",
+        "description": "An academic anthology examining creolisation theory and its critics across Caribbean cultural studies.",
+        "find_url": "https://www.worldcat.org/search?q=Questioning+Creole+Shepherd+Richards",
+    },
+    {
+        "title": "Preserving our Culture, Directing our Future", "author": "Colville L. Petty",
+        "year": "2006", "publisher": "anguillaguide.com",
+        "spine_color": "#2a6a5a",
+        "description": "A web essay by Petty arguing for deliberate cultural preservation as Anguilla's tourism economy grew.",
+        "find_url": "https://aahsanguilla.com/",
+    },
+    {
+        "title": "Bless our forebears", "author": "Colville L. Petty",
+        "year": "2008", "publisher": "Zenith Services Limited, Trinidad",
+        "spine_color": "#7a6a3a",
+        "description": "A tribute to Anguillian ancestors and the generations who shaped the island's culture and institutions.",
+        "find_url": "https://www.worldcat.org/search?q=Bless+our+forebears+Petty",
+    },
+    {
+        "title": "The Anguillian, Vol. 12, No. 41", "author": "The Anguillian Newspaper",
+        "year": "Undated", "publisher": "The Anguillian",
+        "spine_color": "#4a4a4a",
+        "description": "A specific back issue of Anguilla's long-running weekly newspaper -- for current and archived issues, the paper's own site is the legitimate source.",
+        "find_url": "https://theanguillian.com/",
+    },
+]
+
+
+
 ACTIVITIES = [
     ("Prickly Pear Cays boat trip", "Snorkeling / Boat", "Uninhabited cays with reef protected under Anguilla's marine park rules; morning trips give the calmest water and the most cay time."),
     ("Sandy Island sunset cruise", "Boat", "A tiny sandbar cay with a beach bar, popular as an evening cocktail-cruise destination."),
@@ -1066,6 +1182,12 @@ def villas_page():
 def activities_page():
     return render_template("activities.html", now=datetime.utcnow(),
                             activities=ACTIVITIES, active_page="activities")
+
+
+@app.route("/library")
+def library_page():
+    return render_template("library.html", now=datetime.utcnow(),
+                            books=LIBRARY_BOOKS, active_page="library")
 
 
 @app.route("/api/anguilla-businesses.json")
