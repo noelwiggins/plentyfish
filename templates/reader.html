@@ -75,6 +75,25 @@
   .reader-icon-btn:hover { background:var(--md-sys-color-surface-container-high); }
   .reader-icon-btn.active { background:var(--md-sys-color-secondary-container); color:var(--md-sys-color-on-secondary-container); }
 
+  .reader-more-menu { display:none; position:absolute; top:44px; left:0; z-index:50; min-width:200px;
+    background:var(--md-sys-color-surface-container-highest); border-radius:8px; box-shadow:0 4px 16px rgba(0,0,0,.5);
+    padding:6px; flex-direction:column; }
+  .reader-more-menu.open { display:flex; }
+  .reader-more-menu button { display:flex; align-items:center; gap:10px; background:none; border:none;
+    color:var(--md-sys-color-on-surface); padding:10px 12px; border-radius:6px; font-size:13px; text-align:left; cursor:pointer; }
+  .reader-more-menu button:hover { background:rgba(255,255,255,.08); }
+  .reader-more-menu .material-symbols-outlined { font-size:18px; }
+
+  /* Print stylesheet: hide all UI chrome, show only the book text cleanly */
+  @media print {
+    .top-app-bar, .nav-drawer, .nav-scrim, #reader-progress-track, .reader-header,
+    .reader-image-panel, #reader-zoom-overlay, #reader-toast, #reader-cite-popup,
+    .reader-illustration-thumb, footer.site-footer { display:none !important; }
+    .reader-text-panel { width:100% !important; height:auto !important; overflow:visible !important; }
+    .reader-page-block { break-inside: avoid; }
+    body { padding-top:0 !important; }
+  }
+
   .reader-jump-select { background:var(--md-sys-color-surface-container); color:var(--md-sys-color-on-surface);
     border:1px solid var(--md-sys-color-outline-variant); border-radius:18px; padding:6px 12px; font-size:13px; }
 
@@ -144,9 +163,6 @@
     </div>
   </div>
   <div class="reader-toolbar">
-    <select class="reader-jump-select" id="reader-jump-select">
-      <option value="">Jump to page…</option>
-    </select>
     <div class="reader-search-box">
       <span class="material-symbols-outlined">search</span>
       <input type="text" id="reader-search-input" placeholder="Search this book..." />
@@ -158,13 +174,23 @@
     <button class="reader-icon-btn" id="reader-search-next" title="Next match" aria-label="Next match">
       <span class="material-symbols-outlined" style="font-size:18px;">expand_more</span>
     </button>
+    <select class="reader-jump-select" id="reader-jump-select">
+      <option value="">Jump to page…</option>
+    </select>
     <button class="reader-icon-btn" id="reader-font-btn" title="Text size">Aa</button>
     <button class="reader-icon-btn" id="reader-sepia-btn" title="Sepia reading mode" aria-label="Sepia mode">
       <span class="material-symbols-outlined" style="font-size:18px;">tonality</span>
     </button>
-    <button class="reader-icon-btn" id="reader-share-btn" title="Share this book" aria-label="Share">
-      <span class="material-symbols-outlined" style="font-size:18px;">share</span>
-    </button>
+    <div style="position:relative;">
+      <button class="reader-icon-btn" id="reader-more-btn" title="More options" aria-label="More options">
+        <span class="material-symbols-outlined" style="font-size:18px;">more_vert</span>
+      </button>
+      <div class="reader-more-menu" id="reader-more-menu">
+        <button id="reader-bookmark-btn"><span class="material-symbols-outlined">bookmark_border</span> Bookmark this page</button>
+        <button id="reader-print-btn"><span class="material-symbols-outlined">print</span> Print to PDF</button>
+        <button id="reader-share-btn"><span class="material-symbols-outlined">share</span> Share</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -184,6 +210,17 @@
 <div id="reader-zoom-overlay">
   <img id="reader-zoom-img" src="" alt="Zoomed page" draggable="false" />
   <div id="reader-zoom-page-label"></div>
+  <div style="position:absolute; top:16px; right:16px;">
+    <button class="reader-icon-btn" id="reader-zoom-more-btn" title="More options" aria-label="More options"
+      style="background:rgba(0,0,0,.5); border-color:rgba(255,255,255,.2); color:#fff;">
+      <span class="material-symbols-outlined" style="font-size:18px;">more_vert</span>
+    </button>
+    <div class="reader-more-menu" id="reader-zoom-more-menu" style="right:0; left:auto;">
+      <button id="reader-zoom-bookmark-btn"><span class="material-symbols-outlined">bookmark_border</span> Bookmark this page</button>
+      <button id="reader-zoom-print-btn"><span class="material-symbols-outlined">print</span> Print to PDF</button>
+      <button id="reader-zoom-share-btn"><span class="material-symbols-outlined">share</span> Share</button>
+    </div>
+  </div>
   <div id="reader-zoom-nav">
     <button id="reader-zoom-prev" aria-label="Previous page"><span class="material-symbols-outlined">chevron_left</span></button>
     <button id="reader-zoom-exit" aria-label="Close, return to text"><span class="material-symbols-outlined">close</span> Text view</button>
@@ -380,6 +417,7 @@ fetch('{{ data_url }}')
       });
     }
 
+    refreshBookmarksInJumpMenu();
     loadMoreObserver.observe(sentinel);
     renderNextBatch();
 
@@ -515,21 +553,84 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
-// --- Share button ---
-document.getElementById('reader-share-btn').addEventListener('click', async () => {
+// --- More-options menus (bookmark / print / share), one for the text
+// view header, one for the zoomed image view -- same three actions,
+// wired to whichever page is currently in view in each context.
+const BOOKMARKS_COOKIE = 'reader_bookmarks_' + BOOK_SLUG;
+function getBookmarks() {
+  const raw = getCookie(BOOKMARKS_COOKIE);
+  return raw ? raw.split(',').map(n => parseInt(n, 10)).filter(n => !isNaN(n)) : [];
+}
+function toggleBookmark(pageNum) {
+  let marks = getBookmarks();
+  if (marks.includes(pageNum)) {
+    marks = marks.filter(n => n !== pageNum);
+    showToast('Bookmark removed');
+  } else {
+    marks.push(pageNum);
+    showToast('Page ' + pageNum + ' bookmarked');
+  }
+  setCookie(BOOKMARKS_COOKIE, marks.join(','));
+  refreshBookmarksInJumpMenu();
+}
+function refreshBookmarksInJumpMenu() {
+  const existing = jumpSelect.querySelector('optgroup[label="Bookmarks"]');
+  if (existing) existing.remove();
+  const marks = getBookmarks();
+  if (!marks.length) return;
+  const grp = document.createElement('optgroup');
+  grp.label = 'Bookmarks';
+  marks.sort((a, b) => a - b).forEach(pg => {
+    const opt = document.createElement('option');
+    opt.value = pg;
+    opt.textContent = '★ Page ' + pg;
+    grp.appendChild(opt);
+  });
+  jumpSelect.insertBefore(grp, jumpSelect.firstChild.nextSibling);
+}
+
+function doShare() {
   const shareData = {
     title: BOOK_TITLE,
     text: 'Read "' + BOOK_TITLE + '" (' + BOOK_YEAR + ') -- full text and original scans, free to read.',
     url: window.location.href,
   };
   if (navigator.share) {
-    try { await navigator.share(shareData); } catch (e) {}
+    navigator.share(shareData).catch(() => {});
   } else {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      showToast('Link copied to clipboard');
-    } catch (e) { showToast('Could not copy link'); }
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => showToast('Link copied to clipboard'))
+      .catch(() => showToast('Could not copy link'));
   }
+}
+function doPrint() { window.print(); }
+
+// Text-view menu
+const moreBtn = document.getElementById('reader-more-btn');
+const moreMenu = document.getElementById('reader-more-menu');
+moreBtn.addEventListener('click', (e) => { e.stopPropagation(); moreMenu.classList.toggle('open'); });
+document.getElementById('reader-bookmark-btn').addEventListener('click', () => {
+  const pageNum = parseInt(pageIndicator.textContent.match(/Page (\d+)/)?.[1] || allPages[0].page, 10);
+  toggleBookmark(pageNum);
+  moreMenu.classList.remove('open');
+});
+document.getElementById('reader-print-btn').addEventListener('click', () => { doPrint(); moreMenu.classList.remove('open'); });
+document.getElementById('reader-share-btn').addEventListener('click', () => { doShare(); moreMenu.classList.remove('open'); });
+
+// Zoom-view menu (same three actions, bound to whichever page is showing in zoom)
+const zoomMoreBtn = document.getElementById('reader-zoom-more-btn');
+const zoomMoreMenu = document.getElementById('reader-zoom-more-menu');
+zoomMoreBtn.addEventListener('click', (e) => { e.stopPropagation(); zoomMoreMenu.classList.toggle('open'); });
+document.getElementById('reader-zoom-bookmark-btn').addEventListener('click', () => {
+  toggleBookmark(allPages[zoomCurrentIdx].page);
+  zoomMoreMenu.classList.remove('open');
+});
+document.getElementById('reader-zoom-print-btn').addEventListener('click', () => { doPrint(); zoomMoreMenu.classList.remove('open'); });
+document.getElementById('reader-zoom-share-btn').addEventListener('click', () => { doShare(); zoomMoreMenu.classList.remove('open'); });
+
+document.addEventListener('click', () => {
+  moreMenu.classList.remove('open');
+  zoomMoreMenu.classList.remove('open');
 });
 
 // --- Font size cycling ---
