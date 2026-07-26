@@ -38,6 +38,12 @@
   .reader-illustration-thumb .material-symbols-outlined { font-size:16px; vertical-align:middle; }
   .reader-illustration-thumb:hover { border-color:var(--md-sys-color-primary); color:var(--md-sys-color-primary); }
 
+  /* Possibly-garbled OCR text: subtle dotted underline, not intrusive --
+     just enough to suggest checking the source image at that spot. This
+     is a heuristic guess, not a real confidence score, so it's kept quiet
+     rather than alarming. */
+  .reader-maybe-garbled { border-bottom: 1px dotted var(--md-sys-color-tertiary); cursor:help; }
+
   /* Sepia reading mode -- affects only the text panel, a classic e-reader comfort option */
   .reader-text-panel.sepia { background:#f4ecd8; color:#3b2f22; }
   .reader-text-panel.sepia .reader-page-block { border-bottom-color:#d8cba8; }
@@ -196,6 +202,11 @@ const RESUME_COOKIE = 'reader_pos_' + BOOK_SLUG;
 const PAGE_BATCH_SIZE = 40; // lazily render this many page-blocks at a time
 
 let allPages = [];
+function escapeHtml(s) {
+  const d = document.createElement('div');
+  d.textContent = s;
+  return d.innerHTML;
+}
 let avgTextLength = 200; // recalculated once real page data loads; used for illustration detection
 let renderedCount = 0;
 const panel = document.getElementById('reader-text-panel');
@@ -214,6 +225,28 @@ function setCookie(name, value) {
   document.cookie = name + '=' + value + ';path=/;max-age=' + (60 * 60 * 24 * 365);
 }
 
+function flagPossiblyGarbled(text) {
+  // Heuristic OCR-quality flag: no real confidence score is available from
+  // plain OCR text, so this looks for words with patterns that are common
+  // OCR-garbling artifacts (old typefaces, broken long-s, smudged print) --
+  // internal mixed-case oddities (bAckwards, aBnormal caps), long runs of
+  // non-alphanumeric junk, or single-letter "words" surrounded by real
+  // text. Flagged spans get a subtle dotted underline, not intrusive, just
+  // enough to suggest "maybe check the source image here."
+  const words = text.split(/(\s+)/);
+  return words.map(w => {
+    const trimmed = w.trim();
+    if (!trimmed) return w;
+    const isJunk = /[^a-zA-Z0-9.,;:'"\-()]{2,}/.test(trimmed) ||
+      (/[a-z][A-Z]/.test(trimmed) && /[A-Z][a-z]/.test(trimmed) && trimmed.length > 3) ||
+      (trimmed.length === 1 && /[^aAI.,;:]/.test(trimmed));
+    if (isJunk) {
+      return `<span class="reader-maybe-garbled" title="This may be an OCR error -- check the source image">${escapeHtml(w)}</span>`;
+    }
+    return escapeHtml(w);
+  }).join('');
+}
+
 function renderBlock(p) {
   if (!p.text || p.text.trim().length < 3) return null;
   const block = document.createElement('div');
@@ -221,7 +254,7 @@ function renderBlock(p) {
   block.dataset.image = p.image;
   block.dataset.page = p.page;
   block.innerHTML = `<div class="reader-page-number">Page ${p.page}</div><div class="reader-page-text"></div>`;
-  block.querySelector('.reader-page-text').textContent = p.text;
+  block.querySelector('.reader-page-text').innerHTML = flagPossiblyGarbled(p.text);
 
   // Illustration detection: pages with unusually little OCR text relative
   // to the book's typical page are probably a plate/illustration rather
@@ -303,13 +336,49 @@ fetch('{{ data_url }}')
     img.src = allPages[0].image;
     avgTextLength = allPages.reduce((sum, p) => sum + p.text.trim().length, 0) / allPages.length;
 
-    // Populate jump-to-page dropdown
+    // Chapter/heading detection heuristic: a line that's short, in caps,
+    // and either starts with "CHAPTER" or sits alone near the top of an
+    // otherwise-normal text page is probably a chapter heading. There's no
+    // real structural markup in plain OCR text, so this is a heuristic,
+    // not a guarantee -- but it beats a flat, undifferentiated page list
+    // for anything longer than ~50 pages.
+    const chapters = [];
+    const HEADING_RE = /^(CHAPTER\s+[IVXLC\d]+\.?\s*[-—]?\s*.{0,60})$/im;
     allPages.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = p.page;
-      opt.textContent = 'Page ' + p.page;
-      jumpSelect.appendChild(opt);
+      const firstLines = p.text.split('\n').slice(0, 6).join('\n');
+      const m = firstLines.match(HEADING_RE);
+      if (m) chapters.push({ page: p.page, label: m[1].trim().replace(/\s+/g, ' ') });
     });
+
+    // Populate jump-to-page dropdown -- chapters grouped first (if any were
+    // found) with a divider, then the full flat page list below.
+    if (chapters.length) {
+      const grp = document.createElement('optgroup');
+      grp.label = 'Chapters';
+      chapters.forEach(c => {
+        const opt = document.createElement('option');
+        opt.value = c.page;
+        opt.textContent = c.label.length > 45 ? c.label.slice(0, 45) + '…' : c.label;
+        grp.appendChild(opt);
+      });
+      jumpSelect.appendChild(grp);
+      const pagesGrp = document.createElement('optgroup');
+      pagesGrp.label = 'All pages';
+      allPages.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.page;
+        opt.textContent = 'Page ' + p.page;
+        pagesGrp.appendChild(opt);
+      });
+      jumpSelect.appendChild(pagesGrp);
+    } else {
+      allPages.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.page;
+        opt.textContent = 'Page ' + p.page;
+        jumpSelect.appendChild(opt);
+      });
+    }
 
     loadMoreObserver.observe(sentinel);
     renderNextBatch();
@@ -330,11 +399,6 @@ fetch('{{ data_url }}')
     let hits = [];
     let activeHit = -1;
 
-    function escapeHtml(s) {
-      const d = document.createElement('div');
-      d.textContent = s;
-      return d.innerHTML;
-    }
     function clearHighlights() {
       panel.querySelectorAll('mark.reader-hit').forEach(m => {
         const parent = m.parentNode;
