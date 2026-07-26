@@ -1422,6 +1422,44 @@ READABLE_BOOKS = [
                         "spy's report echoing the island's \"not worth keeping\" "
                         "reputation, and documented history of Irish settlers.",
     },
+    {
+        "slug": "trinidad-1866",
+        "title": "Trinidad and the Other West India Islands and Colonies",
+        "author": "James Hume Collens", "year": "1866",
+        "spine_color": "#7a2a2a",
+        "source_url": "https://www.loc.gov/item/24031382/",
+        "description": "Includes a dedicated Anguilla section: a separate 1746 French "
+                        "attack repelled by outnumbered defenders, revenue figures, and "
+                        "governance structure.",
+    },
+    {
+        "slug": "sailing-directions-1868",
+        "title": "Sailing Directions for the West Indies",
+        "author": "British Admiralty", "year": "1868",
+        "spine_color": "#1a3a4a",
+        "source_url": "https://www.loc.gov/item/ltf91089143/",
+        "description": "Official nautical sailing directions with a full section on "
+                        "Anguilla's coastline, reefs, and surrounding cays -- confirms the "
+                        "island's \"Eel\" etymology directly.",
+    },
+    {
+        "slug": "gossip-caribbees-1893",
+        "title": "Gossip of the Caribbees: Sketches of Anglo-West-Indian Life",
+        "author": "Anonymous", "year": "1893",
+        "spine_color": "#4a3a5a",
+        "description": "A literary, atmospheric account of an administrator's isolated "
+                        "posting to Anguilla -- visited only monthly by a mail ship.",
+        "source_url": "https://www.loc.gov/item/08028484/",
+    },
+    {
+        "slug": "pinkerton-1811",
+        "title": "Modern Geography, Vol. 2",
+        "author": "John Pinkerton", "year": "1811",
+        "spine_color": "#3a5a3a",
+        "source_url": "https://www.loc.gov/item/30033189/",
+        "description": "A massive world gazetteer with a real find buried inside: "
+                        "Anguillian settlers credited with founding the Virgin Islands colony.",
+    },
 ]
 
 
