@@ -703,6 +703,20 @@ ARCHIVE_KNOWN_GAPS = [
 # actually include Anguilla.
 HISTORICAL_ACCOUNTS = [
     {
+        "year": "1678", "title": "\"A Description of the Island of Anguilla\"",
+        "quote": "A dedicated section giving the island's coordinates and dimensions, "
+                 "then bluntly assessing its ~200-300 English inhabitants as poor, "
+                 "concluding the isle was \u201cnot worth the keeping.\u201d",
+        "context": "Part of Richard Blome's \"A Description of the Island of Jamaica: "
+                    "with the other isles and territories in America to which the "
+                    "English are related\" -- one of the earliest known dedicated "
+                    "English descriptions of Anguilla specifically, and a blunt "
+                    "confirmation of the colonial neglect that shaped the island's "
+                    "whole documentary record.",
+        "source": "Richard Blome, 1678, via Oxford Text Creation Partnership",
+        "source_url": "https://ota.bodleian.ox.ac.uk/repository/xmlui/bitstream/handle/20.500.12024/A28392/A28392.html",
+    },
+    {
         "year": "1667-68", "title": "Major John Scott's account",
         "quote": "left the island \u201cin good condition\u201d; noted that in "
                  "July 1668, \u201c200 or 300 people fled thither in time of war.\u201d",
