@@ -703,6 +703,19 @@ ARCHIVE_KNOWN_GAPS = [
 # actually include Anguilla.
 HISTORICAL_ACCOUNTS = [
     {
+        "year": "1838", "title": "An eyewitness account of Emancipation Day in Anguilla",
+        "quote": "A Black Methodist minister recounts being stationed in Anguilla when "
+                 "emancipation took effect -- the newly-freed continued their work calmly "
+                 "on the day itself, but broke into weeping and shouting the following "
+                 "Sunday when he preached on their new status.",
+        "context": "From an American Quaker delegation's tour documenting conditions "
+                    "after British slave emancipation (1834) across the West Indies. "
+                    "A rare direct account of how the moment itself was actually "
+                    "experienced in Anguilla, rather than a description from outside.",
+        "source": "\"Emancipation in the West Indies\" (1838), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/02017739/",
+    },
+    {
         "year": "1826", "title": "A visiting Englishman's full chapter on Anguilla",
         "quote": "Describes the island's stark, unplanted landscape -- more like Kent or "
                  "Devon than the sugar islands -- an aging lieutenant governor "
