@@ -832,6 +832,21 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/ltf91089143/",
     },
     {
+        "year": "1912", "title": "A German geologist's classification (translated from German)",
+        "quote": "Groups Anguilla with Tintamarre and Barbuda as part of the Antilles' "
+                 "\"flat outer zone,\" contrasting them with the volcanic inner-zone "
+                 "islands (Guadeloupe's Grande Soufri\u00e8re reaches 1,484m). Separately "
+                 "notes that on Tobago, Anguilla, and Barbuda specifically, pastoral "
+                 "grazing -- not crop plantation -- formed the main occupation of "
+                 "inhabitants, unlike most other islands.",
+        "context": "From a German geographical survey of Central America, the Lesser "
+                    "Antilles, and the Dutch West and East Indies -- a genuinely "
+                    "different national/scientific perspective (geological rather than "
+                    "colonial-administrative) from most other sources in this archive.",
+        "source": "\"Mittelamerika, Kleine Antillen, Niederl\u00e4ndisch-West- und Ostindien\" (1912), via Library of Congress -- translated from German",
+        "source_url": "https://www.loc.gov/item/13014850/",
+    },
+    {
         "year": "1866", "title": "A different French attack, and outnumbered defenders who won",
         "quote": "Describes 600 French troops landing in 1746 against a defending force of "
                  "only 150 armed Anguillans -- who nonetheless killed 150 of the "
