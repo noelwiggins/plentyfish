@@ -12,26 +12,27 @@
 */
 
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap');
-@import url('https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined');
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap');
 
 :root {
-  /* --- Color roles: Primary (teal) --- */
-  --md-sys-color-primary: #6FF7EA;
-  --md-sys-color-on-primary: #003733;
-  --md-sys-color-primary-container: #004F49;
-  --md-sys-color-on-primary-container: #8DFFF1;
+  /* --- Color roles derived from the Anguilla flag: navy blue field,
+     orange dolphins, light-blue sea, red from the Union Jack --- */
+  --md-sys-color-primary: #9BCBEB;
+  --md-sys-color-on-primary: #00344A;
+  --md-sys-color-primary-container: #004C69;
+  --md-sys-color-on-primary-container: #C7E7FF;
 
-  /* --- Secondary (muted teal-gray) --- */
-  --md-sys-color-secondary: #B0CCC7;
-  --md-sys-color-on-secondary: #1B3532;
-  --md-sys-color-secondary-container: #324B47;
-  --md-sys-color-on-secondary-container: #CCE8E3;
+  /* --- Secondary: orange (the flag's three dolphins) --- */
+  --md-sys-color-secondary: #FFB25B;
+  --md-sys-color-on-secondary: #4A2800;
+  --md-sys-color-secondary-container: #6A3D00;
+  --md-sys-color-on-secondary-container: #FFDCB8;
 
-  /* --- Tertiary (orange) --- */
-  --md-sys-color-tertiary: #FFB77C;
-  --md-sys-color-on-tertiary: #4A2800;
-  --md-sys-color-tertiary-container: #6A3D00;
-  --md-sys-color-on-tertiary-container: #FFDCB8;
+  /* --- Tertiary: red (from the Union Jack in the canton) --- */
+  --md-sys-color-tertiary: #FFB4A8;
+  --md-sys-color-on-tertiary: #5C0F0A;
+  --md-sys-color-tertiary-container: #7D1810;
+  --md-sys-color-on-tertiary-container: #FFDAD3;
 
   /* --- Error --- */
   --md-sys-color-error: #FFB4AB;
@@ -39,22 +40,22 @@
   --md-sys-color-error-container: #93000A;
   --md-sys-color-on-error-container: #FFDAD6;
 
-  /* --- Neutral surfaces --- */
-  --md-sys-color-background: #0F1416;
+  /* --- Neutral surfaces: deep navy, echoing the flag's blue field --- */
+  --md-sys-color-background: #0B1420;
   --md-sys-color-on-background: #DDE4E2;
-  --md-sys-color-surface: #0F1416;
+  --md-sys-color-surface: #0B1420;
   --md-sys-color-on-surface: #DDE4E2;
   --md-sys-color-surface-variant: #3F4947;
   --md-sys-color-on-surface-variant: #BEC9C6;
   --md-sys-color-outline: #899391;
-  --md-sys-color-outline-variant: #3F4947;
+  --md-sys-color-outline-variant: #2A3440;
 
   /* Surface container tones (M3 elevation-via-tint scale, dark theme) */
-  --md-sys-color-surface-container-lowest: #0A0F11;
-  --md-sys-color-surface-container-low: #171D1F;
-  --md-sys-color-surface-container: #1B2123;
-  --md-sys-color-surface-container-high: #252B2D;
-  --md-sys-color-surface-container-highest: #303638;
+  --md-sys-color-surface-container-lowest: #060C14;
+  --md-sys-color-surface-container-low: #101A28;
+  --md-sys-color-surface-container: #14202F;
+  --md-sys-color-surface-container-high: #1C2938;
+  --md-sys-color-surface-container-highest: #263242;
 
   /* --- Shape (M3 corner radius scale) --- */
   --md-sys-shape-corner-small: 8px;

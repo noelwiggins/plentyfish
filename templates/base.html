@@ -7,15 +7,19 @@
 <link rel="stylesheet" href="/static/css/md3-theme.css">
 {% block extra_head %}{% endblock %}
 <style>
-  body { padding-top: 56px; } /* space for fixed top app bar */
+  body { padding-top: 60px; } /* space for fixed top app bar */
 
-  .top-app-bar { position:fixed; top:0; left:0; right:0; height:56px; z-index:900;
+  .top-app-bar { position:fixed; top:0; left:0; right:0; height:60px; z-index:900;
     background:var(--md-sys-color-surface-container-low); display:flex; align-items:center;
-    gap:12px; padding:0 8px; box-shadow:0 1px 3px rgba(0,0,0,.3); }
-  .top-app-bar .menu-btn { background:none; border:none; color:var(--md-sys-color-on-surface);
-    width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center;
-    cursor:pointer; transition:background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
-  .top-app-bar .menu-btn:hover { background:rgba(255,255,255,.08); }
+    gap:10px; padding:0 12px; box-shadow:0 2px 6px rgba(0,0,0,.4); }
+  .top-app-bar .menu-btn { background:var(--md-sys-color-secondary-container);
+    color:var(--md-sys-color-on-secondary-container); border:none;
+    height:44px; padding:0 16px 0 12px; border-radius:22px; display:flex; align-items:center; gap:8px;
+    font-size:14px; font-weight:600; cursor:pointer;
+    box-shadow: 0 1px 3px rgba(0,0,0,.3);
+    transition:background-color var(--md-sys-motion-duration-short) var(--md-sys-motion-easing-standard); }
+  .top-app-bar .menu-btn:hover { filter: brightness(1.15); }
+  .top-app-bar .menu-btn .material-symbols-outlined { font-size:22px; }
   .top-app-bar .brand { font-size:18px; font-weight:500; color:var(--md-sys-color-on-surface); }
 
   .nav-scrim { position:fixed; inset:0; background:rgba(0,0,0,.5); z-index:998; display:none; }
@@ -46,7 +50,7 @@
 
 <header class="top-app-bar">
   <button class="menu-btn" onclick="toggleNav(true)" aria-label="Menu">
-    <span class="material-symbols-outlined">menu</span>
+    <span class="material-symbols-outlined">menu</span> Menu
   </button>
   <span class="brand">plentyfish.ai</span>
 </header>
