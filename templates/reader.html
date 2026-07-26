@@ -15,21 +15,60 @@
   .reader-page-number { color:var(--md-sys-color-primary); font-size:11px; font-weight:700;
     letter-spacing:.08em; text-transform:uppercase; margin-bottom:8px; }
   .reader-page-text { font-size:15px; line-height:1.7; white-space:pre-wrap; font-family: Georgia, serif; }
-  .reader-header { padding: 16px 32px 8px; }
+  .reader-header { padding: 16px 32px 8px; display:flex; justify-content:space-between;
+    align-items:flex-start; gap:16px; flex-wrap:wrap; }
   .reader-header .book-title { font-size:20px; font-weight:500; }
   .reader-header .book-meta { color:var(--md-sys-color-on-surface-variant); font-size:12px; margin-top:4px; }
+  .reader-toolbar { display:flex; gap:8px; align-items:center; }
+  .reader-search-box { display:flex; align-items:center; gap:6px; background:var(--md-sys-color-surface-container);
+    border-radius:20px; padding:6px 12px; border:1px solid var(--md-sys-color-outline-variant); }
+  .reader-search-box input { background:none; border:none; outline:none; color:var(--md-sys-color-on-surface);
+    font-size:13px; width:150px; }
+  .reader-search-box .material-symbols-outlined { font-size:18px; color:var(--md-sys-color-on-surface-variant); }
+  .reader-search-count { font-size:11px; color:var(--md-sys-color-on-surface-variant); white-space:nowrap; }
+  .reader-icon-btn { background:var(--md-sys-color-surface-container); border:1px solid var(--md-sys-color-outline-variant);
+    color:var(--md-sys-color-on-surface); width:36px; height:36px; border-radius:50%; display:flex;
+    align-items:center; justify-content:center; cursor:pointer; }
+  .reader-icon-btn:hover { background:var(--md-sys-color-surface-container-high); }
+  mark.reader-hit { background:var(--md-sys-color-secondary); color:var(--md-sys-color-on-secondary);
+    border-radius:2px; }
+  mark.reader-hit.reader-hit-active { background:var(--md-sys-color-tertiary); color:var(--md-sys-color-on-tertiary); }
+  #reader-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
+    background:var(--md-sys-color-surface-container-highest); color:var(--md-sys-color-on-surface);
+    padding:10px 20px; border-radius:20px; font-size:13px; z-index:1100; opacity:0; pointer-events:none;
+    transition:opacity .25s; box-shadow:0 2px 8px rgba(0,0,0,.4); }
+  #reader-toast.show { opacity:1; }
   @media (max-width: 800px) {
     .reader-layout { flex-direction: column; height: auto; }
     .reader-image-panel { width:100%; position:relative; top:0; height:50vh; }
     .reader-text-panel { width:100%; height:auto; }
+    .reader-search-box input { width:100px; }
   }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="reader-header">
-  <div class="book-title">{{ book_title }}</div>
-  <div class="book-meta">{{ book_author }} · {{ book_year }} · Public domain, full text · <a href="{{ book_source_url }}" target="_blank" rel="noopener">View at Library of Congress</a></div>
+  <div>
+    <div class="book-title">{{ book_title }}</div>
+    <div class="book-meta">{{ book_author }} · {{ book_year }} · Public domain, full text · <a href="{{ book_source_url }}" target="_blank" rel="noopener">View at Library of Congress</a></div>
+  </div>
+  <div class="reader-toolbar">
+    <div class="reader-search-box">
+      <span class="material-symbols-outlined">search</span>
+      <input type="text" id="reader-search-input" placeholder="Search this book..." />
+      <span class="reader-search-count" id="reader-search-count"></span>
+    </div>
+    <button class="reader-icon-btn" id="reader-search-prev" title="Previous match" aria-label="Previous match">
+      <span class="material-symbols-outlined" style="font-size:18px;">expand_less</span>
+    </button>
+    <button class="reader-icon-btn" id="reader-search-next" title="Next match" aria-label="Next match">
+      <span class="material-symbols-outlined" style="font-size:18px;">expand_more</span>
+    </button>
+    <button class="reader-icon-btn" id="reader-share-btn" title="Share this book" aria-label="Share">
+      <span class="material-symbols-outlined" style="font-size:18px;">share</span>
+    </button>
+  </div>
 </div>
 <div class="reader-layout">
   <div class="reader-image-panel">
@@ -39,6 +78,7 @@
     <!-- Page blocks injected by JS -->
   </div>
 </div>
+<div id="reader-toast"></div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -55,6 +95,7 @@ fetch('{{ data_url }}')
       const block = document.createElement('div');
       block.className = 'reader-page-block';
       block.dataset.image = p.image;
+      block.dataset.page = p.page;
       block.innerHTML = `<div class="reader-page-number">Page ${p.page}</div>` +
         `<div class="reader-page-text"></div>`;
       block.querySelector('.reader-page-text').textContent = p.text;
@@ -70,9 +111,111 @@ fetch('{{ data_url }}')
       });
     }, { root: panel, threshold: 0.5 });
     blocks.forEach(b => observer.observe(b));
+
+    // --- In-book search: highlights matches across all pages, jump between them ---
+    const searchInput = document.getElementById('reader-search-input');
+    const searchCount = document.getElementById('reader-search-count');
+    const prevBtn = document.getElementById('reader-search-prev');
+    const nextBtn = document.getElementById('reader-search-next');
+    let hits = [];
+    let activeHit = -1;
+
+    function clearHighlights() {
+      panel.querySelectorAll('mark.reader-hit').forEach(m => {
+        const parent = m.parentNode;
+        parent.replaceChild(document.createTextNode(m.textContent), m);
+        parent.normalize();
+      });
+    }
+
+    function runSearch(query) {
+      clearHighlights();
+      hits = [];
+      activeHit = -1;
+      if (!query || query.trim().length < 2) {
+        searchCount.textContent = '';
+        return;
+      }
+      const q = query.trim().toLowerCase();
+      panel.querySelectorAll('.reader-page-text').forEach(textEl => {
+        const text = textEl.textContent;
+        const lower = text.toLowerCase();
+        let idx = 0;
+        let positions = [];
+        while ((idx = lower.indexOf(q, idx)) !== -1) {
+          positions.push(idx);
+          idx += q.length;
+        }
+        if (!positions.length) return;
+        let html = '';
+        let last = 0;
+        positions.forEach(pos => {
+          html += escapeHtml(text.slice(last, pos)) +
+            '<mark class="reader-hit">' + escapeHtml(text.slice(pos, pos + q.length)) + '</mark>';
+          last = pos + q.length;
+        });
+        html += escapeHtml(text.slice(last));
+        textEl.innerHTML = html;
+      });
+      hits = Array.from(panel.querySelectorAll('mark.reader-hit'));
+      searchCount.textContent = hits.length ? `1 / ${hits.length}` : 'No matches';
+      if (hits.length) jumpTo(0);
+    }
+
+    function escapeHtml(s) {
+      const d = document.createElement('div');
+      d.textContent = s;
+      return d.innerHTML;
+    }
+
+    function jumpTo(i) {
+      if (!hits.length) return;
+      if (activeHit >= 0) hits[activeHit].classList.remove('reader-hit-active');
+      activeHit = (i + hits.length) % hits.length;
+      hits[activeHit].classList.add('reader-hit-active');
+      hits[activeHit].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      searchCount.textContent = `${activeHit + 1} / ${hits.length}`;
+    }
+
+    let searchDebounce;
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(searchDebounce);
+      searchDebounce = setTimeout(() => runSearch(e.target.value), 300);
+    });
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') jumpTo(activeHit + 1);
+    });
+    prevBtn.addEventListener('click', () => jumpTo(activeHit - 1));
+    nextBtn.addEventListener('click', () => jumpTo(activeHit + 1));
   })
   .catch(err => {
     document.getElementById('reader-text-panel').textContent = 'Could not load book text.';
   });
+
+// --- Share button: native share sheet where available, clipboard fallback ---
+function showToast(msg) {
+  const t = document.getElementById('reader-toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+document.getElementById('reader-share-btn').addEventListener('click', async () => {
+  const shareData = {
+    title: {{ book_title|tojson }},
+    text: 'Read "' + {{ book_title|tojson }} + '" (' + {{ book_year|tojson }} + ') -- full text and original scans, free to read.',
+    url: window.location.href,
+  };
+  if (navigator.share) {
+    try { await navigator.share(shareData); } catch (e) { /* user cancelled, no-op */ }
+  } else {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      showToast('Link copied to clipboard');
+    } catch (e) {
+      showToast('Could not copy link');
+    }
+  }
+});
 </script>
 {% endblock %}
