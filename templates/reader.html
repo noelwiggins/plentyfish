@@ -113,6 +113,23 @@
     font-weight:600; padding:8px 12px; cursor:pointer; white-space:nowrap; }
   #reader-cite-popup button:hover { text-decoration:underline; }
 
+  /* Thumbnail grid page browser -- visual way to jump around a long
+     document, same idea as Internet Archive's grid-view icon. */
+  #reader-grid-overlay { display:none; position:fixed; inset:0; z-index:900; background:var(--md-sys-color-background);
+    flex-direction:column; }
+  #reader-grid-overlay.open { display:flex; }
+  #reader-grid-header { display:flex; justify-content:space-between; align-items:center; padding:14px 20px;
+    border-bottom:1px solid var(--md-sys-color-outline-variant); font-size:15px; font-weight:500; }
+  #reader-grid-header button { background:var(--md-sys-color-surface-container); border:none; color:var(--md-sys-color-on-surface);
+    width:36px; height:36px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  #reader-grid-content { flex:1; overflow-y:auto; padding:16px; display:grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap:12px; }
+  .reader-grid-thumb { cursor:pointer; text-align:center; }
+  .reader-grid-thumb img { width:100%; height:150px; object-fit:cover; border-radius:4px; border:2px solid transparent;
+    box-shadow:0 1px 4px rgba(0,0,0,.4); }
+  .reader-grid-thumb:hover img { border-color:var(--md-sys-color-primary); }
+  .reader-grid-thumb span { display:block; font-size:11px; color:var(--md-sys-color-on-surface-variant); margin-top:4px; }
+
   /* Full-image zoom modal (desktop click + mobile long-press both use this) */
   #reader-zoom-overlay { display:none; position:fixed; inset:0; z-index:1000; background:rgba(0,0,0,.92);
     align-items:center; justify-content:center; }
@@ -177,6 +194,12 @@
     <select class="reader-jump-select" id="reader-jump-select">
       <option value="">Jump to page…</option>
     </select>
+    <button class="reader-icon-btn" id="reader-grid-btn" title="Page thumbnail grid" aria-label="Thumbnail grid view">
+      <span class="material-symbols-outlined" style="font-size:18px;">grid_view</span>
+    </button>
+    <button class="reader-icon-btn" id="reader-tts-btn" title="Read this page aloud" aria-label="Read aloud">
+      <span class="material-symbols-outlined" style="font-size:18px;">headphones</span>
+    </button>
     <button class="reader-icon-btn" id="reader-font-btn" title="Text size">Aa</button>
     <button class="reader-icon-btn" id="reader-sepia-btn" title="Sepia reading mode" aria-label="Sepia mode">
       <span class="material-symbols-outlined" style="font-size:18px;">tonality</span>
@@ -205,6 +228,14 @@
 </div>
 
 <div id="reader-cite-popup"><button id="reader-cite-btn">Cite this passage</button></div>
+
+<div id="reader-grid-overlay">
+  <div id="reader-grid-header">
+    <span>All pages</span>
+    <button id="reader-grid-close" aria-label="Close grid view"><span class="material-symbols-outlined">close</span></button>
+  </div>
+  <div id="reader-grid-content"></div>
+</div>
 <div id="reader-toast"></div>
 
 <div id="reader-zoom-overlay">
@@ -647,6 +678,55 @@ document.getElementById('reader-sepia-btn').addEventListener('click', (e) => {
   panel.classList.toggle('sepia');
   e.currentTarget.classList.toggle('active');
 });
+
+// --- Thumbnail grid page browser ---
+const gridOverlay = document.getElementById('reader-grid-overlay');
+const gridContent = document.getElementById('reader-grid-content');
+let gridBuilt = false;
+document.getElementById('reader-grid-btn').addEventListener('click', () => {
+  if (!gridBuilt && allPages.length) {
+    allPages.forEach(p => {
+      const thumb = document.createElement('div');
+      thumb.className = 'reader-grid-thumb';
+      thumb.innerHTML = `<img src="${p.image}" alt="Page ${p.page}" loading="lazy" />` +
+        `<span>Page ${p.page}</span>`;
+      thumb.addEventListener('click', () => {
+        renderUpTo(p.page);
+        setTimeout(() => {
+          const target = panel.querySelector(`.reader-page-block[data-page="${p.page}"]`);
+          if (target) target.scrollIntoView({ block: 'start' });
+        }, 30);
+        gridOverlay.classList.remove('open');
+      });
+      gridContent.appendChild(thumb);
+    });
+    gridBuilt = true;
+  }
+  gridOverlay.classList.add('open');
+});
+document.getElementById('reader-grid-close').addEventListener('click', () => gridOverlay.classList.remove('open'));
+
+// --- Read aloud (browser Speech Synthesis, no external service needed) ---
+const ttsBtn = document.getElementById('reader-tts-btn');
+let ttsUtterance = null;
+function stopReadAloud() {
+  speechSynthesis.cancel();
+  ttsBtn.classList.remove('active');
+  ttsUtterance = null;
+}
+ttsBtn.addEventListener('click', () => {
+  if (speechSynthesis.speaking) { stopReadAloud(); return; }
+  const pageNum = parseInt(pageIndicator.textContent.match(/Page (\d+)/)?.[1] || allPages[0].page, 10);
+  const currentPage = allPages.find(p => p.page === pageNum) || allPages[0];
+  ttsUtterance = new SpeechSynthesisUtterance(currentPage.text);
+  ttsUtterance.rate = 0.95;
+  ttsUtterance.onend = () => ttsBtn.classList.remove('active');
+  speechSynthesis.speak(ttsUtterance);
+  ttsBtn.classList.add('active');
+});
+// Stop reading if the reader navigates away mid-speech, so it doesn't
+// keep narrating a page that's no longer on screen.
+['popstate'].forEach(evt => window.addEventListener(evt, () => { if (speechSynthesis.speaking) stopReadAloud(); }));
 
 // --- Image zoom: click on desktop, long-press on mobile ---
 // Uses the History API so the device/browser back button closes the
