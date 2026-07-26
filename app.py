@@ -164,6 +164,18 @@ ANGUILLA_POPULATION = 16_000  # commonly-cited round figure; sources range
 # launch. Do not lose track of this flag when editing this list.
 ARCHIVE_ITEMS = [
     {
+        "title": "Pascaerte van de Caribes Eylanden, van 't Eylant Granadillos, tot 't Eylant Anguilla",
+        "year": "1675", "kind": "Map",
+        "image_url": "/static/archive/1675-roggeveen-caribbean-chart.jpg",
+        "source": "National Library of France (via Europeana)", "license": "No known copyright",
+        "source_url": "https://gallica.bnf.fr/ark:/12148/btv1b8596295t",
+        "description": "A Dutch nautical chart of the Lesser Antilles, from Grenada to "
+                        "Anguilla, by Arent Roggeveen -- a real 17th-century Dutch "
+                        "cartographer and ship's pilot (his son Jacob later became famous "
+                        "for the European discovery of Easter Island).",
+        "clear_before_launch": False,
+    },
+    {
         "title": "Insulae Americanae in Oceano Septentrionali cum terris adjacentibus",
         "year": "1634", "kind": "Map",
         "image_url": "/static/archive/loc-2003630536.jpg",
