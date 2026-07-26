@@ -703,6 +703,27 @@ ARCHIVE_KNOWN_GAPS = [
 # actually include Anguilla.
 HISTORICAL_ACCOUNTS = [
     {
+        "year": "1826", "title": "A visiting Englishman's full chapter on Anguilla",
+        "quote": "Describes the island's stark, unplanted landscape -- more like Kent or "
+                 "Devon than the sugar islands -- an aging lieutenant governor "
+                 "proudly recalling repelling a French attack, and a legal system "
+                 "so under-resourced that a 1809 writ wasn't executed until 1818 for "
+                 "want of a jail. Recounts the 1796 French raid that burned the church "
+                 "and church and stripped and murdered residents, and calls Anguilla "
+                 "an \u201cunjustly forgotten colony.\u201d Gives a population breakdown "
+                 "(365 white, 327 free-colored, 2,388 enslaved) and describes the "
+                 "salt pond as the island's one real export, calling free trade what "
+                 "\u201cwould be charity to Anguilla.\u201d",
+        "context": "By far the richest and most detailed pre-20th-century account of "
+                    "Anguilla found in this whole project -- a full ~13-page dedicated "
+                    "chapter, not a passing mention. Written by Henry Nelson Coleridge "
+                    "(nephew of the poet Samuel Taylor Coleridge), who toured the West "
+                    "Indies in 1825 with his cousin, the Bishop of Barbados, and "
+                    "published this account anonymously the following year.",
+        "source": "Henry Nelson Coleridge, \"Six Months in the West Indies in 1825\" (1826), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/ltf91000120/",
+    },
+    {
         "year": "1811", "title": "Anguillians as founders, not just forgotten",
         "quote": "Describes how, after the Dutch were expelled from Tortola and made "
                  "little progress developing it, credit for the colony's growth went to "
