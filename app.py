@@ -1354,7 +1354,7 @@ def library_reader(slug):
         from flask import abort
         abort(404)
     return render_template("reader.html", now=datetime.utcnow(),
-                            book_title=book["title"], book_author=book["author"],
+                            slug=slug, book_title=book["title"], book_author=book["author"],
                             book_year=book["year"], book_source_url=book["source_url"],
                             data_url=f"/static/reader-data/{slug}.json")
 
