@@ -16,22 +16,24 @@
 
 :root {
   /* --- Color roles derived from the Anguilla flag: navy blue field,
-     orange dolphins, light-blue sea, red from the Union Jack --- */
-  --md-sys-color-primary: #9BCBEB;
+     orange dolphins, light-blue sea, red from the Union Jack. Pushed more
+     saturated/vivid than a typical muted M3 dark palette, since the flag
+     itself is bold and the site was reading as too dull. --- */
+  --md-sys-color-primary: #4DD0FF;
   --md-sys-color-on-primary: #00344A;
-  --md-sys-color-primary-container: #004C69;
-  --md-sys-color-on-primary-container: #C7E7FF;
+  --md-sys-color-primary-container: #005578;
+  --md-sys-color-on-primary-container: #C7EFFF;
 
   /* --- Secondary: orange (the flag's three dolphins) --- */
-  --md-sys-color-secondary: #FFB25B;
-  --md-sys-color-on-secondary: #4A2800;
+  --md-sys-color-secondary: #FF9E2C;
+  --md-sys-color-on-secondary: #442200;
   --md-sys-color-secondary-container: #6A3D00;
   --md-sys-color-on-secondary-container: #FFDCB8;
 
   /* --- Tertiary: red (from the Union Jack in the canton) --- */
-  --md-sys-color-tertiary: #FFB4A8;
-  --md-sys-color-on-tertiary: #5C0F0A;
-  --md-sys-color-tertiary-container: #7D1810;
+  --md-sys-color-tertiary: #FF6B5E;
+  --md-sys-color-on-tertiary: #4A0902;
+  --md-sys-color-tertiary-container: #8A1C10;
   --md-sys-color-on-tertiary-container: #FFDAD3;
 
   /* --- Error --- */

@@ -155,6 +155,7 @@ const sargassumLayer = L.tileLayer.wms(
     format: 'image/png',
     transparent: true,
     version: '1.3.0',
+    crs: L.CRS.EPSG4326, // this WMS server only supports EPSG:4326, rejects Leaflet's default EPSG:3857
     opacity: 0.85,
     attribution: 'NOAA/AOML &amp; University of South Florida (Hu et al.)',
   }
@@ -188,9 +189,13 @@ fetch(`https://api.open-meteo.com/v1/forecast?latitude=${ANGUILLA_CENTER[0]}&lon
   .then(data => {
     const c = data.current;
     const desc = WEATHER_CODES[c.weather_code] || 'Unknown';
-    document.getElementById('weather-value').textContent = c.temperature_2m + '°C';
+    const tempF = (c.temperature_2m * 9 / 5 + 32).toFixed(0);
+    const windMph = (c.wind_speed_10m * 0.621371).toFixed(0);
+    document.getElementById('weather-value').textContent =
+      c.temperature_2m + '°C / ' + tempF + '°F';
     document.getElementById('weather-foot').textContent =
-      desc + ' · ' + c.relative_humidity_2m + '% humidity · wind ' + c.wind_speed_10m + ' km/h';
+      desc + ' · ' + c.relative_humidity_2m + '% humidity · wind ' +
+      c.wind_speed_10m + ' km/h (' + windMph + ' mph)';
   })
   .catch(() => { document.getElementById('weather-value').textContent = 'Unavailable'; });
 
