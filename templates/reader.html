@@ -40,9 +40,11 @@
   #reader-toast.show { opacity:1; }
   @media (max-width: 800px) {
     .reader-layout { flex-direction: column; height: auto; }
-    .reader-image-panel { width:100%; position:relative; top:0; height:50vh; }
-    .reader-text-panel { width:100%; height:auto; }
+    .reader-image-panel { width:100%; position:sticky; top:56px; height:34vh; z-index:5; }
+    .reader-text-panel { width:100%; height:auto; max-height:none; }
     .reader-search-box input { width:100px; }
+    .reader-header { padding: 12px 16px 6px; }
+    .reader-text-panel { padding: 16px 20px; }
   }
 </style>
 {% endblock %}
