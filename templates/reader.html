@@ -20,37 +20,6 @@
   .reader-app { display:flex; flex-direction:column; height: calc(100vh - 56px); overflow:hidden; }
   .reader-header { flex:none; }
   .reader-layout { display:flex; flex:1; min-height:0; }
-  .reader-layout.layer-text-only .reader-image-panel { display:none; }
-  .reader-layout.layer-text-only .reader-text-panel-wrap { width:100% !important; }
-  .reader-layout.layer-image-only .reader-text-panel-wrap { display:none; }
-  .reader-layout.layer-image-only .reader-image-panel { width:100% !important; }
-
-  /* Layer-toggle FAB + panel -- same pattern as oedio's bottom-sheet layer
-     switcher (FAB on mobile, docked card on wider screens), adapted here
-     to toggle which of the scan / transcription layers are visible. */
-  #reader-layers-fab { position:fixed; bottom:24px; right:24px; z-index:500;
-    background:var(--md-sys-color-primary); color:var(--md-sys-color-on-primary);
-    width:56px; height:56px; border-radius:28px; border:none; box-shadow:0 4px 12px rgba(0,0,0,.5);
-    display:flex; align-items:center; justify-content:center; cursor:pointer; }
-  #reader-layers-panel { position:fixed; bottom:92px; right:24px; z-index:500; display:none;
-    background:var(--md-sys-color-surface-container-highest); border-radius:16px; padding:12px;
-    box-shadow:0 4px 20px rgba(0,0,0,.5); min-width:220px; }
-  #reader-layers-panel.open { display:block; }
-  #reader-layers-panel .layer-row { display:flex; align-items:center; justify-content:space-between;
-    padding:10px 8px; gap:16px; }
-  #reader-layers-panel .layer-row .switch { width:36px; height:20px; border-radius:10px;
-    background:var(--md-sys-color-outline-variant); position:relative; cursor:pointer; flex-shrink:0; }
-  #reader-layers-panel .layer-row .switch.on { background:var(--md-sys-color-primary); }
-  #reader-layers-panel .layer-row .switch .knob { position:absolute; top:2px; left:2px; width:16px; height:16px;
-    border-radius:50%; background:#fff; transition:left .15s; }
-  #reader-layers-panel .layer-row .switch.on .knob { left:18px; }
-  #reader-layers-panel .layer-title { font-size:12px; font-weight:700; text-transform:uppercase;
-    letter-spacing:.06em; color:var(--md-sys-color-on-surface-variant); padding:4px 8px 8px; }
-  @media (min-width: 1180px) {
-    /* Docked, not floating, on wide screens -- matches oedio's ">=1180px" breakpoint */
-    #reader-layers-fab { display:none; }
-    #reader-layers-panel { display:block; position:fixed; bottom:24px; right:24px; }
-  }
   .reader-image-panel { width:45%; background:#000; overflow-y:auto; scroll-behavior:auto; }
   .reader-image-block { display:flex; align-items:center; justify-content:center; padding:20px 16px; }
   .reader-image-block img { max-width:100%; max-height:calc(100vh - 100px); object-fit:contain;
@@ -306,21 +275,6 @@
 </div>
 </div><!-- /.reader-app -->
 
-<button id="reader-layers-fab" aria-label="Toggle layers">
-  <span class="material-symbols-outlined">layers</span>
-</button>
-<div id="reader-layers-panel">
-  <div class="layer-title">Layers</div>
-  <div class="layer-row">
-    <span>Original scan</span>
-    <div class="switch on" id="layer-switch-image"><div class="knob"></div></div>
-  </div>
-  <div class="layer-row">
-    <span>Transcribed text</span>
-    <div class="switch on" id="layer-switch-text"><div class="knob"></div></div>
-  </div>
-</div>
-
 <div id="reader-cite-popup"><button id="reader-cite-btn">Cite this passage</button></div>
 
 <div id="reader-grid-overlay">
@@ -439,6 +393,7 @@ function renderBlock(p) {
       zoomCurrentIdx = allPages.findIndex(pg => pg.page === p.page);
       showZoomPage(zoomCurrentIdx);
       zoomOverlay.style.display = 'flex';
+      zoomOverlay.classList.add('open');
       history.pushState({ readerZoom: true }, '');
       zoomOpenedViaHistory = true;
     });
@@ -459,6 +414,7 @@ function renderImageBlock(p) {
     zoomCurrentIdx = allPages.findIndex(pg => pg.page === p.page);
     showZoomPage(zoomCurrentIdx);
     zoomOverlay.style.display = 'flex';
+    zoomOverlay.classList.add('open');
     history.pushState({ readerZoom: true }, '');
     zoomOpenedViaHistory = true;
   });
@@ -924,6 +880,7 @@ document.getElementById('reader-view-scan-btn').addEventListener('click', () => 
   zoomCurrentIdx = currentPageIdx();
   showZoomPage(zoomCurrentIdx);
   zoomOverlay.style.display = 'flex';
+  zoomOverlay.classList.add('open');
   history.pushState({ readerZoom: true }, '');
   zoomOpenedViaHistory = true;
 });
@@ -1003,11 +960,13 @@ function openZoom() {
   zoomCurrentIdx = currentPageIdx();
   showZoomPage(zoomCurrentIdx);
   zoomOverlay.style.display = 'flex';
+  zoomOverlay.classList.add('open');
   history.pushState({ readerZoom: true }, '');
   zoomOpenedViaHistory = true;
 }
 function closeZoom(fromPopstate) {
   zoomOverlay.style.display = 'none';
+  zoomOverlay.classList.remove('open');
   // Sync the main reading view to wherever the reader flipped to in zoom mode
   renderUpTo(allPages[zoomCurrentIdx].page);
   setTimeout(() => {
@@ -1022,44 +981,6 @@ function closeZoom(fromPopstate) {
 window.addEventListener('popstate', (e) => {
   if (zoomOverlay.style.display === 'flex') {
     closeZoom(true);
-  }
-});
-
-// --- Layer toggle (FAB + panel, pattern from oedio's layer switcher) ---
-// Lets the reader show scan-only, text-only, or both -- vertical scroll
-// works the same way regardless of which layer(s) are active, since the
-// image panel is its own infinite scroll too, not a single static image.
-const readerLayout = document.querySelector('.reader-layout');
-const layersFab = document.getElementById('reader-layers-fab');
-const layersPanel = document.getElementById('reader-layers-panel');
-const switchImage = document.getElementById('layer-switch-image');
-const switchText = document.getElementById('layer-switch-text');
-let layerState = { image: true, text: true };
-
-function applyLayerState() {
-  readerLayout.classList.remove('layer-text-only', 'layer-image-only');
-  if (layerState.image && !layerState.text) readerLayout.classList.add('layer-image-only');
-  if (layerState.text && !layerState.image) readerLayout.classList.add('layer-text-only');
-  if (!layerState.image && !layerState.text) {
-    layerState.text = true;
-    switchText.classList.add('on');
-    readerLayout.classList.add('layer-text-only');
-  }
-}
-switchImage.addEventListener('click', () => {
-  layerState.image = !layerState.image;
-  switchImage.classList.toggle('on', layerState.image);
-  applyLayerState();
-});
-switchText.addEventListener('click', () => {
-  layerState.text = !layerState.text;
-  switchText.classList.toggle('on', layerState.text);
-  applyLayerState();
-});
-layersFab.addEventListener('click', () => layersPanel.classList.toggle('open'));
-document.addEventListener('click', (e) => {
-  if (!layersPanel.contains(e.target) && e.target !== layersFab && !layersFab.contains(e.target)) {
-    layersPanel.classList.remove('open');
   }
 });
 
