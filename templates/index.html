@@ -209,7 +209,19 @@ const sargassumLayer = L.tileLayer.wms(
     attribution: 'NOAA/AOML &amp; University of South Florida (Hu et al.)',
   }
 );
-sargassumLayer.addTo(map);
+// The WMS layer above colors the *entire* data range (including clear
+// water and negative index values) with a background wash, since NOAA's
+// server doesn't expose an alternate "algae-only" style -- checked its
+// GetCapabilities directly, no other styles are offered. So for the
+// always-on default view, we use our own thresholded rendering instead:
+// same raw data, but genuinely transparent everywhere except where
+// sargassum is actually detected, with a hard cutoff (no partial wash).
+const SARG_BBOX_LIVE = [[16.5, -64.5], [20.5, -61.5]];
+const sargassumCurrentLayer = L.imageOverlay('/static/sargassum/current.png', SARG_BBOX_LIVE, {
+  opacity: 0.9,
+  attribution: 'NOAA/AOML &amp; University of South Florida (Hu et al.)',
+});
+sargassumCurrentLayer.addTo(map);
 
 // Sargassum animation: uses our OWN smoothed renderings (generated from the
 // raw NOAA/AOML data values via ERDDAP's data API, not the rendered map
@@ -263,7 +275,8 @@ document.getElementById('sarg-anim-toggle').addEventListener('click', (e) => {
 L.control.layers(
   { 'Light': lightLayer, 'Dark': darkLayer, 'Satellite': satelliteLayer },
   {
-    'Sargassum (7-day, NOAA/USF)': sargassumLayer,
+    'Sargassum (7-day, NOAA/USF)': sargassumCurrentLayer,
+    'Sargassum -- raw scientific data (unthresholded)': sargassumLayer,
     'Restaurants': businessLayers['Restaurants'],
     'Accommodation': businessLayers['Accommodation'],
     'Shopping': businessLayers['Shopping'],
