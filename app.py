@@ -1457,6 +1457,16 @@ def library_page():
 # file at static/reader-data/{slug}.json (page text + image URL per page).
 READABLE_BOOKS = [
     {
+        "slug": "emancipation-1838",
+        "title": "Emancipation in the West Indies",
+        "author": "James A. Thome & J. Horace Kimball", "year": "1837/38",
+        "spine_color": "#4a2a2a",
+        "source_url": "https://www.loc.gov/item/02017739/",
+        "description": "An American Quaker delegation's tour documenting conditions "
+                        "after British slave emancipation -- includes a firsthand account "
+                        "of how Emancipation Day itself was experienced in Anguilla.",
+    },
+    {
         "slug": "coleridge-1826",
         "title": "Six Months in the West Indies in 1825",
         "author": "Henry Nelson Coleridge", "year": "1826",
