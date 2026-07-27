@@ -62,7 +62,7 @@
 </div>
 
 <div style="display:flex; align-items:center; gap:12px; padding: 0 24px 8px;">
-  <button id="sarg-anim-toggle" class="md-button-filled" style="font-size:13px;">▶ Play last 8 weeks (smoothed)</button>
+  <button id="sarg-anim-toggle" class="md-button-filled" style="font-size:13px;">▶ Play last 6 months (smoothed)</button>
   <span id="sarg-anim-label" style="color:var(--md-sys-color-on-surface-variant); font-size:13px;"></span>
 </div>
 <div id="map"></div>
@@ -256,14 +256,14 @@ document.getElementById('sarg-anim-toggle').addEventListener('click', (e) => {
   if (sargAnimTimer) {
     clearInterval(sargAnimTimer);
     sargAnimTimer = null;
-    e.currentTarget.textContent = '▶ Play last 8 weeks (smoothed)';
+    e.currentTarget.textContent = '▶ Play last 6 months (smoothed)';
     if (sargImageOverlay) { map.removeLayer(sargImageOverlay); sargImageOverlay = null; }
     document.getElementById('sarg-anim-label').textContent = '';
   } else {
     sargAnimIdx = 0;
     const start = () => {
       sargAnimStep();
-      sargAnimTimer = setInterval(sargAnimStep, 1000);
+      sargAnimTimer = setInterval(sargAnimStep, 450);
     };
     if (sargManifest) start(); else {
       const check = setInterval(() => { if (sargManifest) { clearInterval(check); start(); } }, 100);
