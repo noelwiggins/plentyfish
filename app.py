@@ -862,6 +862,18 @@ HISTORICAL_ACCOUNTS = [
         "source_url": "https://www.loc.gov/item/24031382/",
     },
     {
+        "year": "1922", "title": "A thin archaeological record, even by a museum's own account",
+        "quote": "A museum collections guide notes that finds from Anguilla and St. "
+                 "Eustatius were \"small\" with \"little character,\" compared to richer "
+                 "Carib-influenced stone tools and pottery documented from St. Kitts, "
+                 "Nevis, and Montserrat.",
+        "context": "Even in archaeology, Anguilla shows up as comparatively "
+                    "under-documented next to its neighbors -- consistent with the "
+                    "broader pattern across this whole archive.",
+        "source": "\"Guide to the Collections from the West Indies\" (1922), via Library of Congress",
+        "source_url": "https://www.loc.gov/item/23007166/",
+    },
+    {
         "year": "1917", "title": "Another nickname, and a pirate-haunt footnote",
         "quote": "Confirms the island as \"sometimes known as Eel Island and Little Snake\" -- "
                  "a second nickname corroborating the 1835 gazetteer's \"Snake Island\" -- "
