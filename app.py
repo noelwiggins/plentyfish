@@ -1457,6 +1457,18 @@ def library_page():
 # file at static/reader-data/{slug}.json (page text + image URL per page).
 READABLE_BOOKS = [
     {
+        "slug": "french-colonies-1867",
+        "title": "Les colonies anglaises de 1574 \u00e0 1660",
+        "author": "J. Felsenhart", "year": "1867",
+        "spine_color": "#2a3a5a",
+        "source_url": "https://www.loc.gov/item/13022174/",
+        "description": "French history of early English colonization, naming Anguilla in "
+                        "Charles I's 1627 Carlisle land grants. English translation available "
+                        "for the preface and the Anguilla/Carlisle section; full-book "
+                        "translation is ongoing.",
+        "is_translated": True,
+    },
+    {
         "slug": "emancipation-1838",
         "title": "Emancipation in the West Indies",
         "author": "James A. Thome & J. Horace Kimball", "year": "1837/38",
@@ -1546,6 +1558,7 @@ def library_reader(slug):
     return render_template("reader.html", now=datetime.utcnow(),
                             slug=slug, book_title=book["title"], book_author=book["author"],
                             book_year=book["year"], book_source_url=book["source_url"],
+                            is_translated=book.get("is_translated", False),
                             data_url=f"/static/reader-data/{slug}.json")
 
 

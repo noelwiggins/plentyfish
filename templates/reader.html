@@ -95,6 +95,13 @@
     body { padding-top:0 !important; }
   }
 
+  .reader-lang-toggle { display:flex; background:var(--md-sys-color-surface-container);
+    border-radius:20px; padding:3px; gap:2px; }
+  .reader-lang-toggle button { background:none; border:none; color:var(--md-sys-color-on-surface-variant);
+    padding:7px 14px; border-radius:16px; font-size:12px; font-weight:600; cursor:pointer; }
+  .reader-lang-toggle button.active { background:var(--md-sys-color-secondary-container);
+    color:var(--md-sys-color-on-secondary-container); }
+
   .reader-jump-select { background:var(--md-sys-color-surface-container); color:var(--md-sys-color-on-surface);
     border:1px solid var(--md-sys-color-outline-variant); border-radius:18px; padding:6px 12px; font-size:13px; }
 
@@ -192,11 +199,20 @@
     <button class="reader-icon-btn" id="reader-search-next" title="Next match" aria-label="Next match">
       <span class="material-symbols-outlined" style="font-size:18px;">expand_more</span>
     </button>
+{% if is_translated %}
+    <div class="reader-lang-toggle" id="reader-lang-toggle">
+      <button class="active" data-lang="translation">English</button>
+      <button data-lang="original">Original (Français)</button>
+    </div>
+{% endif %}
     <select class="reader-jump-select" id="reader-jump-select">
       <option value="">Jump to page…</option>
     </select>
     <button class="reader-icon-btn" id="reader-grid-btn" title="Page thumbnail grid" aria-label="Thumbnail grid view">
       <span class="material-symbols-outlined" style="font-size:18px;">grid_view</span>
+    </button>
+    <button class="reader-icon-btn" id="reader-view-scan-btn" title="View original scanned page" aria-label="View scan">
+      <span class="material-symbols-outlined" style="font-size:18px;">image</span>
     </button>
     <button class="reader-icon-btn" id="reader-tts-btn" title="Read this page aloud" aria-label="Read aloud">
       <span class="material-symbols-outlined" style="font-size:18px;">headphones</span>
@@ -316,6 +332,8 @@ function flagPossiblyGarbled(text) {
   }).join('');
 }
 
+let currentLang = 'translation'; // for dual-language books; 'translation' or 'original'
+
 function renderBlock(p) {
   if (!p.text || p.text.trim().length < 3) return null;
   const block = document.createElement('div');
@@ -323,7 +341,9 @@ function renderBlock(p) {
   block.dataset.image = p.image;
   block.dataset.page = p.page;
   block.innerHTML = `<div class="reader-page-number">Page ${p.page}</div><div class="reader-page-text"></div>`;
-  block.querySelector('.reader-page-text').innerHTML = flagPossiblyGarbled(p.text);
+  const textToShow = (currentLang === 'translation' && p.translation) ? p.translation : p.text;
+  block.querySelector('.reader-page-text').innerHTML = flagPossiblyGarbled(textToShow);
+  if (p.translation) block.dataset.hasTranslation = 'true';
 
   // Illustration detection: pages with unusually little OCR text relative
   // to the book's typical page are probably a plate/illustration rather
@@ -347,6 +367,29 @@ function renderBlock(p) {
     block.appendChild(thumb);
   }
   return block;
+}
+
+function rerenderAllPagesForLangSwitch() {
+  const rendered = Array.from(panel.querySelectorAll('.reader-page-block'));
+  rendered.forEach(block => {
+    const pageNum = parseInt(block.dataset.page, 10);
+    const p = allPages.find(pg => pg.page === pageNum);
+    if (!p) return;
+    const textToShow = (currentLang === 'translation' && p.translation) ? p.translation : p.text;
+    block.querySelector('.reader-page-text').innerHTML = flagPossiblyGarbled(textToShow);
+  });
+}
+
+const langToggle = document.getElementById('reader-lang-toggle');
+if (langToggle) {
+  langToggle.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      langToggle.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentLang = btn.dataset.lang;
+      rerenderAllPagesForLangSwitch();
+    });
+  });
 }
 
 const imgObserver = new IntersectionObserver((entries) => {
@@ -682,6 +725,14 @@ document.getElementById('reader-sepia-btn').addEventListener('click', (e) => {
 
 // --- Thumbnail grid page browser ---
 const gridOverlay = document.getElementById('reader-grid-overlay');
+document.getElementById('reader-view-scan-btn').addEventListener('click', () => {
+  zoomCurrentIdx = currentPageIdx();
+  showZoomPage(zoomCurrentIdx);
+  zoomOverlay.style.display = 'flex';
+  history.pushState({ readerZoom: true }, '');
+  zoomOpenedViaHistory = true;
+});
+
 const gridContent = document.getElementById('reader-grid-content');
 let gridBuilt = false;
 document.getElementById('reader-grid-btn').addEventListener('click', () => {
@@ -785,16 +836,24 @@ if (!isMobile) {
   zoomOverlay.addEventListener('click', (e) => { if (e.target === zoomOverlay) closeZoom(); });
 } else {
   // Long-press anywhere on the text panel reveals the current page's original
-  // scan full-screen. Prevent the browser's native long-press "save image"
-  // menu from appearing over our own image -- that dialog was intercepting
-  // the gesture instead of our overlay opening.
+  // scan full-screen (or, for dual-language books, toggles Translation <-> Original
+  // text instead -- long-press is repurposed per-book since showing the source-
+  // language text serves the same "verify against the source" role as the scan
+  // does for single-language books). Prevent the browser's native long-press
+  // "save image" menu from appearing over our own image -- that dialog was
+  // intercepting the gesture instead of our overlay opening.
   zoomImg.addEventListener('contextmenu', (e) => e.preventDefault());
   zoomImg.style.webkitTouchCallout = 'none';
 
   let pressTimer = null;
   panel.addEventListener('touchstart', () => {
     pressTimer = setTimeout(() => {
-      if (zoomOverlay.style.display !== 'flex') openZoom();
+      if (langToggle) {
+        const other = currentLang === 'translation' ? 'original' : 'translation';
+        langToggle.querySelector(`button[data-lang="${other}"]`)?.click();
+      } else if (zoomOverlay.style.display !== 'flex') {
+        openZoom();
+      }
     }, 500);
   });
   ['touchend', 'touchmove', 'touchcancel'].forEach(evt =>
