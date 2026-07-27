@@ -496,12 +496,17 @@ fetch('{{ data_url }}')
     loadMoreObserver.observe(sentinel);
     renderNextBatch();
 
-    // Resume where the reader left off, if a cookie exists
+    // Resume where the reader left off (cookie) takes priority since it reflects
+    // this reader's own progress; otherwise, if this book has a known relevant
+    // passage (start_page), jump there instead of defaulting to page 1 -- some
+    // of these books are 900+ pages with only one page actually relevant.
     const resumePage = getCookie(RESUME_COOKIE);
-    if (resumePage) {
-      renderUpTo(parseInt(resumePage, 10) + PAGE_BATCH_SIZE);
+    const START_PAGE = {{ (start_page or 0)|tojson }};
+    const jumpTarget = resumePage || (START_PAGE > 1 ? String(START_PAGE) : null);
+    if (jumpTarget) {
+      renderUpTo(parseInt(jumpTarget, 10) + PAGE_BATCH_SIZE);
       setTimeout(() => {
-        const target = panel.querySelector(`.reader-page-block[data-page="${resumePage}"]`);
+        const target = panel.querySelector(`.reader-page-block[data-page="${jumpTarget}"]`);
         if (target) target.scrollIntoView({ block: 'start' });
       }, 50);
     }

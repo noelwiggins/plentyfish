@@ -1532,8 +1532,11 @@ READABLE_BOOKS = [
         "author": "John Pinkerton", "year": "1811",
         "spine_color": "#3a5a3a",
         "source_url": "https://www.loc.gov/item/30033189/",
-        "description": "A massive world gazetteer with a real find buried inside: "
-                        "Anguillian settlers credited with founding the Virgin Islands colony.",
+        "description": "A massive 911-page world gazetteer -- opens directly to page 529, "
+                        "where Anguillian settlers are credited with founding the Virgin "
+                        "Islands colony, since that passage would otherwise be nearly "
+                        "impossible to find by scrolling.",
+        "start_page": 529,
     },
     {
         "slug": "west-indies-1911",
@@ -1559,6 +1562,7 @@ def library_reader(slug):
                             slug=slug, book_title=book["title"], book_author=book["author"],
                             book_year=book["year"], book_source_url=book["source_url"],
                             is_translated=book.get("is_translated", False),
+                            start_page=book.get("start_page"),
                             data_url=f"/static/reader-data/{slug}.json")
 
 
