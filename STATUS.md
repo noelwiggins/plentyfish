@@ -11,6 +11,7 @@ Last updated: 2026-07-27
 *(Nothing currently incomplete as of this update — full pass just completed and verified live.)*
 
 ## Recently completed (this session)
+- Reader polish (desktop): image panel converted from single sticky-swap image to a real scrolling column of per-page images, bidirectionally scroll-synced with the text panel by scroll fraction; fixed search box scrolling off-screen by wrapping header+layout in a fixed-height flex shell so the outer page can't scroll; added Chrome-style orange find-on-page highlight colors + a scrollbar-adjacent minimap strip showing all match locations. Verified live on coleridge-1826.
 - Fixed reader bug: bottom text lines were hidden behind mobile browser chrome/gesture bar (safe-area-inset-bottom padding added)
 - LOC crawl (~700-800 of 1,143 non-newspaper results): confirmed diminishing returns past ~1920 (encyclopedia volumes, phone books, incidental matches) -- switched to spot-checking specific titles per Noel's direction rather than continuing chronologically
 - Added 1922 archaeological collections note (Anguilla's thin archaeological record vs. neighbors)
