@@ -5,15 +5,16 @@ This exists specifically because work has been lost/overlooked before when a ses
 mid-task (tool-call limits, an interruption, or a missed confirmation) — this file is the
 durable record that survives even if the conversation transcript isn't re-read carefully.
 
-Last updated: 2026-07-26
+Last updated: 2026-07-27
 
 ## In progress / known incomplete
 *(Nothing currently incomplete as of this update — full pass just completed and verified live.)*
 
 ## Recently completed (this session)
-- Reader: consolidated bookmark/print-to-PDF/share menu (text view + zoom view), thumbnail grid page browser, read-aloud (Speech Synthesis)
-- Added 3 more Historical Accounts: 1912 German geography source (translated), 1917 Book of the West Indies gazetteer entry
-- Continued LOC non-newspaper research: checked Danish West Indies (1917), Alone in the Caribbean (1917), Mittelamerika (1912, German), Book of the West Indies (1917) — 2 solid finds, 2 minor
+- Fixed reader bug: bottom text lines were hidden behind mobile browser chrome/gesture bar (safe-area-inset-bottom padding added)
+- LOC crawl (~700-800 of 1,143 non-newspaper results): confirmed diminishing returns past ~1920 (encyclopedia volumes, phone books, incidental matches) -- switched to spot-checking specific titles per Noel's direction rather than continuing chronologically
+- Added 1922 archaeological collections note (Anguilla's thin archaeological record vs. neighbors)
+- Note: "The CARICOM Bibliography" (1977) and a couple other hlas-bi-prefixed items hit repeated LOC server 503s -- worth retrying later, not a dead end, just a bad server day
 
 ## Standing project facts (won't change often)
 - Stack: Flask + PostgreSQL + Railway, repo `noelwiggins/plentyfish`
