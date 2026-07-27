@@ -12,13 +12,54 @@
     transition:width .1s linear; }
 
   .reader-layout { display:flex; height: calc(100vh - 59px); }
-  .reader-image-panel { width:45%; background:#000; display:flex; align-items:center;
-    justify-content:center; position:sticky; top:59px; height: calc(100vh - 59px); overflow:hidden;
-    cursor:zoom-in; }
-  .reader-image-panel img { max-width:100%; max-height:100%; object-fit:contain;
+  .reader-layout.layer-text-only .reader-image-panel { display:none; }
+  .reader-layout.layer-text-only .reader-text-panel-wrap { width:100% !important; }
+  .reader-layout.layer-image-only .reader-text-panel-wrap { display:none; }
+  .reader-layout.layer-image-only .reader-image-panel { width:100% !important; }
+
+  /* Layer-toggle FAB + panel -- same pattern as oedio's bottom-sheet layer
+     switcher (FAB on mobile, docked card on wider screens), adapted here
+     to toggle which of the scan / transcription / translation layers are
+     visible, rather than switching between book editions. */
+  #reader-layers-fab { position:fixed; bottom:24px; right:24px; z-index:500;
+    background:var(--md-sys-color-primary); color:var(--md-sys-color-on-primary);
+    width:56px; height:56px; border-radius:28px; border:none; box-shadow:0 4px 12px rgba(0,0,0,.5);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; }
+  #reader-layers-panel { position:fixed; bottom:92px; right:24px; z-index:500; display:none;
+    background:var(--md-sys-color-surface-container-highest); border-radius:16px; padding:12px;
+    box-shadow:0 4px 20px rgba(0,0,0,.5); min-width:220px; }
+  #reader-layers-panel.open { display:block; }
+  #reader-layers-panel .layer-row { display:flex; align-items:center; justify-content:space-between;
+    padding:10px 8px; gap:16px; }
+  #reader-layers-panel .layer-row .switch { width:36px; height:20px; border-radius:10px;
+    background:var(--md-sys-color-outline-variant); position:relative; cursor:pointer; flex-shrink:0; }
+  #reader-layers-panel .layer-row .switch.on { background:var(--md-sys-color-primary); }
+  #reader-layers-panel .layer-row .switch .knob { position:absolute; top:2px; left:2px; width:16px; height:16px;
+    border-radius:50%; background:#fff; transition:left .15s; }
+  #reader-layers-panel .layer-row .switch.on .knob { left:18px; }
+  #reader-layers-panel .layer-title { font-size:12px; font-weight:700; text-transform:uppercase;
+    letter-spacing:.06em; color:var(--md-sys-color-on-surface-variant); padding:4px 8px 8px; }
+  @media (min-width: 1180px) {
+    /* Docked, not floating, on wide screens -- matches oedio's ">=1180px" breakpoint */
+    #reader-layers-fab { display:none; }
+    #reader-layers-panel { display:block; position:fixed; bottom:24px; right:24px; }
+  }
+  .reader-image-panel { width:45%; background:#000; overflow-y:auto;
+    scroll-behavior:smooth; height: calc(100vh - 59px); }
+  .reader-image-panel .reader-image-page { display:flex; align-items:center; justify-content:center;
+    min-height:100%; padding:12px; box-sizing:border-box; }
+  .reader-image-panel img { max-width:100%; max-height:calc(100vh - 83px); object-fit:contain;
     box-shadow: 0 4px 24px rgba(0,0,0,.5); }
-  .reader-text-panel { width:55%; overflow-y:auto; height: calc(100vh - 59px);
+  .reader-text-panel { width:100%; overflow-y:auto; height: calc(100vh - 59px);
     padding: 24px 32px calc(24px + env(safe-area-inset-bottom)); }
+
+  /* Search-match minimap: a thin track alongside the text panel showing
+     tick marks for every match position, similar to Chrome's find-in-page
+     scrollbar bands -- click a tick to jump straight there. */
+  #reader-search-minimap { position:absolute; top:0; right:2px; bottom:0; width:8px; z-index:40; }
+  .reader-minimap-tick { position:absolute; left:0; right:0; height:3px; background:var(--md-sys-color-secondary);
+    opacity:.8; cursor:pointer; border-radius:1px; }
+  .reader-minimap-tick.active { background:var(--md-sys-color-tertiary); height:5px; opacity:1; }
 
   .reader-page-block { margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid var(--md-sys-color-outline-variant); }
   .reader-page-block:last-child { border-bottom:none; }
@@ -58,7 +99,9 @@
   .reader-text-panel.fs-xlarge .reader-page-text { font-size:21px; }
 
   .reader-header { padding: 12px 32px 8px; display:flex; justify-content:space-between;
-    align-items:flex-start; gap:16px; flex-wrap:wrap; }
+    align-items:flex-start; gap:16px; flex-wrap:wrap;
+    position:sticky; top:59px; z-index:60; background:var(--md-sys-color-background);
+    border-bottom:1px solid var(--md-sys-color-outline-variant); }
   .reader-header .book-title { font-size:20px; font-weight:500; }
   .reader-header .book-meta { color:var(--md-sys-color-on-surface-variant); font-size:12px; margin-top:4px; }
   .reader-toolbar { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
@@ -236,11 +279,14 @@
 
 <div class="reader-layout">
   <div class="reader-image-panel" id="reader-image-panel">
-    <img id="reader-current-image" src="" alt="Current page" />
+    <!-- Page images injected by JS, lazily, mirroring the text panel -->
   </div>
-  <div class="reader-text-panel fs-medium" id="reader-text-panel">
-    <!-- Page blocks injected by JS, lazily -->
-    <div id="reader-load-sentinel" style="height:1px;"></div>
+  <div class="reader-text-panel-wrap" style="position:relative; width:55%;">
+    <div class="reader-text-panel fs-medium" id="reader-text-panel">
+      <!-- Page blocks injected by JS, lazily -->
+      <div id="reader-load-sentinel" style="height:1px;"></div>
+    </div>
+    <div id="reader-search-minimap"></div>
   </div>
 </div>
 
@@ -275,6 +321,21 @@
     <button id="reader-zoom-next" aria-label="Next page"><span class="material-symbols-outlined">chevron_right</span></button>
   </div>
 </div>
+
+<button id="reader-layers-fab" aria-label="Toggle layers">
+  <span class="material-symbols-outlined">layers</span>
+</button>
+<div id="reader-layers-panel">
+  <div class="layer-title">Layers</div>
+  <div class="layer-row">
+    <span>Original scan</span>
+    <div class="switch on" id="layer-switch-image"><div class="knob"></div></div>
+  </div>
+  <div class="layer-row">
+    <span>Transcribed text</span>
+    <div class="switch on" id="layer-switch-text"><div class="knob"></div></div>
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}
@@ -295,7 +356,6 @@ function escapeHtml(s) {
 let avgTextLength = 200; // recalculated once real page data loads; used for illustration detection
 let renderedCount = 0;
 const panel = document.getElementById('reader-text-panel');
-const img = document.getElementById('reader-current-image');
 const imagePanel = document.getElementById('reader-image-panel');
 const sentinel = document.getElementById('reader-load-sentinel');
 const jumpSelect = document.getElementById('reader-jump-select');
@@ -345,6 +405,15 @@ function renderBlock(p) {
   block.querySelector('.reader-page-text').innerHTML = flagPossiblyGarbled(textToShow);
   if (p.translation) block.dataset.hasTranslation = 'true';
 
+  // Matching image-panel entry -- the image side is now its own infinite
+  // scroll (desktop), not a single swapped <img>, kept in sync with the
+  // text side's scroll position.
+  const imgWrap = document.createElement('div');
+  imgWrap.className = 'reader-image-page';
+  imgWrap.dataset.page = p.page;
+  imgWrap.innerHTML = `<img src="${p.image}" alt="Scan of page ${p.page}" loading="lazy" />`;
+  imagePanel.appendChild(imgWrap);
+
   // Illustration detection: pages with unusually little OCR text relative
   // to the book's typical page are probably a plate/illustration rather
   // than a text page (a full-page image OCRs to almost nothing). There's
@@ -392,11 +461,17 @@ if (langToggle) {
   });
 }
 
+let syncingImagePanel = false;
 const imgObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      img.src = entry.target.dataset.image;
       const pageNum = entry.target.dataset.page;
+      const imgEl = imagePanel.querySelector(`.reader-image-page[data-page="${pageNum}"]`);
+      if (imgEl && !syncingImagePanel) {
+        syncingImagePanel = true;
+        imgEl.scrollIntoView({ block: 'center', behavior: 'auto' });
+        setTimeout(() => { syncingImagePanel = false; }, 50);
+      }
       pageIndicator.textContent = `Page ${pageNum} of ${allPages[allPages.length - 1].page}`;
       setCookie(RESUME_COOKIE, pageNum);
       updateProgress();
@@ -445,7 +520,7 @@ fetch('{{ data_url }}')
   .then(pages => {
     allPages = pages.filter(p => p.text && p.text.trim().length >= 3);
     if (!allPages.length) throw new Error('empty');
-    img.src = allPages[0].image;
+    // (image panel now populated per-page in renderBlock/renderNextBatch)
     avgTextLength = allPages.reduce((sum, p) => sum + p.text.trim().length, 0) / allPages.length;
 
     // Chapter/heading detection heuristic: a line that's short, in caps,
@@ -524,10 +599,31 @@ fetch('{{ data_url }}')
         parent.normalize();
       });
     }
+    function updateSearchMinimap() {
+      const minimap = document.getElementById('reader-search-minimap');
+      minimap.innerHTML = '';
+      if (!hits.length) return;
+      const totalHeight = panel.scrollHeight;
+      hits.forEach((hit) => {
+        const tick = document.createElement('div');
+        tick.className = 'reader-minimap-tick';
+        const topPct = (hit.closest('.reader-page-block').offsetTop / totalHeight) * 100;
+        tick.style.top = topPct + '%';
+        tick.addEventListener('click', () => {
+          const idx = hits.indexOf(hit);
+          jumpToHit(idx);
+        });
+        minimap.appendChild(tick);
+      });
+    }
     function runSearch(query) {
       clearHighlights();
       hits = []; activeHit = -1;
-      if (!query || query.trim().length < 2) { searchCount.textContent = ''; return; }
+      if (!query || query.trim().length < 2) {
+        searchCount.textContent = '';
+        document.getElementById('reader-search-minimap').innerHTML = '';
+        return;
+      }
       // Search requires all pages to be rendered to find matches anywhere in the book
       renderUpTo(allPages[allPages.length - 1].page);
       const q = query.trim().toLowerCase();
@@ -548,6 +644,7 @@ fetch('{{ data_url }}')
       });
       hits = Array.from(panel.querySelectorAll('mark.reader-hit'));
       searchCount.textContent = hits.length ? `1 / ${hits.length}` : 'No matches';
+      updateSearchMinimap();
       if (hits.length) jumpToHit(0);
     }
     function jumpToHit(i) {
@@ -557,6 +654,9 @@ fetch('{{ data_url }}')
       hits[activeHit].classList.add('reader-hit-active');
       hits[activeHit].scrollIntoView({ behavior: 'smooth', block: 'center' });
       searchCount.textContent = `${activeHit + 1} / ${hits.length}`;
+      document.querySelectorAll('.reader-minimap-tick').forEach((t, idx) => {
+        t.classList.toggle('active', idx === activeHit);
+      });
     }
     let searchDebounce;
     searchInput.addEventListener('input', (e) => {
@@ -832,6 +932,45 @@ function closeZoom(fromPopstate) {
 window.addEventListener('popstate', (e) => {
   if (zoomOverlay.style.display === 'flex') {
     closeZoom(true);
+  }
+});
+
+// --- Layer toggle (FAB + panel, pattern from oedio's layer switcher) ---
+// Lets the reader show scan-only, text-only, or both -- vertical scroll
+// works the same way regardless of which layer(s) are active, since the
+// image panel is now its own infinite scroll too, not a single static image.
+const readerLayout = document.querySelector('.reader-layout');
+const layersFab = document.getElementById('reader-layers-fab');
+const layersPanel = document.getElementById('reader-layers-panel');
+const switchImage = document.getElementById('layer-switch-image');
+const switchText = document.getElementById('layer-switch-text');
+let layerState = { image: true, text: true };
+
+function applyLayerState() {
+  readerLayout.classList.remove('layer-text-only', 'layer-image-only');
+  if (layerState.image && !layerState.text) readerLayout.classList.add('layer-image-only');
+  if (layerState.text && !layerState.image) readerLayout.classList.add('layer-text-only');
+  // Never allow both off -- force text back on rather than showing a blank reader
+  if (!layerState.image && !layerState.text) {
+    layerState.text = true;
+    switchText.classList.add('on');
+    readerLayout.classList.add('layer-text-only');
+  }
+}
+switchImage.addEventListener('click', () => {
+  layerState.image = !layerState.image;
+  switchImage.classList.toggle('on', layerState.image);
+  applyLayerState();
+});
+switchText.addEventListener('click', () => {
+  layerState.text = !layerState.text;
+  switchText.classList.toggle('on', layerState.text);
+  applyLayerState();
+});
+layersFab.addEventListener('click', () => layersPanel.classList.toggle('open'));
+document.addEventListener('click', (e) => {
+  if (!layersPanel.contains(e.target) && e.target !== layersFab && !layersFab.contains(e.target)) {
+    layersPanel.classList.remove('open');
   }
 });
 
