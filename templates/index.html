@@ -62,7 +62,7 @@
 </div>
 
 <div style="display:flex; align-items:center; gap:12px; padding: 0 24px 8px;">
-  <button id="sarg-anim-toggle" class="md-button-filled" style="font-size:13px;">▶ Play last 8 weeks</button>
+  <button id="sarg-anim-toggle" class="md-button-filled" style="font-size:13px;">▶ Play last 8 weeks (smoothed)</button>
   <span id="sarg-anim-label" style="color:var(--md-sys-color-on-surface-variant); font-size:13px;"></span>
 </div>
 <div id="map"></div>
@@ -211,44 +211,51 @@ const sargassumLayer = L.tileLayer.wms(
 );
 sargassumLayer.addTo(map);
 
-// Sargassum animation: cycles the SAME NOAA/AOML layer above through the
-// past several weeks by changing its WMS "time" parameter, showing real
-// week-to-week change using our own already-integrated data source --
-// not a reproduction of USF's own (copyrighted) animated imagery.
+// Sargassum animation: uses our OWN smoothed renderings (generated from the
+// raw NOAA/AOML data values via ERDDAP's data API, not the rendered map
+// tiles) rather than the live WMS layer above, which is genuinely blocky at
+// this scale since the underlying satellite data is ~1.7km/pixel. We fetch
+// the actual per-pixel values, upsample with smooth interpolation, and
+// apply a gentle blur -- clearer to read at a glance, while the raw WMS
+// layer stays as the scientifically-precise default view. Not a
+// reproduction of USF's own copyrighted animated imagery.
 let sargAnimTimer = null;
 let sargAnimIdx = 0;
-const SARG_ANIM_WEEKS = 8;
-function sargWeekDates() {
-  const dates = [];
-  const now = new Date();
-  for (let i = SARG_ANIM_WEEKS - 1; i >= 0; i--) {
-    const d = new Date(now);
-    d.setDate(d.getDate() - i * 7);
-    dates.push(d);
-  }
-  return dates;
-}
-const sargDates = sargWeekDates();
+let sargImageOverlay = null;
+const SARG_BBOX = [[16.5, -64.5], [20.5, -61.5]]; // [[south, west], [north, east]]
+let sargManifest = null;
+
+fetch('/static/sargassum/manifest.json')
+  .then(r => r.json())
+  .then(m => { sargManifest = m; });
 
 function sargAnimStep() {
-  const d = sargDates[sargAnimIdx];
-  const iso = d.toISOString().split('T')[0] + 'T00:00:00Z';
-  sargassumLayer.setParams({ time: iso });
+  if (!sargManifest) return;
+  const week = sargManifest.weeks[sargAnimIdx];
+  const url = `/static/sargassum/week_${week.idx}.png`;
+  if (sargImageOverlay) map.removeLayer(sargImageOverlay);
+  sargImageOverlay = L.imageOverlay(url, SARG_BBOX, { opacity: 0.9 }).addTo(map);
+  const d = new Date(week.date + 'T00:00:00Z');
   document.getElementById('sarg-anim-label').textContent =
     d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
-  sargAnimIdx = (sargAnimIdx + 1) % sargDates.length;
+  sargAnimIdx = (sargAnimIdx + 1) % sargManifest.weeks.length;
 }
 document.getElementById('sarg-anim-toggle').addEventListener('click', (e) => {
   if (sargAnimTimer) {
     clearInterval(sargAnimTimer);
     sargAnimTimer = null;
-    e.currentTarget.textContent = '▶ Play last 8 weeks';
-    sargassumLayer.setParams({ time: undefined }); // back to current/latest
+    e.currentTarget.textContent = '▶ Play last 8 weeks (smoothed)';
+    if (sargImageOverlay) { map.removeLayer(sargImageOverlay); sargImageOverlay = null; }
     document.getElementById('sarg-anim-label').textContent = '';
   } else {
     sargAnimIdx = 0;
-    sargAnimStep();
-    sargAnimTimer = setInterval(sargAnimStep, 1000);
+    const start = () => {
+      sargAnimStep();
+      sargAnimTimer = setInterval(sargAnimStep, 1000);
+    };
+    if (sargManifest) start(); else {
+      const check = setInterval(() => { if (sargManifest) { clearInterval(check); start(); } }, 100);
+    }
     e.currentTarget.textContent = '⏸ Pause';
   }
 });
