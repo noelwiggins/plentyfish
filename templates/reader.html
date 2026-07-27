@@ -532,6 +532,20 @@ function renderUpTo(pageNum) {
   }
 }
 
+function renderAllAsync(onDone) {
+  // Same end result as renderUpTo(lastPage), but spreads the work across
+  // multiple animation frames instead of one giant synchronous loop --
+  // rendering an entire 600+ page book in one blocking call is exactly
+  // what was freezing the tab and triggering Chrome's "Page Unresponsive"
+  // dialog during search. Yielding between batches keeps the tab alive.
+  function step() {
+    if (renderedCount >= allPages.length) { onDone(); return; }
+    renderNextBatch();
+    requestAnimationFrame(step);
+  }
+  step();
+}
+
 const loadMoreObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => { if (entry.isIntersecting) renderNextBatch(); });
 }, { rootMargin: '800px' });
@@ -687,28 +701,43 @@ fetch('{{ data_url }}')
       hits = []; activeHit = -1;
       searchMinimap.innerHTML = ''; minimapBands = [];
       if (!query || query.trim().length < 2) { searchCount.textContent = ''; return; }
-      // Search requires all pages to be rendered to find matches anywhere in the book
-      renderUpTo(allPages[allPages.length - 1].page);
       const q = query.trim().toLowerCase();
-      panel.querySelectorAll('.reader-page-text').forEach(textEl => {
-        const text = textEl.textContent;
-        const lower = text.toLowerCase();
-        let idx = 0, positions = [];
-        while ((idx = lower.indexOf(q, idx)) !== -1) { positions.push(idx); idx += q.length; }
-        if (!positions.length) return;
-        let html = '', last = 0;
-        positions.forEach(pos => {
-          html += escapeHtml(text.slice(last, pos)) + '<mark class="reader-hit">' +
-            escapeHtml(text.slice(pos, pos + q.length)) + '</mark>';
-          last = pos + q.length;
+
+      // Quick in-memory check first (fast, no DOM work) so we don't even
+      // start the expensive render pass if there's nothing to find.
+      const matchCount = allPages.reduce((sum, p) => {
+        const lower = p.text.toLowerCase();
+        let idx = 0, n = 0;
+        while ((idx = lower.indexOf(q, idx)) !== -1) { n++; idx += q.length; }
+        return sum + n;
+      }, 0);
+      if (!matchCount) { searchCount.textContent = 'No matches'; return; }
+      searchCount.textContent = `Finding ${matchCount} match${matchCount === 1 ? '' : 'es'}...`;
+
+      // Render the rest of the book asynchronously (spread across frames,
+      // not one blocking loop) before highlighting, so search across a
+      // long book can't freeze the tab.
+      renderAllAsync(() => {
+        panel.querySelectorAll('.reader-page-text').forEach(textEl => {
+          const text = textEl.textContent;
+          const lower = text.toLowerCase();
+          let idx = 0, positions = [];
+          while ((idx = lower.indexOf(q, idx)) !== -1) { positions.push(idx); idx += q.length; }
+          if (!positions.length) return;
+          let html = '', last = 0;
+          positions.forEach(pos => {
+            html += escapeHtml(text.slice(last, pos)) + '<mark class="reader-hit">' +
+              escapeHtml(text.slice(pos, pos + q.length)) + '</mark>';
+            last = pos + q.length;
+          });
+          html += escapeHtml(text.slice(last));
+          textEl.innerHTML = html;
         });
-        html += escapeHtml(text.slice(last));
-        textEl.innerHTML = html;
+        hits = Array.from(panel.querySelectorAll('mark.reader-hit'));
+        searchCount.textContent = hits.length ? `1 / ${hits.length}` : 'No matches';
+        renderMinimap();
+        if (hits.length) jumpToHit(0);
       });
-      hits = Array.from(panel.querySelectorAll('mark.reader-hit'));
-      searchCount.textContent = hits.length ? `1 / ${hits.length}` : 'No matches';
-      renderMinimap();
-      if (hits.length) jumpToHit(0);
     }
     function jumpToHit(i) {
       if (!hits.length) return;
