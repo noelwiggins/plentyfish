@@ -11,14 +11,34 @@
   #reader-progress-fill { height:100%; width:0%; background:var(--md-sys-color-primary);
     transition:width .1s linear; }
 
-  .reader-layout { display:flex; height: calc(100vh - 59px); }
-  .reader-image-panel { width:45%; background:#000; display:flex; align-items:center;
-    justify-content:center; position:sticky; top:59px; height: calc(100vh - 59px); overflow:hidden;
-    cursor:zoom-in; }
-  .reader-image-panel img { max-width:100%; max-height:100%; object-fit:contain;
-    box-shadow: 0 4px 24px rgba(0,0,0,.5); }
-  .reader-text-panel { width:55%; overflow-y:auto; height: calc(100vh - 59px);
+  /* Fixed-height app shell: header + layout together never exceed the viewport,
+     so the outer page itself can't scroll. That's what keeps the search box
+     (inside .reader-header) persistently in view on desktop -- previously the
+     header sat in normal document flow above a full-viewport-height layout,
+     so the whole window scrolled and carried the header (and search controls)
+     off the top whenever a search result jumped the text panel. */
+  .reader-app { display:flex; flex-direction:column; height: calc(100vh - 56px); overflow:hidden; }
+  .reader-header { flex:none; }
+  .reader-layout { display:flex; flex:1; min-height:0; }
+  .reader-image-panel { width:45%; background:#000; overflow-y:auto; scroll-behavior:auto; }
+  .reader-image-block { display:flex; align-items:center; justify-content:center; padding:20px 16px; }
+  .reader-image-block img { max-width:100%; max-height:calc(100vh - 100px); object-fit:contain;
+    box-shadow: 0 4px 24px rgba(0,0,0,.5); cursor:zoom-in; }
+  .reader-image-block.reader-image-current img { box-shadow: 0 0 0 2px var(--md-sys-color-primary), 0 4px 24px rgba(0,0,0,.5); }
+  .reader-text-panel-wrap { position:relative; width:55%; height:100%; }
+  .reader-text-panel { width:100%; overflow-y:auto; height:100%;
     padding: 24px 32px calc(24px + env(safe-area-inset-bottom)); }
+
+  /* Find-on-page style minimap: a thin strip of orange bands next to the text
+     panel's scrollbar marking every search-match location in the document,
+     so results are visible at a glance even while scrolled far away from them --
+     mirroring Chrome's native in-page "Find" scrollbar bands. Purely visual
+     (pointer-events:none) so it never blocks the real scrollbar underneath. */
+  .reader-search-minimap { position:absolute; top:0; right:1px; width:5px; height:100%;
+    pointer-events:none; z-index:5; }
+  .reader-search-minimap .reader-minimap-band { position:absolute; left:0; width:100%; height:3px;
+    background:#ff9800; border-radius:1px; }
+  .reader-search-minimap .reader-minimap-band.active { background:#ff3d00; height:4px; width:9px; left:-2px; }
 
   .reader-page-block { margin-bottom:40px; padding-bottom:32px; border-bottom:1px solid var(--md-sys-color-outline-variant); }
   .reader-page-block:last-child { border-bottom:none; }
@@ -49,7 +69,8 @@
   .reader-text-panel.sepia { background:#f4ecd8; color:#3b2f22; }
   .reader-text-panel.sepia .reader-page-block { border-bottom-color:#d8cba8; }
   .reader-text-panel.sepia .reader-page-number { color:#8a5a2a; }
-  .reader-text-panel.sepia mark.reader-hit { background:#e0c060; color:#3b2f22; }
+  .reader-text-panel.sepia mark.reader-hit { background:#f0a030; color:#3b2f22; }
+  .reader-text-panel.sepia mark.reader-hit.reader-hit-active { background:#c8500a; color:#fff; }
 
   /* Font-size steps, cycled by the Aa button */
   .reader-text-panel.fs-small .reader-page-text { font-size:13px; }
@@ -90,7 +111,7 @@
     .top-app-bar, .nav-drawer, .nav-scrim, #reader-progress-track, .reader-header,
     .reader-image-panel, #reader-zoom-overlay, #reader-toast, #reader-cite-popup,
     .reader-illustration-thumb, footer.site-footer { display:none !important; }
-    .reader-text-panel { width:100% !important; height:auto !important; overflow:visible !important; }
+    .reader-text-panel-wrap, .reader-text-panel { width:100% !important; height:auto !important; overflow:visible !important; }
     .reader-page-block { break-inside: avoid; }
     body { padding-top:0 !important; }
   }
@@ -105,8 +126,10 @@
   .reader-jump-select { background:var(--md-sys-color-surface-container); color:var(--md-sys-color-on-surface);
     border:1px solid var(--md-sys-color-outline-variant); border-radius:18px; padding:6px 12px; font-size:13px; }
 
-  mark.reader-hit { background:var(--md-sys-color-secondary); color:var(--md-sys-color-on-secondary); border-radius:2px; }
-  mark.reader-hit.reader-hit-active { background:var(--md-sys-color-tertiary); color:var(--md-sys-color-on-tertiary); }
+  /* Orange matches the browser's native "Find on page" convention, so results
+     read as familiar rather than a bespoke color choice. */
+  mark.reader-hit { background:#ffb74d; color:#3b2000; border-radius:2px; }
+  mark.reader-hit.reader-hit-active { background:#ff6d00; color:#fff; }
 
   #reader-toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%);
     background:var(--md-sys-color-surface-container-highest); color:var(--md-sys-color-on-surface);
@@ -165,9 +188,11 @@
        button, the back button, or another long-press. No always-visible
        image panel on mobile; screen space is too tight for it to stay
        useful, unlike desktop. */
+    .reader-app { height:auto; overflow:visible; }
     .reader-layout { flex-direction: column; height: auto; }
     .reader-image-panel { display: none; }
-    .reader-text-panel { width:100%; height:auto; padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); }
+    .reader-text-panel-wrap { width:100%; height:auto; }
+    .reader-text-panel { width:100%; height:auto; overflow-y:visible; padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); }
     .reader-header { padding: 10px 16px 6px; }
     .reader-search-box input { width:90px; }
     #reader-zoom-overlay.open #reader-zoom-nav { display: flex; }
@@ -178,6 +203,7 @@
 {% block content %}
 <div id="reader-progress-track"><div id="reader-progress-fill"></div></div>
 
+<div class="reader-app">
 <div class="reader-header">
   <div>
     <div class="book-title">{{ book_title }}</div>
@@ -236,13 +262,18 @@
 
 <div class="reader-layout">
   <div class="reader-image-panel" id="reader-image-panel">
-    <img id="reader-current-image" src="" alt="Current page" />
+    <!-- Image blocks injected by JS, lazily, in lockstep with the text panel -->
+    <div id="reader-image-load-sentinel" style="height:1px;"></div>
   </div>
-  <div class="reader-text-panel fs-medium" id="reader-text-panel">
-    <!-- Page blocks injected by JS, lazily -->
-    <div id="reader-load-sentinel" style="height:1px;"></div>
+  <div class="reader-text-panel-wrap">
+    <div class="reader-search-minimap" id="reader-search-minimap"></div>
+    <div class="reader-text-panel fs-medium" id="reader-text-panel">
+      <!-- Page blocks injected by JS, lazily -->
+      <div id="reader-load-sentinel" style="height:1px;"></div>
+    </div>
   </div>
 </div>
+</div><!-- /.reader-app -->
 
 <div id="reader-cite-popup"><button id="reader-cite-btn">Cite this passage</button></div>
 
@@ -295,8 +326,9 @@ function escapeHtml(s) {
 let avgTextLength = 200; // recalculated once real page data loads; used for illustration detection
 let renderedCount = 0;
 const panel = document.getElementById('reader-text-panel');
-const img = document.getElementById('reader-current-image');
 const imagePanel = document.getElementById('reader-image-panel');
+const imageSentinel = document.getElementById('reader-image-load-sentinel');
+let syncingScroll = false; // guards against feedback loops in the two-way scroll sync below
 const sentinel = document.getElementById('reader-load-sentinel');
 const jumpSelect = document.getElementById('reader-jump-select');
 const pageIndicator = document.getElementById('reader-page-indicator');
@@ -369,6 +401,24 @@ function renderBlock(p) {
   return block;
 }
 
+function renderImageBlock(p) {
+  // Mirrors renderBlock() one-to-one per page so the image column and text
+  // column always have matching block counts/order -- that's what keeps the
+  // proportional scroll sync between the two panels meaningful.
+  const block = document.createElement('div');
+  block.className = 'reader-image-block';
+  block.dataset.page = p.page;
+  block.innerHTML = `<img src="${p.image}" alt="Scanned original of page ${p.page}" loading="lazy" />`;
+  block.addEventListener('click', () => {
+    zoomCurrentIdx = allPages.findIndex(pg => pg.page === p.page);
+    showZoomPage(zoomCurrentIdx);
+    zoomOverlay.style.display = 'flex';
+    history.pushState({ readerZoom: true }, '');
+    zoomOpenedViaHistory = true;
+  });
+  return block;
+}
+
 function rerenderAllPagesForLangSwitch() {
   const rendered = Array.from(panel.querySelectorAll('.reader-page-block'));
   rendered.forEach(block => {
@@ -392,14 +442,20 @@ if (langToggle) {
   });
 }
 
+let currentImageBlock = null;
 const imgObserver = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
     if (entry.isIntersecting) {
-      img.src = entry.target.dataset.image;
       const pageNum = entry.target.dataset.page;
       pageIndicator.textContent = `Page ${pageNum} of ${allPages[allPages.length - 1].page}`;
       setCookie(RESUME_COOKIE, pageNum);
       updateProgress();
+      // Highlight the matching image block so it's clear which scan corresponds
+      // to what's currently in view on the text side, even though the image
+      // panel now scrolls independently rather than swapping a single image.
+      if (currentImageBlock) currentImageBlock.classList.remove('reader-image-current');
+      const imgBlock = imagePanel.querySelector(`.reader-image-block[data-page="${pageNum}"]`);
+      if (imgBlock) { imgBlock.classList.add('reader-image-current'); currentImageBlock = imgBlock; }
     }
   });
 }, { root: null, threshold: 0.5 });
@@ -411,6 +467,7 @@ function renderNextBatch() {
     if (block) {
       panel.insertBefore(block, sentinel);
       imgObserver.observe(block);
+      imagePanel.insertBefore(renderImageBlock(p), imageSentinel);
     }
   });
   renderedCount += slice.length;
@@ -440,12 +497,43 @@ function updateProgress() {
 }
 panel.addEventListener('scroll', updateProgress);
 
+// Two-way proportional scroll sync: the image column now scrolls independently
+// (infinite scroll, same as the text column) instead of swapping one sticky
+// image, so keep the two roughly aligned by scroll fraction rather than
+// pixel position -- page images and page text blocks are rarely the same
+// height, so fraction-of-total-height is the only mapping that stays sane
+// across the whole book. The syncingScroll flag + requestAnimationFrame
+// stops the two listeners from bouncing off each other in a feedback loop.
+function scrollFraction(el) {
+  const max = el.scrollHeight - el.clientHeight;
+  return max > 0 ? el.scrollTop / max : 0;
+}
+function applyScrollFraction(el, frac) {
+  const max = el.scrollHeight - el.clientHeight;
+  el.scrollTop = frac * max;
+}
+panel.addEventListener('scroll', () => {
+  if (syncingScroll) return;
+  syncingScroll = true;
+  requestAnimationFrame(() => {
+    applyScrollFraction(imagePanel, scrollFraction(panel));
+    syncingScroll = false;
+  });
+});
+imagePanel.addEventListener('scroll', () => {
+  if (syncingScroll) return;
+  syncingScroll = true;
+  requestAnimationFrame(() => {
+    applyScrollFraction(panel, scrollFraction(imagePanel));
+    syncingScroll = false;
+  });
+});
+
 fetch('{{ data_url }}')
   .then(r => r.json())
   .then(pages => {
     allPages = pages.filter(p => p.text && p.text.trim().length >= 3);
     if (!allPages.length) throw new Error('empty');
-    img.src = allPages[0].image;
     avgTextLength = allPages.reduce((sum, p) => sum + p.text.trim().length, 0) / allPages.length;
 
     // Chapter/heading detection heuristic: a line that's short, in caps,
@@ -514,8 +602,10 @@ fetch('{{ data_url }}')
     // --- In-book search ---
     const searchInput = document.getElementById('reader-search-input');
     const searchCount = document.getElementById('reader-search-count');
+    const searchMinimap = document.getElementById('reader-search-minimap');
     let hits = [];
     let activeHit = -1;
+    let minimapBands = [];
 
     function clearHighlights() {
       panel.querySelectorAll('mark.reader-hit').forEach(m => {
@@ -524,9 +614,32 @@ fetch('{{ data_url }}')
         parent.normalize();
       });
     }
+    // Find-on-page style minimap: one orange band per match, positioned by
+    // fraction of total scroll height, so all matches are visible at a
+    // glance next to the scrollbar -- same idea as Chrome's native Find bands.
+    function renderMinimap() {
+      searchMinimap.innerHTML = '';
+      minimapBands = [];
+      if (!hits.length) return;
+      const total = panel.scrollHeight;
+      const panelTop = panel.getBoundingClientRect().top;
+      hits.forEach((hit) => {
+        const top = hit.getBoundingClientRect().top - panelTop + panel.scrollTop;
+        const pct = Math.min(100, Math.max(0, (top / total) * 100));
+        const band = document.createElement('div');
+        band.className = 'reader-minimap-band';
+        band.style.top = pct + '%';
+        searchMinimap.appendChild(band);
+        minimapBands.push(band);
+      });
+    }
+    function updateActiveBand() {
+      minimapBands.forEach((b, i) => b.classList.toggle('active', i === activeHit));
+    }
     function runSearch(query) {
       clearHighlights();
       hits = []; activeHit = -1;
+      searchMinimap.innerHTML = ''; minimapBands = [];
       if (!query || query.trim().length < 2) { searchCount.textContent = ''; return; }
       // Search requires all pages to be rendered to find matches anywhere in the book
       renderUpTo(allPages[allPages.length - 1].page);
@@ -548,6 +661,7 @@ fetch('{{ data_url }}')
       });
       hits = Array.from(panel.querySelectorAll('mark.reader-hit'));
       searchCount.textContent = hits.length ? `1 / ${hits.length}` : 'No matches';
+      renderMinimap();
       if (hits.length) jumpToHit(0);
     }
     function jumpToHit(i) {
@@ -557,6 +671,7 @@ fetch('{{ data_url }}')
       hits[activeHit].classList.add('reader-hit-active');
       hits[activeHit].scrollIntoView({ behavior: 'smooth', block: 'center' });
       searchCount.textContent = `${activeHit + 1} / ${hits.length}`;
+      updateActiveBand();
     }
     let searchDebounce;
     searchInput.addEventListener('input', (e) => {
@@ -837,7 +952,8 @@ window.addEventListener('popstate', (e) => {
 
 const isMobile = window.matchMedia('(max-width: 800px)').matches;
 if (!isMobile) {
-  imagePanel.addEventListener('click', openZoom);
+  // Per-image click-to-zoom is now bound individually in renderImageBlock(),
+  // since the image panel holds a scrolling column of blocks rather than one image.
   zoomOverlay.addEventListener('click', (e) => { if (e.target === zoomOverlay) closeZoom(); });
 } else {
   // Long-press anywhere on the text panel reveals the current page's original
